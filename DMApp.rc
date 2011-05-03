@@ -1,0 +1,54 @@
+#ifndef __BORLANDC__
+#include <windows.h>
+#endif
+
+#include "resource.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+DMApp MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                        IDM_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",                    IDM_FILE_OPEN
+        MENUITEM "&Save\tCtrl+S",                       IDM_FILE_SAVE
+        MENUITEM "Save &As...",                 IDM_FILE_SAVEAS
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",                       IDM_EDIT_UNDO
+        MENUITEM "&Redo\tCtrl+Y",                       IDM_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                        IDM_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",                       IDM_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",                      IDM_EDIT_PASTE
+        MENUITEM "&Delete\tDel",                     IDM_EDIT_DELETE
+        MENUITEM "Select A&ll\tCtrl+A",                 IDM_EDIT_SELECTALL
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+DMApp ACCELERATORS DISCARDABLE 
+BEGIN
+    "A",            IDM_EDIT_SELECTALL,      VIRTKEY, CONTROL
+    "C",            IDM_EDIT_COPY,           VIRTKEY, CONTROL
+    "N",            IDM_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            IDM_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            IDM_FILE_SAVE,           VIRTKEY, CONTROL
+    "V",            IDM_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_DELETE,      IDM_EDIT_DELETE,         VIRTKEY
+    "X",            IDM_EDIT_CUT,            VIRTKEY, CONTROL
+    "Y",            IDM_EDIT_REDO,           VIRTKEY, CONTROL
+    "Z",            IDM_EDIT_UNDO,           VIRTKEY, CONTROL
+END
+
