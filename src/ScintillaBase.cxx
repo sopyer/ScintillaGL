@@ -64,10 +64,10 @@ void ScintillaBase::Finalise() {
 	popup.Destroy();
 }
 
-void ScintillaBase::RefreshColourPalette(Palette &pal, bool want) {
-	Editor::RefreshColourPalette(pal, want);
-	ct.RefreshColourPalette(pal, want);
-}
+//void ScintillaBase::RefreshColourPalette(Palette &pal, bool want) {
+//	Editor::RefreshColourPalette(pal, want);
+//	ct.RefreshColourPalette(pal, want);
+//}
 
 void ScintillaBase::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 	bool isFillUp = ac.Active() && ac.IsFillUpChar(*s);
@@ -790,19 +790,19 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		break;
 
 	case SCI_CALLTIPSETBACK:
-		ct.colourBG = ColourDesired(wParam);
+		ct.colourBG = Colour/*Desired*/(wParam);
 		vs.styles[STYLE_CALLTIP].back = ct.colourBG;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_CALLTIPSETFORE:
-		ct.colourUnSel = ColourDesired(wParam);
+		ct.colourUnSel = Colour/*Desired*/(wParam);
 		vs.styles[STYLE_CALLTIP].fore = ct.colourUnSel;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_CALLTIPSETFOREHLT:
-		ct.colourSel = ColourDesired(wParam);
+		ct.colourSel = Colour/*Desired*/(wParam);
 		InvalidateStyleRedraw();
 		break;
 

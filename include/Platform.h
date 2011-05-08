@@ -128,6 +128,53 @@ public:
 	}
 };
 
+typedef unsigned int Colour;
+inline Colour MakeRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a=0xFF)
+{
+	return a<<24|b<<16|g<<8|r;
+}
+
+inline int GetRed(Colour c)
+{
+	return c&0xFF;
+}
+
+inline int GetGreen(Colour c)
+{
+	return (c>>8)&0xFF;
+}
+
+inline int GetBlue(Colour c)
+{
+	return (c>>16)&0xFF;
+}
+
+inline int GetAlpha(Colour c)
+{
+	return (c>>24)&0xFF;
+}
+
+inline unsigned int ValueOfHex(const char ch) {
+	if (ch >= '0' && ch <= '9')
+		return ch - '0';
+	else if (ch >= 'A' && ch <= 'F')
+		return ch - 'A' + 10;
+	else if (ch >= 'a' && ch <= 'f')
+		return ch - 'a' + 10;
+	else
+		return 0;
+}
+
+inline Colour ColourFromText(const char *val) {
+	if (*val == '#') {
+		val++;
+	}
+	unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
+	unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
+	unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
+	return MakeRGBA(r, g, b);
+}
+
 /**
  * In some circumstances, including Win32 in paletted mode and GTK+, each colour
  * must be allocated before use. The desired colours are held in the ColourDesired class,
@@ -143,140 +190,140 @@ public:
 /**
  * Holds a desired RGB colour.
  */
-class ColourDesired {
-	long co;
-public:
-	ColourDesired(long lcol=0) {
-		co = lcol;
-	}
-
-	ColourDesired(unsigned int red, unsigned int green, unsigned int blue) {
-		Set(red, green, blue);
-	}
-
-	bool operator==(const ColourDesired &other) const {
-		return co == other.co;
-	}
-
-	void Set(long lcol) {
-		co = lcol;
-	}
-
-	void Set(unsigned int red, unsigned int green, unsigned int blue) {
-		co = red | (green << 8) | (blue << 16);
-	}
-
-	static inline unsigned int ValueOfHex(const char ch) {
-		if (ch >= '0' && ch <= '9')
-			return ch - '0';
-		else if (ch >= 'A' && ch <= 'F')
-			return ch - 'A' + 10;
-		else if (ch >= 'a' && ch <= 'f')
-			return ch - 'a' + 10;
-		else
-			return 0;
-	}
-
-	void Set(const char *val) {
-		if (*val == '#') {
-			val++;
-		}
-		unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
-		unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
-		unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
-		Set(r, g, b);
-	}
-
-	long AsLong() const {
-		return co;
-	}
-
-	unsigned int GetRed() {
-		return co & 0xff;
-	}
-
-	unsigned int GetGreen() {
-		return (co >> 8) & 0xff;
-	}
-
-	unsigned int GetBlue() {
-		return (co >> 16) & 0xff;
-	}
-};
-
-/**
- * Holds an allocated RGB colour which may be an approximation to the desired colour.
- */
-class ColourAllocated {
-	long coAllocated;
-
-public:
-
-	ColourAllocated(long lcol=0) {
-		coAllocated = lcol;
-	}
-
-	void Set(long lcol) {
-		coAllocated = lcol;
-	}
-
-	long AsLong() const {
-		return coAllocated;
-	}
-};
-
-/**
- * Colour pairs hold a desired colour and an allocated colour.
- */
-struct ColourPair {
-	ColourDesired desired;
-	ColourAllocated allocated;
-
-	ColourPair(ColourDesired desired_=ColourDesired(0,0,0)) {
-		desired = desired_;
-		allocated.Set(desired.AsLong());
-	}
-	void Copy() {
-		allocated.Set(desired.AsLong());
-	}
-};
+//class Colour/*Desired*/ {
+//	long co;
+//public:
+//	Colour/*Desired*/(long lcol=0) {
+//		co = lcol;
+//	}
+//
+//	Colour/*Desired*/(unsigned int red, unsigned int green, unsigned int blue) {
+//		Set(red, green, blue);
+//	}
+//
+//	bool operator==(const Colour/*Desired*/ &other) const {
+//		return co == other.co;
+//	}
+//
+//	void Set(long lcol) {
+//		co = lcol;
+//	}
+//
+//	void Set(unsigned int red, unsigned int green, unsigned int blue) {
+//		co = red | (green << 8) | (blue << 16);
+//	}
+//
+//	static inline unsigned int ValueOfHex(const char ch) {
+//		if (ch >= '0' && ch <= '9')
+//			return ch - '0';
+//		else if (ch >= 'A' && ch <= 'F')
+//			return ch - 'A' + 10;
+//		else if (ch >= 'a' && ch <= 'f')
+//			return ch - 'a' + 10;
+//		else
+//			return 0;
+//	}
+//
+//	void Set(const char *val) {
+//		if (*val == '#') {
+//			val++;
+//		}
+//		unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
+//		unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
+//		unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
+//		Set(r, g, b);
+//	}
+//
+//	long AsLong() const {
+//		return co;
+//	}
+//
+//	unsigned int GetRed() {
+//		return co & 0xff;
+//	}
+//
+//	unsigned int GetGreen() {
+//		return (co >> 8) & 0xff;
+//	}
+//
+//	unsigned int GetBlue() {
+//		return (co >> 16) & 0xff;
+//	}
+//};
+//
+///**
+// * Holds an allocated RGB colour which may be an approximation to the desired colour.
+// */
+//class Colour/*Allocated*/ {
+//	long coAllocated;
+//
+//public:
+//
+//	Colour/*Allocated*/(long lcol=0) {
+//		coAllocated = lcol;
+//	}
+//
+//	void Set(long lcol) {
+//		coAllocated = lcol;
+//	}
+//
+//	long AsLong() const {
+//		return coAllocated;
+//	}
+//};
+//
+///**
+// * Colour pairs hold a desired colour and an allocated colour.
+// */
+//struct Colour/*Pair*/ {
+//	Colour/*Desired*/ desired;
+//	Colour/*Allocated*/ allocated;
+//
+//	Colour/*Pair*/(Colour/*Desired*/ desired_=Colour/*Desired*/(0,0,0)) {
+//		desired = desired_;
+//		allocated.Set(desired.AsLong());
+//	}
+//	void Copy() {
+//		allocated.Set(desired.AsLong());
+//	}
+//};
 
 class Window;	// Forward declaration for Palette
 
 /**
  * Colour palette management.
  */
-class Palette {
-	int used;
-	int size;
-	ColourPair *entries;
-#if PLAT_GTK
-	void *allocatedPalette; // GdkColor *
-	int allocatedLen;
-#endif
-	// Private so Palette objects can not be copied
-	Palette(const Palette &);
-	Palette &operator=(const Palette &);
-public:
-#if PLAT_WIN
-	void *hpal;
-#endif
-	bool allowRealization;
-
-	Palette();
-	~Palette();
-
-	void Release();
-
-	/**
-	 * This method either adds a colour to the list of wanted colours (want==true)
-	 * or retrieves the allocated colour back to the ColourPair.
-	 * This is one method to make it easier to keep the code for wanting and retrieving in sync.
-	 */
-	void WantFind(ColourPair &cp, bool want);
-
-	void Allocate(Window &w);
-};
+//class Palette {
+//	int used;
+//	int size;
+//	Colour/*Pair*/ *entries;
+//#if PLAT_GTK
+//	void *allocatedPalette; // GdkColor *
+//	int allocatedLen;
+//#endif
+//	// Private so Palette objects can not be copied
+//	Palette(const Palette &);
+//	Palette &operator=(const Palette &);
+//public:
+//#if PLAT_WIN
+//	void *hpal;
+//#endif
+//	bool allowRealization;
+//
+//	Palette();
+//	~Palette();
+//
+//	void Release();
+//
+//	/**
+//	 * This method either adds a colour to the list of wanted colours (want==true)
+//	 * or retrieves the allocated colour back to the Colour/*Pair*/.
+//	 * This is one method to make it easier to keep the code for wanting and retrieving in sync.
+//	 */
+//	void WantFind(Colour/*Pair*/ &cp, bool want);
+//
+//	void Allocate(Window &w);
+//};
 
 /**
  * Font management.
@@ -324,24 +371,24 @@ public:
 
 	virtual void Release()=0;
 	virtual bool Initialised()=0;
-	virtual void PenColour(ColourAllocated fore)=0;
+	virtual void PenColour(Colour/*Allocated*/ fore)=0;
 	virtual int LogPixelsY()=0;
 	virtual int DeviceHeightFont(int points)=0;
 	virtual void MoveTo(int x_, int y_)=0;
 	virtual void LineTo(int x_, int y_)=0;
-	virtual void Polygon(Point *pts, int npts, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void RectangleDraw(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void FillRectangle(PRectangle rc, ColourAllocated back)=0;
+	virtual void Polygon(Point *pts, int npts, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	virtual void RectangleDraw(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	virtual void FillRectangle(PRectangle rc, Colour/*Allocated*/ back)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
-	virtual void RoundedRectangle(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void AlphaRectangle(PRectangle rc, int cornerSize, ColourAllocated fill, int alphaFill,
-		ColourAllocated outline, int alphaOutline, int flags)=0;
-	virtual void Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated back)=0;
+	virtual void RoundedRectangle(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	virtual void AlphaRectangle(PRectangle rc, int cornerSize, Colour/*Allocated*/ fill, int alphaFill,
+		Colour/*Allocated*/ outline, int alphaOutline, int flags)=0;
+	virtual void Ellipse(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
-	virtual void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore, ColourAllocated back)=0;
-	virtual void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, ColourAllocated fore)=0;
+	virtual void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	virtual void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	virtual void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore)=0;
 	virtual void MeasureWidths(Font &font_, const char *s, int len, int *positions)=0;
 	virtual int WidthText(Font &font_, const char *s, int len)=0;
 	virtual int WidthChar(Font &font_, char ch)=0;
@@ -352,7 +399,7 @@ public:
 	virtual int Height(Font &font_)=0;
 	virtual int AverageCharWidth(Font &font_)=0;
 
-	virtual int SetPalette(Palette *pal, bool inBackGround)=0;
+	//virtual int SetPalette(Palette *pal, bool inBackGround)=0;
 	virtual void SetClip(PRectangle rc)=0;
 	virtual void FlushCachedState()=0;
 
@@ -499,8 +546,8 @@ public:
 	// but gcc warns about this
 	Platform() {}
 	~Platform() {}
-	static ColourDesired Chrome();
-	static ColourDesired ChromeHighlight();
+	static Colour/*Desired*/ Chrome();
+	static Colour/*Desired*/ ChromeHighlight();
 	static const char *DefaultFont();
 	static int DefaultFontSize();
 	static unsigned int DoubleClickTime();

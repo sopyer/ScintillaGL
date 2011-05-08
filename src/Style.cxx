@@ -18,17 +18,17 @@ using namespace Scintilla;
 
 Style::Style() {
 	aliasOfDefaultFont = true;
-	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
+	Clear(MakeRGBA/*Desired*/(0, 0, 0), MakeRGBA/*Desired*/(0xff, 0xff, 0xff),
 	      Platform::DefaultFontSize(), 0, SC_CHARSET_DEFAULT,
 	      false, false, false, false, caseMixed, true, true, false);
 }
 
 Style::Style(const Style &source) {
-	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
+	Clear(MakeRGBA/*Desired*/(0, 0, 0), MakeRGBA/*Desired*/(0xff, 0xff, 0xff),
 	      0, 0, 0,
 	      false, false, false, false, caseMixed, true, true, false);
-	fore.desired = source.fore.desired;
-	back.desired = source.back.desired;
+	fore/*.desired*/ = source.fore/*.desired*/;
+	back/*.desired*/ = source.back/*.desired*/;
 	characterSet = source.characterSet;
 	bold = source.bold;
 	italic = source.italic;
@@ -52,11 +52,11 @@ Style::~Style() {
 Style &Style::operator=(const Style &source) {
 	if (this == &source)
 		return * this;
-	Clear(ColourDesired(0, 0, 0), ColourDesired(0xff, 0xff, 0xff),
+	Clear(MakeRGBA/*Desired*/(0, 0, 0), MakeRGBA/*Desired*/(0xff, 0xff, 0xff),
 	      0, 0, SC_CHARSET_DEFAULT,
 	      false, false, false, false, caseMixed, true, true, false);
-	fore.desired = source.fore.desired;
-	back.desired = source.back.desired;
+	fore/*.desired*/ = source.fore/*.desired*/;
+	back/*.desired*/ = source.back/*.desired*/;
 	characterSet = source.characterSet;
 	bold = source.bold;
 	italic = source.italic;
@@ -69,13 +69,13 @@ Style &Style::operator=(const Style &source) {
 	return *this;
 }
 
-void Style::Clear(ColourDesired fore_, ColourDesired back_, int size_,
+void Style::Clear(Colour/*Desired*/ fore_, Colour/*Desired*/ back_, int size_,
                   const char *fontName_, int characterSet_,
                   bool bold_, bool italic_, bool eolFilled_,
                   bool underline_, ecaseForced caseForce_,
 		  bool visible_, bool changeable_, bool hotspot_) {
-	fore.desired = fore_;
-	back.desired = back_;
+	fore/*.desired*/ = fore_;
+	back/*.desired*/ = back_;
 	characterSet = characterSet_;
 	bold = bold_;
 	italic = italic_;
@@ -103,8 +103,8 @@ void Style::Clear(ColourDesired fore_, ColourDesired back_, int size_,
 
 void Style::ClearTo(const Style &source) {
 	Clear(
-		source.fore.desired,
-		source.back.desired,
+		source.fore/*.desired*/,
+		source.back/*.desired*/,
 		source.size,
 		source.fontName,
 		source.characterSet,

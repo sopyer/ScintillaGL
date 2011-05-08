@@ -38,15 +38,15 @@ static size_t MeasureLength(const char *s) {
 	return i;
 }
 
-ColourAllocated XPM::ColourFromCode(int ch) const {
-	return colourCodeTable[ch]->allocated;
+Colour/*Allocated*/ XPM::ColourFromCode(int ch) const {
+	return colourCodeTable[ch]/*->allocated*/;
 #ifdef SLOW
 	for (int i=0; i<nColours; i++) {
 		if (codes[i] == ch) {
-			return colours[i].allocated;
+			return colours[i]/*.allocated*/;
 		}
 	}
-	return colours[0].allocated;
+	return colours[0]/*.allocated*/;
 #endif
 }
 
@@ -113,7 +113,7 @@ void XPM::Init(const char *const *linesForm) {
 		return;
 	}
 	codes = new char[nColours];
-	colours = new ColourPair[nColours];
+	colours = new Colour/*Pair*/[nColours];
 
 	int strings = 1+height+nColours;
 	lines = new char *[strings];
@@ -140,12 +140,12 @@ void XPM::Init(const char *const *linesForm) {
 		codes[c] = colourDef[0];
 		colourDef += 4;
 		if (*colourDef == '#') {
-			colours[c].desired.Set(colourDef);
+			colours[c]/*.desired.Set(colourDef)*/ = ColourFromText(colourDef);
 		} else {
-			colours[c].desired = ColourDesired(0xff, 0xff, 0xff);
+			colours[c]/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
 			codeTransparent = codes[c];
 		}
-		colourCodeTable[static_cast<unsigned char>(codes[c])] = &(colours[c]);
+		colourCodeTable[static_cast<unsigned char>(codes[c])] = (colours[c]);
 	}
 }
 
@@ -160,23 +160,23 @@ void XPM::Clear() {
 	lines = 0;
 }
 
-void XPM::RefreshColourPalette(Palette &pal, bool want) {
-	if (!data || !codes || !colours || !lines) {
-		return;
-	}
-	for (int i=0; i<nColours; i++) {
-		pal.WantFind(colours[i], want);
-	}
-}
+//void XPM::RefreshColourPalette(Palette &pal, bool want) {
+//	if (!data || !codes || !colours || !lines) {
+//		return;
+//	}
+//	for (int i=0; i<nColours; i++) {
+//		pal.WantFind(colours[i], want);
+//	}
+//}
 
-void XPM::CopyDesiredColours() {
-	if (!data || !codes || !colours || !lines) {
-		return;
-	}
-	for (int i=0; i<nColours; i++) {
-		colours[i].Copy();
-	}
-}
+//void XPM::CopyDesiredColours() {
+//	if (!data || !codes || !colours || !lines) {
+//		return;
+//	}
+//	for (int i=0; i<nColours; i++) {
+//		colours[i].Copy();
+//	}
+//}
 
 void XPM::Draw(Surface *surface, PRectangle &rc) {
 	if (!data || !codes || !colours || !lines) {
@@ -270,7 +270,7 @@ void XPMSet::Add(int id, const char *textForm) {
 	for (int i = 0; i < len; i++) {
 		if (set[i]->GetId() == id) {
 			set[i]->Init(textForm);
-			set[i]->CopyDesiredColours();
+			//set[i]->CopyDesiredColours();
 			return;
 		}
 	}
@@ -279,7 +279,7 @@ void XPMSet::Add(int id, const char *textForm) {
 	XPM *pxpm = new XPM(textForm);
 	if (pxpm) {
 		pxpm->SetId(id);
-		pxpm->CopyDesiredColours();
+		//pxpm->CopyDesiredColours();
 		if (len == maximum) {
 			maximum += 64;
 			XPM **setNew = new XPM *[maximum];

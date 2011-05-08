@@ -228,18 +228,105 @@ void DMApp::InitialiseEditor() {
 	SendEditor(SCI_STYLESETEOLFILLED, SCE_HJA_STRINGEOL, 1);
 }
 
-int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdShow)
+#include <SDL.h>
+#include <gl/glee.h>
+
+int main(int argc, char* argv[])
 {
+	SDL_Surface* mScreen;
+
+	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER)<0)											// Init The SDL Library, The VIDEO Subsystem
+	{
+		return 0;															// Get Out Of Here. Sorry.
+	}
+
+	uint32_t flags = SDL_HWSURFACE|SDL_OPENGLBLIT;									// We Want A Hardware Surface And Special OpenGLBlit Mode
+
+	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );								// In order to use SDL_OPENGLBLIT we have to
+	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );							// set GL attributes first
+	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
+	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, TRUE );							// colors and doublebuffering
+	//SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
+	//SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 0 );
+	//SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
+
+	if(!(mScreen = SDL_SetVideoMode(800, 600, 32, flags)))
+	{
+		SDL_Quit();
+		return 0;															// And Exit
+	}
+		
+	//SDL_EnableUNICODE(TRUE);
+	//SDL_EnableKeyRepeat(40, 40);
 	app.InitialiseEditor();
 
+	//char str[] = "<HTML>Hello Scintilla!</HTML>";
+	//app.SendEditor(SCI_CANCEL);
+	//app.SendEditor(SCI_SETUNDOCOLLECTION, 0);
+	//app.SendEditor(SCI_ADDTEXT, sizeof(str), reinterpret_cast<LPARAM>((char*)str));
+	//app.SendEditor(SCI_SETUNDOCOLLECTION, 1);
+	//app.SendEditor(EM_EMPTYUNDOBUFFER);
+	//app.SendEditor(SCI_SETSAVEPOINT);
+	//app.SendEditor(SCI_GOTOPOS, 0);
+
 #ifdef SCI_LEXER
-	Scintilla_LinkLexers();
+	//Scintilla_LinkLexers();
 #endif
 
 	Surface* s = Surface::Allocate();
-	PRectangle rcPaint(0, 0, 111, 111);
-	app.myEd.Paint(s, rcPaint);
+	PRectangle rcPaint(0, 0, 800, 600);
+
+	for (;;)
+	{
+		SDL_Event	E;
+		SDL_PollEvent(&E);
+
+		if (E.type==SDL_QUIT) break;
+		
+		//switch(E.type)
+		//{
+		//	case SDL_KEYDOWN:
+		//		break;
+		//	case SDL_KEYUP:		
+		//		break;
+		//	case SDL_MOUSEMOTION:
+		//		break;
+		//	case SDL_MOUSEBUTTONDOWN:
+		//		break;
+		//	case SDL_MOUSEBUTTONUP:
+		//		break;
+		//}
+
+
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+		GLenum err = glGetError();
+		
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glBegin(GL_TRIANGLES);
+		glColor3f(1, 0, 0);
+		glVertex2f(0, 0.5f);
+		glColor3f(0, 1, 0);
+		glVertex2f(-0.5f, -0.5f);
+		glColor3f(0, 0, 1);
+		glVertex2f(0.5f, -0.5f);
+		glEnd();
+
+		glOrtho(0, 800, 0, 600, 0, 500);
+		glTranslatef(0, 600, 0);
+		glScalef(1, -1, 1);
+		app.myEd.Paint(s, rcPaint);
+
+		SDL_GL_SwapBuffers();
+	}
+
 	s->Release();
+
+	SDL_Quit();
 
 	return 0;
 }

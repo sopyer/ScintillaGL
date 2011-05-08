@@ -131,7 +131,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	 * When a style attribute is changed, this cache is flushed. */
 	bool stylesValid;
 	ViewStyle vs;
-	Palette palette;
+	//Palette palette;
 
 	int printMagnification;
 	int printColourMode;
@@ -146,7 +146,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	/** In bufferedDraw mode, graphics operations are drawn to a pixmap and then copied to
 	 * the screen. This avoids flashing but is about 30% slower. */
-	bool bufferedDraw;
+	//bool bufferedDraw;
 	/** In twoPhaseDraw mode, drawing is performed in two phases, first the background
 	* and then the foreground. This avoids chopping off characters that overlap the next run. */
 	bool twoPhaseDraw;
@@ -168,8 +168,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int virtualSpaceOptions;
 
-	Surface *pixmapLine;
-	Surface *pixmapSelMargin;
+	//Surface *pixmapLine;
+	//Surface *pixmapSelMargin;
 	Surface *pixmapSelPattern;
 	Surface *pixmapIndentGuide;
 	Surface *pixmapIndentGuideHighlight;
@@ -272,7 +272,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void InvalidateStyleData();
 	void InvalidateStyleRedraw();
-	virtual void RefreshColourPalette(Palette &pal, bool want);
+	//virtual void RefreshColourPalette(Palette &pal, bool want);
 	void RefreshStyleData();
 	void DropGraphics();
 
@@ -359,14 +359,14 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	LineLayout *RetrieveLineLayout(int lineNumber);
 	void LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayout *ll,
 		int width=LineLayout::wrapWidthInfinite);
-	ColourAllocated SelectionBackground(ViewStyle &vsDraw, bool main);
-	ColourAllocated TextBackground(ViewStyle &vsDraw, bool overrideBackground, ColourAllocated background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll);
+	Colour/*Allocated*/ SelectionBackground(ViewStyle &vsDraw, bool main);
+	Colour/*Allocated*/ TextBackground(ViewStyle &vsDraw, bool overrideBackground, Colour/*Allocated*/ background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll);
 	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
-	void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourAllocated wrapColour);
+	void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, Colour/*Allocated*/ wrapColour);
 	void DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
 		int line, int lineEnd, int xStart, int subLine, int subLineStart,
-		bool overrideBackground, ColourAllocated background,
-		bool drawWrapMark, ColourAllocated wrapColour);
+		bool overrideBackground, Colour/*Allocated*/ background,
+		bool drawWrapMark, Colour/*Allocated*/ wrapColour);
 	void DrawIndicators(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine, int lineEnd, bool under);
 	void DrawAnnotation(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
@@ -374,7 +374,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVisible, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
 	void DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll, int subLine,
-		int xStart, int offset, int posCaret, PRectangle rcCaret, ColourAllocated caretColour);
+		int xStart, int offset, int posCaret, PRectangle rcCaret, Colour/*Allocated*/ caretColour);
 	void DrawCarets(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
 	void RefreshPixMaps(Surface *surfaceWindow);

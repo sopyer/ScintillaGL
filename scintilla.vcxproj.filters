@@ -370,6 +370,7 @@
     <ClCompile Include="gl\PlatGL.cxx">
       <Filter>gl</Filter>
     </ClCompile>
+    <ClCompile Include="external\GLee.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lexlib\Accessor.h">
