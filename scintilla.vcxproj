@@ -82,7 +82,10 @@
   <ItemGroup>
     <ClCompile Include="DMApp.cxx" />
     <ClCompile Include="external\GLee.c" />
+    <ClCompile Include="gl\DefaultFontData.cpp" />
+    <ClCompile Include="gl\Font.cxx" />
     <ClCompile Include="gl\PlatGL.cxx" />
+    <ClCompile Include="gl\Surface.cxx" />
     <ClCompile Include="lexers\LexA68k.cxx" />
     <ClCompile Include="lexers\LexAbaqus.cxx" />
     <ClCompile Include="lexers\LexAda.cxx" />
@@ -198,6 +201,9 @@
     <ClCompile Include="src\XPM.cxx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="gl\DefaultFontData.h" />
+    <ClInclude Include="gl\ScintillaGL.h" />
+    <ClInclude Include="gl\stb_truetype.h" />
     <ClInclude Include="include\ILexer.h" />
     <ClInclude Include="include\Platform.h" />
     <ClInclude Include="include\SciLexer.h" />
@@ -215,7 +221,6 @@
     <ClInclude Include="lexlib\StyleContext.h" />
     <ClInclude Include="lexlib\WordList.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="ScintillaGL.h" />
     <ClInclude Include="src\AutoComplete.h" />
     <ClInclude Include="src\CallTip.h" />
     <ClInclude Include="src\Catalogue.h" />

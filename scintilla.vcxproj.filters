@@ -371,6 +371,15 @@
       <Filter>gl</Filter>
     </ClCompile>
     <ClCompile Include="external\GLee.c" />
+    <ClCompile Include="gl\Font.cxx">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="gl\Surface.cxx">
+      <Filter>gl</Filter>
+    </ClCompile>
+    <ClCompile Include="gl\DefaultFontData.cpp">
+      <Filter>gl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lexlib\Accessor.h">
@@ -503,7 +512,13 @@
     <ClInclude Include="src\XPM.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="ScintillaGL.h">
+    <ClInclude Include="gl\stb_truetype.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="gl\ScintillaGL.h">
+      <Filter>gl</Filter>
+    </ClInclude>
+    <ClInclude Include="gl\DefaultFontData.h">
       <Filter>gl</Filter>
     </ClInclude>
   </ItemGroup>

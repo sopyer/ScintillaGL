@@ -415,6 +415,7 @@ Point Editor::LocationFromPosition(SelectionPosition pos) {
 		}
 		pt.x += vs.fixedColumnWidth - xOffset;
 	}
+	//assert(!"ll->EndLineStyle is uninitialized for some reason - investigate!!!!!!!");
 	pt.x += pos.VirtualSpace() * static_cast<int>(vs.styles[ll->EndLineStyle()].spaceWidth);
 	return pt;
 }

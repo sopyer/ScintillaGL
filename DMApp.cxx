@@ -18,7 +18,8 @@ const COLORREF white = RGB(0xff,0xff,0xff);
 int Scintilla_RegisterClasses(void *hInstance);
 int Scintilla_ReleaseResources();
 
-#include "ScintillaGL.h"
+#include "gl/ScintillaGL.h"
+#include "gl/stb_truetype.h"
 
 struct DMApp {
 	MyEditor myEd;
@@ -231,6 +232,52 @@ void DMApp::InitialiseEditor() {
 #include <SDL.h>
 #include <gl/glee.h>
 
+unsigned char ttf_buffer[1<<20];
+unsigned char temp_bitmap[512*512];
+
+stbtt_bakedchar cdata[96]; // ASCII 32..126 is 95 glyphs
+GLuint ftex;
+
+void my_stbtt_initfont(void)
+{
+	FILE* f;
+	fread(ttf_buffer, 1, 1<<20, f = fopen("c:/windows/fonts/times.ttf", "rb"));
+	stbtt_BakeFontBitmap(ttf_buffer, 0, 32.0, temp_bitmap, 512, 512, 32, 96, cdata); // no guarantee this fits!
+	// can free ttf_buffer at this point
+	glGenTextures(1, &ftex);
+	glBindTexture(GL_TEXTURE_2D, ftex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, temp_bitmap);
+	// can free temp_bitmap at this point
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	fclose(f);
+}
+
+void my_stbtt_print(float x, float y, char *text)
+{
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	// assume orthographic projection with units = screen pixels, origin at top left
+	glBindTexture(GL_TEXTURE_2D, ftex);
+	glBegin(GL_QUADS);
+	while (*text) {
+		if (*text >= 32 && *text < 128) {
+			stbtt_aligned_quad q;
+			stbtt_GetBakedQuad(cdata, 512,512, *text-32, &x,&y,&q,1);//1=opengl,0=old d3d
+			glTexCoord2f(q.s0,q.t0); glVertex2f(q.x0,q.y0);
+			glTexCoord2f(q.s1,q.t0); glVertex2f(q.x1,q.y0);
+			glTexCoord2f(q.s1,q.t1); glVertex2f(q.x1,q.y1);
+			glTexCoord2f(q.s0,q.t1); glVertex2f(q.x0,q.y1);
+		}
+		++text;
+	}
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+}
+
+void Platform_Initialise();
+void Platform_Finalise();
+
 int main(int argc, char* argv[])
 {
 	SDL_Surface* mScreen;
@@ -258,19 +305,21 @@ int main(int argc, char* argv[])
 		SDL_Quit();
 		return 0;															// And Exit
 	}
-		
+	
+	Platform_Initialise();
+
 	//SDL_EnableUNICODE(TRUE);
 	//SDL_EnableKeyRepeat(40, 40);
 	app.InitialiseEditor();
 
-	//char str[] = "<HTML>Hello Scintilla!</HTML>";
-	//app.SendEditor(SCI_CANCEL);
-	//app.SendEditor(SCI_SETUNDOCOLLECTION, 0);
-	//app.SendEditor(SCI_ADDTEXT, sizeof(str), reinterpret_cast<LPARAM>((char*)str));
-	//app.SendEditor(SCI_SETUNDOCOLLECTION, 1);
-	//app.SendEditor(EM_EMPTYUNDOBUFFER);
-	//app.SendEditor(SCI_SETSAVEPOINT);
-	//app.SendEditor(SCI_GOTOPOS, 0);
+	char str[] = "<HTML>Hello Scintilla!</HTML>";
+	app.SendEditor(SCI_CANCEL);
+	app.SendEditor(SCI_SETUNDOCOLLECTION, 0);
+	app.SendEditor(SCI_ADDTEXT, sizeof(str), reinterpret_cast<LPARAM>((char*)str));
+	app.SendEditor(SCI_SETUNDOCOLLECTION, 1);
+	app.SendEditor(EM_EMPTYUNDOBUFFER);
+	app.SendEditor(SCI_SETSAVEPOINT);
+	app.SendEditor(SCI_GOTOPOS, 0);
 
 #ifdef SCI_LEXER
 	//Scintilla_LinkLexers();
@@ -278,7 +327,7 @@ int main(int argc, char* argv[])
 
 	Surface* s = Surface::Allocate();
 	PRectangle rcPaint(0, 0, 800, 600);
-
+	my_stbtt_initfont();
 	for (;;)
 	{
 		SDL_Event	E;
@@ -320,11 +369,15 @@ int main(int argc, char* argv[])
 		glTranslatef(0, 600, 0);
 		glScalef(1, -1, 1);
 		app.myEd.Paint(s, rcPaint);
+		glColor3f(1, 0, 0);
+		my_stbtt_print(100, 100, "Hello world!!!");
 
 		SDL_GL_SwapBuffers();
 	}
 
 	s->Release();
+
+	Platform_Finalise();
 
 	SDL_Quit();
 
