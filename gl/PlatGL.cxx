@@ -84,13 +84,13 @@ void Window::Show(bool show) {
 	assert(0);
 }
 
-void Window::InvalidateAll() {
-	assert(0);
-}
-
-void Window::InvalidateRectangle(PRectangle rc) {
-	//assert(0);
-}
+//void Window::InvalidateAll() {
+//	assert(0);
+//}
+//
+//void Window::InvalidateRectangle(PRectangle rc) {
+//	//assert(0);
+//}
 
 void Window::SetFont(Font &) {
 	assert(0);

@@ -9,6 +9,8 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+#include <assert.h>
+
 // PLAT_GTK = GTK+ on Linux or Win32
 // PLAT_GTK_WIN32 is defined additionally when running PLAT_GTK under Win32
 // PLAT_WIN = Win32 API on Win32 OS
@@ -450,8 +452,8 @@ public:
 	void SetPositionRelative(PRectangle rc, Window relativeTo);
 	PRectangle GetClientPosition();
 	void Show(bool show=true);
-	void InvalidateAll();
-	void InvalidateRectangle(PRectangle rc);
+	//void InvalidateAll();
+	//void InvalidateRectangle(PRectangle rc);
 	virtual void SetFont(Font &font);
 	enum Cursor { cursorInvalid, cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow, cursorHand };
 	void SetCursor(Cursor curs);

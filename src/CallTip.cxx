@@ -310,7 +310,8 @@ void CallTip::SetHighlight(int start, int end) {
 		startHighlight = start;
 		endHighlight = end;
 		if (wCallTip.Created()) {
-			wCallTip.InvalidateAll();
+			assert(!"Not implemented");
+			//wCallTip.InvalidateAll();
 		}
 	}
 }

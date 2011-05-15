@@ -232,7 +232,7 @@ void ScintillaBase::AutoCompleteStart(int lenEntered, const char *list) {
 	int widthLB = 100;
 	if (pt.x >= rcClient.right - widthLB) {
 		HorizontalScrollTo(xOffset + pt.x - rcClient.right + widthLB);
-		Redraw();
+		//Redraw();
 		pt = PointMainCaret();
 	}
 	PRectangle rcac;
@@ -830,7 +830,7 @@ sptr_t ScintillaBase::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lPara
 		} else {
 			DocumentLexState()->Colourise(wParam, lParam);
 		}
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_SETPROPERTY:

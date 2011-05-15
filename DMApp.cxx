@@ -306,13 +306,19 @@ int main(int argc, char* argv[])
 		return 0;															// And Exit
 	}
 	
+	SDL_EnableUNICODE(TRUE);
+	SDL_EnableKeyRepeat(500, 100);
+
 	Platform_Initialise();
 
-	//SDL_EnableUNICODE(TRUE);
-	//SDL_EnableKeyRepeat(40, 40);
+	Surface* s = Surface::Allocate();
+	app.myEd.drawSurface = s;
+	PRectangle rcPaint(0, 0, 800, 600);
+	my_stbtt_initfont();
+
 	app.InitialiseEditor();
 
-	char str[] = "<HTML>Hello Scintilla!</HTML>";
+	char str[] = "<HTML>\n\tHello Scintilla!\n</HTML>";
 	app.SendEditor(SCI_CANCEL);
 	app.SendEditor(SCI_SETUNDOCOLLECTION, 0);
 	app.SendEditor(SCI_ADDTEXT, sizeof(str), reinterpret_cast<LPARAM>((char*)str));
@@ -325,31 +331,69 @@ int main(int argc, char* argv[])
 	//Scintilla_LinkLexers();
 #endif
 
-	Surface* s = Surface::Allocate();
-	PRectangle rcPaint(0, 0, 800, 600);
-	my_stbtt_initfont();
-	for (;;)
+	Uint8	prevKState[SDLK_LAST] = {0};
+	bool run = true;
+
+	while (run)
 	{
 		SDL_Event	E;
-		SDL_PollEvent(&E);
+		while (SDL_PollEvent(&E))
+		{
+			if (E.type==SDL_QUIT)
+			{
+					run=false;
+			}
+			else if (E.type == SDL_KEYDOWN)
+			{
+				int sciKey;
+				switch(E.key.keysym.sym)
+				{
+					case SDLK_DOWN:				sciKey = SCK_DOWN;          break;
+					case SDLK_UP:				sciKey = SCK_UP;            break;
+					case SDLK_LEFT:				sciKey = SCK_LEFT;          break;
+					case SDLK_RIGHT:			sciKey = SCK_RIGHT;         break;
+					case SDLK_HOME:				sciKey = SCK_HOME;          break;
+					case SDLK_END:				sciKey = SCK_END;           break;
+					case SDLK_PAGEUP:			sciKey = SCK_PRIOR;         break;
+					case SDLK_PAGEDOWN:			sciKey = SCK_NEXT;	        break;
+					case SDLK_DELETE:			sciKey = SCK_DELETE;        break;
+					case SDLK_INSERT:			sciKey = SCK_INSERT;        break;
+					case SDLK_ESCAPE:			sciKey = SCK_ESCAPE;        break;
+					case SDLK_BACKSPACE:		sciKey = SCK_BACK;	        break;
+					case SDLK_TAB:				sciKey = SCK_TAB;	        break;
+					case SDLK_RETURN:			sciKey = SCK_RETURN;        break;
+					case SDLK_KP_PLUS:			sciKey = SCK_ADD;	        break;
+					case SDLK_KP_MINUS:			sciKey = SCK_SUBTRACT;      break;
+					case SDLK_KP_DIVIDE:		sciKey = SCK_DIVIDE;        break;
+					case SDLK_LSUPER:			sciKey = SCK_WIN;	        break;
+					case SDLK_RSUPER:			sciKey = SCK_RWIN;	        break;
+					case SDLK_MENU:				sciKey = SCK_MENU;	        break;
+					case SDLK_SLASH:			sciKey = '/';		        break;
+					case SDLK_ASTERISK:			sciKey = '`';		        break;
+					case SDLK_LEFTBRACKET:		sciKey = '[';		        break;
+					case SDLK_BACKSLASH:		sciKey = '\\';		        break;
+					case SDLK_RIGHTBRACKET:		sciKey = ']';		        break;
+					default:					sciKey = E.key.keysym.sym;
+				}
 
-		if (E.type==SDL_QUIT) break;
+				if (SDLK_a<=sciKey && sciKey<=SDLK_z)
+					sciKey = sciKey-'a'+'A';
+
+				bool consumed;
+
+				app.myEd.KeyDown(sciKey,
+					E.key.keysym.mod&KMOD_LSHIFT | E.key.keysym.mod&KMOD_RSHIFT,
+					E.key.keysym.mod&KMOD_LCTRL | E.key.keysym.mod&KMOD_RCTRL,
+					E.key.keysym.mod&KMOD_LALT | E.key.keysym.mod&KMOD_RALT,
+					&consumed
+				);
+				if (!consumed && sciKey>=32 && sciKey<=128)
+					app.myEd.AddCharUTF(E.key.keysym.unicode);
+			}
+		}
+
+		Uint8* curState = SDL_GetKeyState(0);
 		
-		//switch(E.type)
-		//{
-		//	case SDL_KEYDOWN:
-		//		break;
-		//	case SDL_KEYUP:		
-		//		break;
-		//	case SDL_MOUSEMOTION:
-		//		break;
-		//	case SDL_MOUSEBUTTONDOWN:
-		//		break;
-		//	case SDL_MOUSEBUTTONUP:
-		//		break;
-		//}
-
-
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 		GLenum err = glGetError();
@@ -368,11 +412,13 @@ int main(int argc, char* argv[])
 		glOrtho(0, 800, 0, 600, 0, 500);
 		glTranslatef(0, 600, 0);
 		glScalef(1, -1, 1);
-		app.myEd.Paint(s, rcPaint);
+		app.myEd.Paint(/*s,*/ rcPaint);
 		glColor3f(1, 0, 0);
 		my_stbtt_print(100, 100, "Hello world!!!");
 
 		SDL_GL_SwapBuffers();
+
+		memcpy(prevKState, curState, SDLK_LALT);
 	}
 
 	s->Release();

@@ -65,5 +65,6 @@ public:
 	virtual void SetMouseCapture(bool on) {}
 	virtual bool HaveMouseCapture() {return false;}
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {return 0;}
-	void Paint(Surface *surfaceWindow, PRectangle rcArea) {Editor::Paint(surfaceWindow, rcArea);}
+	void Paint(/*Surface *surfaceWindow,*/ PRectangle rcArea) {Tick(); Editor::Paint(/*surfaceWindow, */rcArea);}
+	void AddCharUTF(char c) {Editor::AddCharUTF(&c, 1);}
 };

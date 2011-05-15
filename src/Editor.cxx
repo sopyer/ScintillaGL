@@ -253,7 +253,7 @@ void Editor::InvalidateStyleData() {
 void Editor::InvalidateStyleRedraw() {
 	NeedWrapping();
 	InvalidateStyleData();
-	Redraw();
+	//Redraw();
 }
 
 //void Editor::RefreshColourPalette(Palette &pal, bool want) {
@@ -263,9 +263,9 @@ void Editor::InvalidateStyleRedraw() {
 void Editor::RefreshStyleData() {
 	if (!stylesValid) {
 		stylesValid = true;
-		AutoSurface surface(this);
-		if (surface) {
-			vs.Refresh(*surface);
+		//AutoSurface surface(this);
+		if (drawSurface) {
+			vs.Refresh(*drawSurface);
 			//RefreshColourPalette(palette, true);
 			//palette.Allocate(wMain);
 			//RefreshColourPalette(palette, false);
@@ -386,14 +386,14 @@ Point Editor::LocationFromPosition(SelectionPosition pos) {
 	int line = pdoc->LineFromPosition(pos.Position());
 	int lineVisible = cs.DisplayFromDoc(line);
 	//Platform::DebugPrintf("line=%d\n", line);
-	AutoSurface surface(this);
+	//AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(line));
-	if (surface && ll) {
+	if (drawSurface && ll) {
 		// -1 because of adding in for visible lines in following loop.
 		pt.y = (lineVisible - topLine - 1) * vs.lineHeight;
 		pt.x = 0;
 		unsigned int posLineStart = pdoc->LineStart(line);
-		LayoutLine(line, surface, vs, ll, wrapWidth);
+		LayoutLine(line, drawSurface, vs, ll, wrapWidth);
 		int posInLine = pos.Position() - posLineStart;
 		// In case of very long line put x at arbitrary large position
 		if (posInLine > ll->maxLineLength) {
@@ -471,10 +471,10 @@ SelectionPosition Editor::SPositionFromLocation(Point pt, bool canReturnInvalid,
 		return SelectionPosition(canReturnInvalid ? INVALID_POSITION : pdoc->Length());
 	unsigned int posLineStart = pdoc->LineStart(lineDoc);
 	SelectionPosition retVal(canReturnInvalid ? INVALID_POSITION : static_cast<int>(posLineStart));
-	AutoSurface surface(this);
+	//AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
-	if (surface && ll) {
-		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
+	if (drawSurface && ll) {
+		LayoutLine(lineDoc, drawSurface, vs, ll, wrapWidth);
 		int lineStartSet = cs.DisplayFromDoc(lineDoc);
 		int subLine = visibleLine - lineStartSet;
 		if (subLine < ll->lines) {
@@ -531,12 +531,12 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 	if (lineDoc >= pdoc->LinesTotal())
 		return pdoc->Length();
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
-	AutoSurface surface(this);
+	//AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	int retVal = 0;
-	if (surface && ll) {
+	if (drawSurface && ll) {
 		unsigned int posLineStart = pdoc->LineStart(lineDoc);
-		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
+		LayoutLine(lineDoc, drawSurface, vs, ll, wrapWidth);
 		retVal = ll->numCharsBeforeEOL + posLineStart;
 		int subLine = 0;
 		int lineStart = ll->LineStart(subLine);
@@ -568,12 +568,12 @@ SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 	if (lineDoc >= pdoc->LinesTotal())
 		return SelectionPosition(pdoc->Length());
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
-	AutoSurface surface(this);
+	//AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	int retVal = 0;
-	if (surface && ll) {
+	if (drawSurface && ll) {
 		unsigned int posLineStart = pdoc->LineStart(lineDoc);
-		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
+		LayoutLine(lineDoc, drawSurface, vs, ll, wrapWidth);
 		int subLine = 0;
 		int lineStart = ll->LineStart(subLine);
 		int lineEnd = ll->LineLastVisible(subLine);
@@ -610,6 +610,7 @@ bool Editor::AbandonPaint() {
 }
 
 void Editor::RedrawRect(PRectangle rc) {
+	assert(!"should not be used!!!");
 	//Platform::DebugPrintf("Redraw %0d,%0d - %0d,%0d\n", rc.left, rc.top, rc.right, rc.bottom);
 
 	// Clip the redraw rectangle into the client area
@@ -624,21 +625,23 @@ void Editor::RedrawRect(PRectangle rc) {
 		rc.right = rcClient.right;
 
 	if ((rc.bottom > rc.top) && (rc.right > rc.left)) {
-		wMain.InvalidateRectangle(rc);
+		//wMain.InvalidateRectangle(rc);
 	}
 }
 
-void Editor::Redraw() {
+//void Editor::Redraw() {
+//	assert(!"should not be used");
 	//Platform::DebugPrintf("Redraw all\n");
-	PRectangle rcClient = GetClientRectangle();
-	wMain.InvalidateRectangle(rcClient);
+	//PRectangle rcClient = GetClientRectangle();
+	//wMain.InvalidateRectangle(rcClient);
 	//wMain.InvalidateAll();
-}
+//}
 
 void Editor::RedrawSelMargin(int line, bool allAfter) {
+	assert(!"Probably should not be used!!!");
 	if (!AbandonPaint()) {
 		if (vs.maskInLine) {
-			Redraw();
+			//Redraw();
 		} else {
 			PRectangle rcSelMargin = GetClientRectangle();
 			rcSelMargin.right = vs.fixedColumnWidth;
@@ -649,7 +652,7 @@ void Editor::RedrawSelMargin(int line, bool allAfter) {
 				if (!allAfter)
 					rcSelMargin.bottom = rcLine.bottom;
 			}
-			wMain.InvalidateRectangle(rcSelMargin);
+			//wMain.InvalidateRectangle(rcSelMargin);
 		}
 	}
 }
@@ -679,9 +682,10 @@ PRectangle Editor::RectangleFromRange(int start, int end) {
 	return rc;
 }
 
-void Editor::InvalidateRange(int start, int end) {
-	RedrawRect(RectangleFromRange(start, end));
-}
+//void Editor::InvalidateRange(int start, int end) {
+//	assert(!"should not be used");
+//	RedrawRect(RectangleFromRange(start, end));
+//}
 
 int Editor::CurrentPosition() {
 	return sel.MainCaret();
@@ -750,7 +754,7 @@ void Editor::InvalidateSelection(SelectionRange newMain, bool invalidateWholeSel
 		}
 	}
 	ContainerNeedsUpdate(SC_UPDATE_SELECTION);
-	InvalidateRange(firstAffected, lastAffected);
+	//InvalidateRange(firstAffected, lastAffected);
 }
 
 void Editor::SetSelection(SelectionPosition currentPos_, SelectionPosition anchor_) {
@@ -968,7 +972,7 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 		if ((abs(linesToMove) <= 10) && (paintState == notPainting)) {
 			ScrollText(linesToMove);
 		} else {
-			Redraw();
+			//Redraw();
 		}
 #else
 		Redraw();
@@ -980,8 +984,9 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 }
 
 void Editor::ScrollText(int /* linesToMove */) {
+	assert(!"WTF");
 	//Platform::DebugPrintf("Editor::ScrollText %d\n", linesToMove);
-	Redraw();
+	//Redraw();
 }
 
 void Editor::HorizontalScrollTo(int xPos) {
@@ -992,7 +997,8 @@ void Editor::HorizontalScrollTo(int xPos) {
 		xOffset = xPos;
 		ContainerNeedsUpdate(SC_UPDATE_H_SCROLL);
 		SetHorizontalScrollPos();
-		RedrawRect(GetClientRectangle());
+		assert(!"should not be used next line");
+		//RedrawRect(GetClientRectangle());
 	}
 }
 
@@ -1002,7 +1008,8 @@ void Editor::VerticalCentreCaret() {
 	int newTop = lineDisplay - (LinesOnScreen() / 2);
 	if (topLine != newTop) {
 		SetTopLine(newTop > 0 ? newTop : 0);
-		RedrawRect(GetClientRectangle());
+		assert(!"should not be used next line");
+		//RedrawRect(GetClientRectangle());
 	}
 }
 
@@ -1024,10 +1031,10 @@ void Editor::MoveCaretInsideView(bool ensureVisible) {
 int Editor::DisplayFromPosition(int pos) {
 	int lineDoc = pdoc->LineFromPosition(pos);
 	int lineDisplay = cs.DisplayFromDoc(lineDoc);
-	AutoSurface surface(this);
+	//AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
-	if (surface && ll) {
-		LayoutLine(lineDoc, surface, vs, ll, wrapWidth);
+	if (drawSurface && ll) {
+		LayoutLine(lineDoc, drawSurface, vs, ll, wrapWidth);
 		unsigned int posLineStart = pdoc->LineStart(lineDoc);
 		int posInLine = pos - posLineStart;
 		lineDisplay--; // To make up for first increment ahead.
@@ -1311,7 +1318,7 @@ void Editor::SetXYScroll(XYScrollPosition newXY) {
 			}
 			SetHorizontalScrollPos();
 		}
-		Redraw();
+		//Redraw();
 		UpdateSystemCaret();
 	}
 }
@@ -1339,10 +1346,10 @@ void Editor::DropCaret() {
 
 void Editor::InvalidateCaret() {
 	if (posDrag.IsValid()) {
-		InvalidateRange(posDrag.Position(), posDrag.Position() + 1);
+		//InvalidateRange(posDrag.Position(), posDrag.Position() + 1);
 	} else {
 		for (size_t r=0; r<sel.Count(); r++) {
-			InvalidateRange(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1);
+			//InvalidateRange(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1);
 		}
 	}
 	UpdateSystemCaret();
@@ -1431,8 +1438,8 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 			rcTextArea.right -= vs.rightMarginWidth;
 			wrapWidth = rcTextArea.Width();
 			RefreshStyleData();
-			AutoSurface surface(this);
-			if (surface) {
+			//AutoSurface surface(this);
+			if (drawSurface) {
 				bool priorityWrap = false;
 				int lastLineToWrap = wrapEnd;
 				int lineToWrap = wrapStart;
@@ -1456,7 +1463,7 @@ bool Editor::WrapLines(bool fullWrap, int priorityWrapLineStart) {
 				// Platform::DebugPrintf("Wraplines: full = %d, priorityStart = %d (wrapping: %d to %d)\n", fullWrap, priorityWrapLineStart, lineToWrap, lastLineToWrap);
 				// Platform::DebugPrintf("Pending wraps: %d to %d\n", wrapStart, wrapEnd);
 				while (lineToWrap < lastLineToWrap) {
-					if (WrapOneLine(surface, lineToWrap)) {
+					if (WrapOneLine(drawSurface, lineToWrap)) {
 						wrapOccurred = true;
 					}
 					lineToWrap++;
@@ -1527,11 +1534,11 @@ void Editor::LinesSplit(int pixelWidth) {
 		const char *eol = StringFromEOLMode(pdoc->eolMode);
 		UndoGroup ug(pdoc);
 		for (int line = lineStart; line <= lineEnd; line++) {
-			AutoSurface surface(this);
+			//AutoSurface surface(this);
 			AutoLineLayout ll(llc, RetrieveLineLayout(line));
-			if (surface && ll) {
+			if (drawSurface && ll) {
 				unsigned int posLineStart = pdoc->LineStart(line);
-				LayoutLine(line, surface, vs, ll, pixelWidth);
+				LayoutLine(line, drawSurface, vs, ll, pixelWidth);
 				for (int subLine = 1; subLine < ll->lines; subLine++) {
 					pdoc->InsertCString(posLineStart + (subLine - 1) * strlen(eol) +
 					        ll->LineStart(subLine), eol);
@@ -3288,7 +3295,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 	}
 }
 
-void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
+void Editor::Paint(/*Surface *surfaceWindow,*/ PRectangle rcArea) {
 	//Platform::DebugPrintf("Paint:%1d (%3d,%3d) ... (%3d,%3d)\n",
 	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
 
@@ -3296,7 +3303,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 
 	//pixmapLine->Release();
 	RefreshStyleData();
-	RefreshPixMaps(surfaceWindow);
+	RefreshPixMaps(drawSurface);
 
 	PRectangle rcClient = GetClientRectangle();
 	//Platform::DebugPrintf("Client: (%3d,%3d) ... (%3d,%3d)   %d\n",
@@ -3323,7 +3330,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		needUpdateUI = 0;
 
 		RefreshStyleData();
-		RefreshPixMaps(surfaceWindow);
+		RefreshPixMaps(drawSurface);
 		//surfaceWindow->SetPalette(&palette, true);
 		//pixmapLine->SetPalette(&palette, !hasFocus);
 	}
@@ -3340,17 +3347,17 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		if (AbandonPaint()) {
 			return;
 		}
-		RefreshPixMaps(surfaceWindow);	// In case pixmaps invalidated by scrollbar change
+		RefreshPixMaps(drawSurface);	// In case pixmaps invalidated by scrollbar change
 	}
 	PLATFORM_ASSERT(pixmapSelPattern->Initialised());
 
 	if (paintState != paintAbandoned) {
-		PaintSelMargin(surfaceWindow, rcArea);
+		PaintSelMargin(drawSurface, rcArea);
 
 		PRectangle rcRightMargin = rcClient;
 		rcRightMargin.left = rcRightMargin.right - vs.rightMarginWidth;
 		if (rcArea.Intersects(rcRightMargin)) {
-			surfaceWindow->FillRectangle(rcRightMargin, vs.styles[STYLE_DEFAULT].back/*.allocated*/);
+			drawSurface->FillRectangle(rcRightMargin, vs.styles[STYLE_DEFAULT].back/*.allocated*/);
 		}
 	}
 
@@ -3372,7 +3379,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 	// Do the painting
 	if (rcArea.right > vs.fixedColumnWidth) {
 
-		Surface *surface = surfaceWindow;
+		Surface *surface = drawSurface;
 		//if (bufferedDraw) {
 		//	surface = pixmapLine;
 		//	PLATFORM_ASSERT(pixmapLine->Initialised());
@@ -3392,7 +3399,7 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		PRectangle rcTextArea = rcClient;
 		rcTextArea.left = vs.fixedColumnWidth;
 		rcTextArea.right -= vs.rightMarginWidth;
-		surfaceWindow->SetClip(rcTextArea);
+		drawSurface->SetClip(rcTextArea);
 
 		// Loop on visible lines
 		//double durLayout = 0.0;
@@ -3499,12 +3506,12 @@ void Editor::Paint(Surface *surfaceWindow, PRectangle rcArea) {
 		rcBeyondEOF.right = rcBeyondEOF.right;
 		rcBeyondEOF.top = (cs.LinesDisplayed() - topLine) * vs.lineHeight;
 		if (rcBeyondEOF.top < rcBeyondEOF.bottom) {
-			surfaceWindow->FillRectangle(rcBeyondEOF, vs.styles[STYLE_DEFAULT].back/*.allocated*/);
+			drawSurface->FillRectangle(rcBeyondEOF, vs.styles[STYLE_DEFAULT].back/*.allocated*/);
 			if (vs.edgeState == EDGE_LINE) {
 				int edgeX = theEdge * vs.spaceWidth;
 				rcBeyondEOF.left = edgeX + xStart;
 				rcBeyondEOF.right = rcBeyondEOF.left + 1;
-				surfaceWindow->FillRectangle(rcBeyondEOF, vs.edgecolour/*.allocated*/);
+				drawSurface->FillRectangle(rcBeyondEOF, vs.edgecolour/*.allocated*/);
 			}
 		}
 		//Platform::DebugPrintf(
@@ -3538,11 +3545,12 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	if (!pfr)
 		return 0;
 
-	AutoSurface surface(pfr->hdc, this);
-	if (!surface)
-		return 0;
-	AutoSurface surfaceMeasure(pfr->hdcTarget, this);
-	if (!surfaceMeasure) {
+	//AutoSurface surface(pfr->hdc, this);
+	//if (!surface)
+	//	return 0;
+	//AutoSurface surfaceMeasure(pfr->hdcTarget, this);
+	//if (!surfaceMeasure) {
+	if (!drawSurface) {
 		return 0;
 	}
 
@@ -3593,14 +3601,14 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	// White background for the line numbers
 	vsPrint.styles[STYLE_LINENUMBER].back/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
 
-	vsPrint.Refresh(*surfaceMeasure);
+	vsPrint.Refresh(*drawSurface);
 	// Determining width must hapen after fonts have been realised in Refresh
 	int lineNumberWidth = 0;
 	if (lineNumberIndex >= 0) {
-		lineNumberWidth = surfaceMeasure->WidthText(vsPrint.styles[STYLE_LINENUMBER].font,
+		lineNumberWidth = drawSurface->WidthText(vsPrint.styles[STYLE_LINENUMBER].font,
 		        "99999" lineNumberPrintSpace, 5 + istrlen(lineNumberPrintSpace));
 		vsPrint.ms[lineNumberIndex].width = lineNumberWidth;
-		vsPrint.Refresh(*surfaceMeasure);	// Recalculate fixedColumnWidth
+		vsPrint.Refresh(*drawSurface);	// Recalculate fixedColumnWidth
 	}
 	// Ensure colours are set up
 	//vsPrint.RefreshColourPalette(palette, true);
@@ -3640,12 +3648,12 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 		// changing the state of surfaceMeasure may change the underlying
 		// state of surface. Therefore, any cached state is discarded before
 		// using each surface.
-		surfaceMeasure->FlushCachedState();
+		drawSurface->FlushCachedState();
 
 		// Copy this line and its styles from the document into local arrays
 		// and determine the x position at which each character starts.
 		LineLayout ll(8000);
-		LayoutLine(lineDoc, surfaceMeasure, vsPrint, &ll, widthPrint);
+		LayoutLine(lineDoc, drawSurface, vsPrint, &ll, widthPrint);
 
 		ll.containsCaret = false;
 
@@ -3679,17 +3687,17 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 			PRectangle rcNumber = rcLine;
 			rcNumber.right = rcNumber.left + lineNumberWidth;
 			// Right justify
-			rcNumber.left = rcNumber.right - surfaceMeasure->WidthText(
+			rcNumber.left = rcNumber.right - drawSurface->WidthText(
 			            vsPrint.styles[STYLE_LINENUMBER].font, number, istrlen(number));
-			surface->FlushCachedState();
-			surface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
+			drawSurface->FlushCachedState();
+			drawSurface->DrawTextNoClip(rcNumber, vsPrint.styles[STYLE_LINENUMBER].font,
 			        ypos + vsPrint.maxAscent, number, istrlen(number),
 			        vsPrint.styles[STYLE_LINENUMBER].fore/*.allocated*/,
 			        vsPrint.styles[STYLE_LINENUMBER].back/*.allocated*/);
 		}
 
 		// Draw the line
-		surface->FlushCachedState();
+		drawSurface->FlushCachedState();
 
 		for (int iwl = 0; iwl < ll.lines; iwl++) {
 			if (ypos + vsPrint.lineHeight <= pfr->rc.bottom) {
@@ -3697,7 +3705,7 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 					if (draw) {
 						rcLine.top = ypos;
 						rcLine.bottom = ypos + vsPrint.lineHeight;
-						DrawLine(surface, vsPrint, lineDoc, visibleLine, xStart, rcLine, &ll, iwl);
+						DrawLine(drawSurface, vsPrint, lineDoc, visibleLine, xStart, rcLine, &ll, iwl);
 					}
 					ypos += vsPrint.lineHeight;
 				}
@@ -3720,9 +3728,9 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 
 int Editor::TextWidth(int style, const char *text) {
 	RefreshStyleData();
-	AutoSurface surface(this);
-	if (surface) {
-		return surface->WidthText(vs.styles[style].font, text, istrlen(text));
+	//AutoSurface surface(this);
+	if (drawSurface) {
+		return drawSurface->WidthText(vs.styles[style].font, text, istrlen(text));
 	} else {
 		return 1;
 	}
@@ -3746,12 +3754,12 @@ void Editor::SetScrollBars() {
 	if (topLine > MaxScrollPos()) {
 		SetTopLine(Platform::Clamp(topLine, 0, MaxScrollPos()));
 		SetVerticalScrollPos();
-		Redraw();
+		//Redraw();
 	}
-	if (modified) {
-		if (!AbandonPaint())
-			Redraw();
-	}
+	//if (modified) {
+		//if (!AbandonPaint())
+			//Redraw();
+	//}
 	//Platform::DebugPrintf("end max = %d page = %d\n", nMax, nPage);
 }
 
@@ -3764,7 +3772,7 @@ void Editor::ChangeSize() {
 		rcTextArea.right -= vs.rightMarginWidth;
 		if (wrapWidth != rcTextArea.Width()) {
 			NeedWrapping();
-			Redraw();
+			//Redraw();
 		}
 	}
 }
@@ -3826,12 +3834,12 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 				sel.Range(r).ClearVirtualSpace();
 				// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
 				if (wrapState != eWrapNone) {
-					AutoSurface surface(this);
-					if (surface) {
-						if (WrapOneLine(surface, pdoc->LineFromPosition(positionInsert))) {
+					//AutoSurface surface(this);
+					if (drawSurface) {
+						if (WrapOneLine(drawSurface, pdoc->LineFromPosition(positionInsert))) {
 							SetScrollBars();
 							SetVerticalScrollPos();
-							Redraw();
+							//Redraw();
 						}
 					}
 				}
@@ -4068,7 +4076,7 @@ void Editor::Clear() {
 void Editor::SelectAll() {
 	sel.Clear();
 	SetSelection(0, pdoc->Length());
-	Redraw();
+	//Redraw();
 }
 
 void Editor::Undo() {
@@ -4353,7 +4361,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			    Range(pdoc->LineStart(mh.line), pdoc->LineStart(mh.line + 1)));
 		} else {
 			// Could check that change is before last visible line.
-			Redraw();
+			//Redraw();
 		}
 	}
 	if (mh.modificationType & SC_MOD_LEXERSTATE) {
@@ -4361,7 +4369,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			CheckForChangeOutsidePaint(
 			    Range(mh.position, mh.position + mh.length));
 		} else {
-			Redraw();
+			//Redraw();
 		}
 	}
 	if (mh.modificationType & (SC_MOD_CHANGESTYLE | SC_MOD_CHANGEINDICATOR)) {
@@ -4369,12 +4377,12 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			pdoc->IncrementStyleClock();
 		}
 		if (paintState == notPainting) {
-			if (mh.position < pdoc->LineStart(topLine)) {
-				// Styling performed before this view
-				Redraw();
-			} else {
-				InvalidateRange(mh.position, mh.position + mh.length);
-			}
+			//if (mh.position < pdoc->LineStart(topLine)) {
+			//	// Styling performed before this view
+			//	Redraw();
+			//} else {
+			//	InvalidateRange(mh.position, mh.position + mh.length);
+			//}
 		}
 		if (mh.modificationType & SC_MOD_CHANGESTYLE) {
 			llc.Invalidate(LineLayout::llCheckTextAndStyle);
@@ -4422,7 +4430,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			int lineDoc = pdoc->LineFromPosition(mh.position);
 			if (vs.annotationVisible) {
 				cs.SetHeight(lineDoc, cs.GetHeight(lineDoc) + mh.annotationLinesAdded);
-				Redraw();
+				//Redraw();
 			}
 		}
 		CheckModificationForWrap(mh);
@@ -4441,14 +4449,14 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 			//InvalidateRange(mh.position, mh.position + mh.length);
 			if (paintState == notPainting && !CanDeferToLastStep(mh)) {
 				QueueStyling(pdoc->Length());
-				Redraw();
+				//Redraw();
 			}
 		} else {
 			//Platform::DebugPrintf("** %x Line Changed %d .. %d\n", this,
 			//	mh.position, mh.position + mh.length);
 			if (paintState == notPainting && mh.length && !CanEliminate(mh)) {
 				QueueStyling(mh.position + mh.length);
-				InvalidateRange(mh.position, mh.position + mh.length);
+				//InvalidateRange(mh.position, mh.position + mh.length);
 			}
 		}
 	}
@@ -4471,7 +4479,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 	// NOW pay the piper WRT "deferred" visual updates
 	if (IsLastStep(mh)) {
 		SetScrollBars();
-		Redraw();
+		//Redraw();
 	}
 
 	// If client wants to see this modification
@@ -4670,7 +4678,7 @@ void Editor::PageMove(int direction, Selection::selTypes selt, bool stuttered) {
 	if (topLineNew != topLine) {
 		SetTopLine(topLineNew);
 		MovePositionTo(newPos, selt);
-		Redraw();
+		//Redraw();
 		SetVerticalScrollPos();
 	} else {
 		MovePositionTo(newPos, selt);
@@ -4857,12 +4865,12 @@ void Editor::ParaUpOrDown(int direction, Selection::selTypes selt) {
 int Editor::StartEndDisplayLine(int pos, bool start) {
 	RefreshStyleData();
 	int line = pdoc->LineFromPosition(pos);
-	AutoSurface surface(this);
+	//AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(line));
 	int posRet = INVALID_POSITION;
-	if (surface && ll) {
+	if (drawSurface && ll) {
 		unsigned int posLineStart = pdoc->LineStart(line);
-		LayoutLine(line, surface, vs, ll, wrapWidth);
+		LayoutLine(line, drawSurface, vs, ll, wrapWidth);
 		int posInLine = pos - posLineStart;
 		if (posInLine <= ll->maxLineLength) {
 			for (int subLine = 0; subLine < ll->lines; subLine++) {
@@ -6045,7 +6053,7 @@ void Editor::ButtonDown(Point pt, unsigned int curTime, bool shift, bool ctrl, b
 					} else {
 						InvalidateSelection(SelectionRange(newPos), true);
 						if (sel.Count() > 1)
-							Redraw();
+							//Redraw();
 						if ((sel.Count() > 1) || (sel.selType != Selection::selStream))
 							sel.Clear();
 						sel.selType = alt ? Selection::selRectangle : Selection::selStream;
@@ -6093,11 +6101,11 @@ void Editor::SetHotSpotRange(Point *pt) {
 		// Only invalidate the range if the hotspot range has changed...
 		if (hsStart_ != hsStart || hsEnd_ != hsEnd) {
 			if (hsStart != -1) {
-				InvalidateRange(hsStart, hsEnd);
+				//InvalidateRange(hsStart, hsEnd);
 			}
 			hsStart = hsStart_;
 			hsEnd = hsEnd_;
-			InvalidateRange(hsStart, hsEnd);
+			//InvalidateRange(hsStart, hsEnd);
 		}
 	} else {
 		if (hsStart != -1) {
@@ -6105,7 +6113,7 @@ void Editor::SetHotSpotRange(Point *pt) {
 			int hsEnd_ = hsEnd;
 			hsStart = -1;
 			hsEnd = -1;
-			InvalidateRange(hsStart_, hsEnd_);
+			//InvalidateRange(hsStart_, hsEnd_);
 		} else {
 			hsStart = -1;
 			hsEnd = -1;
@@ -6193,11 +6201,11 @@ void Editor::ButtonMove(Point pt) {
 				lineMove = cs.DisplayFromDoc(pdoc->LinesTotal() - 1);
 			}
 			ScrollTo(lineMove - LinesOnScreen() + 1);
-			Redraw();
+			//Redraw();
 		} else if (pt.y < rcClient.top) {
 			int lineMove = cs.DisplayFromDoc(LineFromLocation(pt));
 			ScrollTo(lineMove - 1);
-			Redraw();
+			//Redraw();
 		}
 		EnsureCaretVisible(false, false, true);
 
@@ -6467,7 +6475,7 @@ void Editor::SetBraceHighlight(Position pos0, Position pos1, int matchStyle) {
 		}
 		bracesMatchStyle = matchStyle;
 		if (paintState == notPainting) {
-			Redraw();
+			//Redraw();
 		}
 	}
 }
@@ -6508,7 +6516,7 @@ void Editor::SetDocPointer(Document *document) {
 
 	pdoc->AddWatcher(this, 0);
 	SetScrollBars();
-	Redraw();
+	//Redraw();
 }
 
 void Editor::SetAnnotationVisible(int visible) {
@@ -6524,7 +6532,7 @@ void Editor::SetAnnotationVisible(int visible) {
 				}
 			}
 		}
-		Redraw();
+		//Redraw();
 	}
 }
 
@@ -6571,7 +6579,7 @@ void Editor::ToggleContraction(int line) {
 				}
 
 				SetScrollBars();
-				Redraw();
+				//Redraw();
 			}
 
 		} else {
@@ -6582,7 +6590,7 @@ void Editor::ToggleContraction(int line) {
 			cs.SetExpanded(line, 1);
 			Expand(line, true);
 			SetScrollBars();
-			Redraw();
+			//Redraw();
 		}
 	}
 }
@@ -6619,7 +6627,7 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 			}
 		}
 		SetScrollBars();
-		Redraw();
+		//Redraw();
 	}
 	if (enforcePolicy) {
 		int lineDisplay = cs.DisplayFromDoc(lineDoc);
@@ -6627,18 +6635,18 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 			if ((topLine > lineDisplay) || ((visiblePolicy & VISIBLE_STRICT) && (topLine + visibleSlop > lineDisplay))) {
 				SetTopLine(Platform::Clamp(lineDisplay - visibleSlop, 0, MaxScrollPos()));
 				SetVerticalScrollPos();
-				Redraw();
+				//Redraw();
 			} else if ((lineDisplay > topLine + LinesOnScreen() - 1) ||
 			        ((visiblePolicy & VISIBLE_STRICT) && (lineDisplay > topLine + LinesOnScreen() - 1 - visibleSlop))) {
 				SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() + 1 + visibleSlop, 0, MaxScrollPos()));
 				SetVerticalScrollPos();
-				Redraw();
+				//Redraw();
 			}
 		} else {
 			if ((topLine > lineDisplay) || (lineDisplay > topLine + LinesOnScreen() - 1) || (visiblePolicy & VISIBLE_STRICT)) {
 				SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() / 2 + 1, 0, MaxScrollPos()));
 				SetVerticalScrollPos();
-				Redraw();
+				//Redraw();
 			}
 		}
 	}
@@ -6692,11 +6700,11 @@ int Editor::CodePage() const {
 }
 
 int Editor::WrapCount(int line) {
-	AutoSurface surface(this);
+	//AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(line));
 
-	if (surface && ll) {
-		LayoutLine(line, surface, vs, ll, wrapWidth);
+	if (drawSurface && ll) {
+		LayoutLine(line, drawSurface, vs, ll, wrapWidth);
 		return ll->lines;
 	} else {
 		return 1;
@@ -7068,7 +7076,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		xOffset = wParam;
 		ContainerNeedsUpdate(SC_UPDATE_H_SCROLL);
 		SetHorizontalScrollPos();
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETXOFFSET:
@@ -7128,7 +7136,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_HIDESELECTION:
 		hideSelection = wParam != 0;
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_FORMATRANGE:
@@ -7247,7 +7255,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (sel.IsRectangular()) {
 			sel.Rectangular().caret.SetPosition(wParam);
 			SetRectangularRange();
-			Redraw();
+			//Redraw();
 		} else {
 			SetSelection(wParam, sel.MainAnchor());
 		}
@@ -7260,7 +7268,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (sel.IsRectangular()) {
 			sel.Rectangular().anchor.SetPosition(wParam);
 			SetRectangularRange();
-			Redraw();
+			//Redraw();
 		} else {
 			SetSelection(sel.MainCaret(), wParam);
 		}
@@ -7351,7 +7359,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETVIEWWS:
 		vs.viewWhitespace = static_cast<WhiteSpaceVisibility>(wParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETWHITESPACESIZE:
@@ -7359,7 +7367,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETWHITESPACESIZE:
 		vs.whitespaceSize = static_cast<int>(wParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_POSITIONFROMPOINT:
@@ -7684,7 +7692,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETINDENTATIONGUIDES:
 		vs.viewIndentationGuides = IndentView(wParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETINDENTATIONGUIDES:
@@ -7693,7 +7701,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETHIGHLIGHTGUIDE:
 		if ((highlightGuideColumn != static_cast<int>(wParam)) || (wParam > 0)) {
 			highlightGuideColumn = wParam;
-			Redraw();
+			//Redraw();
 		}
 		break;
 
@@ -7969,14 +7977,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SHOWLINES:
 		cs.SetVisible(wParam, lParam, true);
 		SetScrollBars();
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_HIDELINES:
 		if (wParam > 0)
 			cs.SetVisible(wParam, lParam, false);
 		SetScrollBars();
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETLINEVISIBLE:
@@ -7993,7 +8001,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETFOLDFLAGS:
 		foldFlags = wParam;
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_TOGGLEFOLD:
@@ -8722,22 +8730,22 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_CLEARSELECTIONS:
 		sel.Clear();
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_SETSELECTION:
 		sel.SetSelection(SelectionRange(wParam, lParam));
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_ADDSELECTION:
 		sel.AddSelection(SelectionRange(wParam, lParam));
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_SETMAINSELECTION:
 		sel.SetMain(wParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETMAINSELECTION:
@@ -8745,7 +8753,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNCARET:
 		sel.Range(wParam).caret.SetPosition(lParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNCARET:
@@ -8753,14 +8761,14 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNANCHOR:
 		sel.Range(wParam).anchor.SetPosition(lParam);
-		Redraw();
+		//Redraw();
 		break;
 	case SCI_GETSELECTIONNANCHOR:
 		return sel.Range(wParam).anchor.Position();
 
 	case SCI_SETSELECTIONNCARETVIRTUALSPACE:
 		sel.Range(wParam).caret.SetVirtualSpace(lParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNCARETVIRTUALSPACE:
@@ -8768,7 +8776,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNANCHORVIRTUALSPACE:
 		sel.Range(wParam).anchor.SetVirtualSpace(lParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNANCHORVIRTUALSPACE:
@@ -8776,7 +8784,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNSTART:
 		sel.Range(wParam).anchor.SetPosition(lParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNSTART:
@@ -8784,7 +8792,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNEND:
 		sel.Range(wParam).caret.SetPosition(lParam);
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNEND:
@@ -8796,7 +8804,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().caret.SetPosition(wParam);
 		SetRectangularRange();
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETRECTANGULARSELECTIONCARET:
@@ -8808,7 +8816,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().anchor.SetPosition(wParam);
 		SetRectangularRange();
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETRECTANGULARSELECTIONANCHOR:
@@ -8820,7 +8828,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().caret.SetVirtualSpace(wParam);
 		SetRectangularRange();
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETRECTANGULARSELECTIONCARETVIRTUALSPACE:
@@ -8832,7 +8840,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().anchor.SetVirtualSpace(wParam);
 		SetRectangularRange();
-		Redraw();
+		//Redraw();
 		break;
 
 	case SCI_GETRECTANGULARSELECTIONANCHORVIRTUALSPACE:

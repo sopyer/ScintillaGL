@@ -296,10 +296,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	bool AbandonPaint();
 	void RedrawRect(PRectangle rc);
-	void Redraw();
+	//void Redraw();
 	void RedrawSelMargin(int line=-1, bool allAfter=false);
 	PRectangle RectangleFromRange(int start, int end);
-	void InvalidateRange(int start, int end);
+	//void InvalidateRange(int start, int end);
 
 	bool UserVirtualSpace() const {
 		return ((virtualSpaceOptions & SCVS_USERACCESSIBLE) != 0);
@@ -378,7 +378,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DrawCarets(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
 	void RefreshPixMaps(Surface *surfaceWindow);
-	void Paint(Surface *surfaceWindow, PRectangle rcArea);
+	void Paint(/*Surface *surfaceWindow, */PRectangle rcArea);
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr);
 	int TextWidth(int style, const char *text);
 
@@ -455,7 +455,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int StartEndDisplayLine(int pos, bool start);
 	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
-	int KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);
 
 	int GetWhitespaceVisible();
 	void SetWhitespaceVisible(int view);
@@ -541,7 +540,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	static sptr_t StringResult(sptr_t lParam, const char *val);
 
 public:
+	Surface*	drawSurface;
 	// Public so the COM thunks can access it.
+	int KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);
 	bool IsUnicodeMode() const;
 	// Public so scintilla_send_message can use it.
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
@@ -556,40 +557,40 @@ public:
 /**
  * A smart pointer class to ensure Surfaces are set up and deleted correctly.
  */
-class AutoSurface {
-private:
-	Surface *surf;
-public:
-	AutoSurface(Editor *ed) : surf(0) {
-		if (ed->wMain.GetID()) {
-			surf = Surface::Allocate();
-			if (surf) {
-				surf->Init(ed->wMain.GetID());
-				surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
-				surf->SetDBCSMode(ed->CodePage());
-			}
-		}
-	}
-	AutoSurface(SurfaceID sid, Editor *ed) : surf(0) {
-		if (ed->wMain.GetID()) {
-			surf = Surface::Allocate();
-			if (surf) {
-				surf->Init(sid, ed->wMain.GetID());
-				surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
-				surf->SetDBCSMode(ed->CodePage());
-			}
-		}
-	}
-	~AutoSurface() {
-		delete surf;
-	}
-	Surface *operator->() const {
-		return surf;
-	}
-	operator Surface *() const {
-		return surf;
-	}
-};
+//class AutoSurface {
+//private:
+//	Surface *surf;
+//public:
+//	AutoSurface(Editor *ed) : surf(0) {
+//		if (ed->wMain.GetID()) {
+//			surf = Surface::Allocate();
+//			if (surf) {
+//				surf->Init(ed->wMain.GetID());
+//				surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
+//				surf->SetDBCSMode(ed->CodePage());
+//			}
+//		}
+//	}
+//	AutoSurface(SurfaceID sid, Editor *ed) : surf(0) {
+//		if (ed->wMain.GetID()) {
+//			surf = Surface::Allocate();
+//			if (surf) {
+//				surf->Init(sid, ed->wMain.GetID());
+//				surf->SetUnicodeMode(SC_CP_UTF8 == ed->CodePage());
+//				surf->SetDBCSMode(ed->CodePage());
+//			}
+//		}
+//	}
+//	~AutoSurface() {
+//		delete surf;
+//	}
+//	Surface *operator->() const {
+//		return surf;
+//	}
+//	operator Surface *() const {
+//		return surf;
+//	}
+//};
 
 #ifdef SCI_NAMESPACE
 }

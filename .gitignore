@@ -1,0 +1,10 @@
+/Debug
+/win32
+/cocoa
+/macosx
+/ipch
+/gtk
+
+*.user
+*.suo
+*.sdf
