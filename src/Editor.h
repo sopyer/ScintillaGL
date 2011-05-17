@@ -497,7 +497,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual bool SetIdle(bool) { return false; }
 	virtual void SetMouseCapture(bool on) = 0;
 	virtual bool HaveMouseCapture() = 0;
-	void SetFocusState(bool focusState);
 
 	int PositionAfterArea(PRectangle rcArea);
 	void StyleToPositionInView(Position pos);
@@ -543,6 +542,8 @@ public:
 	Surface*	drawSurface;
 	// Public so the COM thunks can access it.
 	int KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);
+	void SetFocusState(bool focusState);
+
 	bool IsUnicodeMode() const;
 	// Public so scintilla_send_message can use it.
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);

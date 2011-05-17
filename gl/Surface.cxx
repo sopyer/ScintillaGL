@@ -302,25 +302,25 @@ void Font::Create(const char *faceName, int characterSet, int size,	bool bold, b
 	stbtt_Font* newFont = new stbtt_Font;
 	size_t len;
 
-	FILE* f = fopen("c:/windows/fonts/times.ttf", "rb");
+	//FILE* f = fopen("c:/windows/fonts/times.ttf", "rb");
 
-	fseek(f, 0, SEEK_END);
-	len = ftell(f);
-	fseek(f, 0, SEEK_SET);
+	//fseek(f, 0, SEEK_END);
+	//len = ftell(f);
+	//fseek(f, 0, SEEK_SET);
 
-	unsigned char* buf = (unsigned char*)malloc(len);
+	//unsigned char* buf = (unsigned char*)malloc(len);
 	unsigned char* bmp = new unsigned char[512*512];
-	fread(buf, 1, len, f);
-	stbtt_BakeFontBitmap(buf, 0, 12.0*2, bmp, 512, 512, 32, 96, newFont->cdata); // no guarantee this fits!
+	//fread(buf, 1, len, f);
+	stbtt_BakeFontBitmap(anonymousProRTTF, 0, 12.0*2, bmp, 512, 512, 32, 96, newFont->cdata); // no guarantee this fits!
 	// can free ttf_buffer at this point
 	glGenTextures(1, &newFont->ftex);
 	glBindTexture(GL_TEXTURE_2D, newFont->ftex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, bmp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 512, 512, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bmp);
 	// can free temp_bitmap at this point
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	fclose(f);
+	//fclose(f);
 
-	stbtt_InitFont(&newFont->fontinfo, buf, 0);
+	stbtt_InitFont(&newFont->fontinfo, anonymousProRTTF, 0);
 
 	delete [] bmp;
 
@@ -331,7 +331,7 @@ void Font::Release()
 {
 	if (fid)
 	{
-		free(((stbtt_Font*)fid)->fontinfo.data);
+		//free(((stbtt_Font*)fid)->fontinfo.data);
 		glDeleteTextures(1, &((stbtt_Font*)fid)->ftex);
 		delete (stbtt_Font*)fid;
 	}
@@ -343,9 +343,11 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// assume orthographic projection with units = screen pixels, origin at top left
 	glBindTexture(GL_TEXTURE_2D, realFont->ftex);
 	glBegin(GL_QUADS);
+	glColor3ubv((GLubyte*)&fore);
 	float x = rc.left, y=ybase;
 	while (*s) {
 		if (*s >= 32 && *s < 128) {
