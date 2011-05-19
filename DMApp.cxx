@@ -107,7 +107,7 @@ void DMApp::InitialiseEditor() {
 		reinterpret_cast<LPARAM>(vbsKeyWords));
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
-	SetAStyle(STYLE_DEFAULT, black, white, 11, "Verdana");
+	SetAStyle(STYLE_DEFAULT, black, white, 16, "c:/windows/fonts/cour.ttf");
 	SendEditor(SCI_STYLECLEARALL);	// Copies global style to all others
 
 	const COLORREF red = RGB(0xFF, 0, 0);
@@ -116,7 +116,7 @@ void DMApp::InitialiseEditor() {
 	const COLORREF darkBlue = RGB(0, 0, 0x80);
 
 	// Hypertext default is used for all the document's text
-	SetAStyle(SCE_H_DEFAULT, black, white, 11, "Times New Roman");
+	SetAStyle(SCE_H_DEFAULT, black, white, 16, "c:/windows/fonts/cour.ttf");
 	
 	// Unknown tags and attributes are highlighed in red. 
 	// If a tag is actually OK, it should be added in lower case to the htmlKeyWords string.
@@ -151,14 +151,14 @@ void DMApp::InitialiseEditor() {
 	// Show the whole section of VBScript with light blue background
 	for (int bstyle=SCE_HB_DEFAULT; bstyle<=SCE_HB_STRINGEOL; bstyle++) {
 		SendEditor(SCI_STYLESETFONT, bstyle, 
-			reinterpret_cast<LPARAM>("Georgia"));
+			reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
 		SendEditor(SCI_STYLESETBACK, bstyle, lightBlue);
 		// This call extends the backround colour of the last style on the line to the edge of the window
 		SendEditor(SCI_STYLESETEOLFILLED, bstyle, 1);
 	}
 	SendEditor(SCI_STYLESETBACK, SCE_HB_STRINGEOL, RGB(0x7F,0x7F,0xFF));
 	SendEditor(SCI_STYLESETFONT, SCE_HB_COMMENTLINE, 
-		reinterpret_cast<LPARAM>("Comic Sans MS"));
+		reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
 
 	SetAStyle(SCE_HBA_DEFAULT, black);
 	SetAStyle(SCE_HBA_COMMENTLINE, darkGreen);
@@ -171,14 +171,14 @@ void DMApp::InitialiseEditor() {
 	// Show the whole section of ASP VBScript with bright yellow background
 	for (int bastyle=SCE_HBA_DEFAULT; bastyle<=SCE_HBA_STRINGEOL; bastyle++) {
 		SendEditor(SCI_STYLESETFONT, bastyle, 
-			reinterpret_cast<LPARAM>("Georgia"));
+			reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
 		SendEditor(SCI_STYLESETBACK, bastyle, RGB(0xFF, 0xFF, 0));
 		// This call extends the backround colour of the last style on the line to the edge of the window
 		SendEditor(SCI_STYLESETEOLFILLED, bastyle, 1);
 	}
 	SendEditor(SCI_STYLESETBACK, SCE_HBA_STRINGEOL, RGB(0xCF,0xCF,0x7F));
 	SendEditor(SCI_STYLESETFONT, SCE_HBA_COMMENTLINE, 
-		reinterpret_cast<LPARAM>("Comic Sans MS"));
+		reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
 		
 	// If there is no need to support embedded Javascript, the following code can be dropped.
 	// Javascript will still be correctly processed but will be displayed in just the default style.
@@ -210,7 +210,7 @@ void DMApp::InitialiseEditor() {
 	// Show the whole section of Javascript with off white background
 	for (int jstyle=SCE_HJ_DEFAULT; jstyle<=SCE_HJ_SYMBOLS; jstyle++) {
 		SendEditor(SCI_STYLESETFONT, jstyle, 
-			reinterpret_cast<LPARAM>("Lucida Sans Unicode"));
+			reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
 		SendEditor(SCI_STYLESETBACK, jstyle, offWhite);
 		SendEditor(SCI_STYLESETEOLFILLED, jstyle, 1);
 	}
@@ -220,7 +220,7 @@ void DMApp::InitialiseEditor() {
 	// Show the whole section of Javascript with brown background
 	for (int jastyle=SCE_HJA_DEFAULT; jastyle<=SCE_HJA_SYMBOLS; jastyle++) {
 		SendEditor(SCI_STYLESETFONT, jastyle, 
-			reinterpret_cast<LPARAM>("Lucida Sans Unicode"));
+			reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
 		SendEditor(SCI_STYLESETBACK, jastyle, RGB(0xDF, 0xDF, 0x7F));
 		SendEditor(SCI_STYLESETEOLFILLED, jastyle, 1);
 	}
@@ -329,22 +329,29 @@ int main(int argc, char* argv[])
 					case SDLK_LEFTBRACKET:		sciKey = '[';		        break;
 					case SDLK_BACKSLASH:		sciKey = '\\';		        break;
 					case SDLK_RIGHTBRACKET:		sciKey = ']';		        break;
+					case SDLK_LSHIFT:
+					case SDLK_RSHIFT:
+					case SDLK_LALT:
+					case SDLK_RALT:
+					case SDLK_LCTRL:
+					case SDLK_RCTRL:
+						sciKey = 0; break;
 					default:					sciKey = E.key.keysym.sym;
 				}
 
-				if (SDLK_a<=sciKey && sciKey<=SDLK_z)
-					sciKey = sciKey-'a'+'A';
+				if (sciKey)
+				{
+					bool consumed;
 
-				bool consumed;
-
-				app.myEd.KeyDown(sciKey,
-					E.key.keysym.mod&KMOD_LSHIFT | E.key.keysym.mod&KMOD_RSHIFT,
-					E.key.keysym.mod&KMOD_LCTRL | E.key.keysym.mod&KMOD_RCTRL,
-					E.key.keysym.mod&KMOD_LALT | E.key.keysym.mod&KMOD_RALT,
-					&consumed
-				);
-				if (!consumed && sciKey>=32 && sciKey<=128)
-					app.myEd.AddCharUTF(E.key.keysym.unicode);
+					app.myEd.KeyDown((SDLK_a<=sciKey && sciKey<=SDLK_z)?sciKey-'a'+'A':sciKey,
+						E.key.keysym.mod&KMOD_LSHIFT | E.key.keysym.mod&KMOD_RSHIFT,
+						E.key.keysym.mod&KMOD_LCTRL | E.key.keysym.mod&KMOD_RCTRL,
+						E.key.keysym.mod&KMOD_LALT | E.key.keysym.mod&KMOD_RALT,
+						&consumed
+					);
+					if (!consumed && sciKey>=32 && sciKey<=128)
+						app.myEd.AddCharUTF(sciKey);
+				}
 			}
 		}
 

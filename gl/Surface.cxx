@@ -260,6 +260,7 @@ struct stbtt_Font
 	stbtt_fontinfo	fontinfo;
 	stbtt_bakedchar cdata[96]; // ASCII 32..126 is 95 glyphs
 	GLuint ftex;
+	float scale;
 };
 
 Font::Font() : fid(0)
@@ -302,25 +303,30 @@ void Font::Create(const char *faceName, int characterSet, int size,	bool bold, b
 	stbtt_Font* newFont = new stbtt_Font;
 	size_t len;
 
-	//FILE* f = fopen("c:/windows/fonts/times.ttf", "rb");
+	FILE* f = fopen(faceName, "rb");
 
-	//fseek(f, 0, SEEK_END);
-	//len = ftell(f);
-	//fseek(f, 0, SEEK_SET);
+	assert(f);
 
-	//unsigned char* buf = (unsigned char*)malloc(len);
+	fseek(f, 0, SEEK_END);
+	len = ftell(f);
+	fseek(f, 0, SEEK_SET);
+
+	unsigned char* buf = (unsigned char*)malloc(len);
 	unsigned char* bmp = new unsigned char[512*512];
-	//fread(buf, 1, len, f);
-	stbtt_BakeFontBitmap(anonymousProRTTF, 0, 12.0*2, bmp, 512, 512, 32, 96, newFont->cdata); // no guarantee this fits!
+	fread(buf, 1, len, f);
+	stbtt_BakeFontBitmap(buf, 0, size, bmp, 512, 512, 32, 96, newFont->cdata); // no guarantee this fits!
 	// can free ttf_buffer at this point
 	glGenTextures(1, &newFont->ftex);
 	glBindTexture(GL_TEXTURE_2D, newFont->ftex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 512, 512, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bmp);
 	// can free temp_bitmap at this point
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//fclose(f);
+	fclose(f);
 
-	stbtt_InitFont(&newFont->fontinfo, anonymousProRTTF, 0);
+	stbtt_InitFont(&newFont->fontinfo, buf, 0);
+
+	newFont->scale = stbtt_ScaleForPixelHeight(&newFont->fontinfo, size);
+
 
 	delete [] bmp;
 
@@ -331,7 +337,7 @@ void Font::Release()
 {
 	if (fid)
 	{
-		//free(((stbtt_Font*)fid)->fontinfo.data);
+		free(((stbtt_Font*)fid)->fontinfo.data);
 		glDeleteTextures(1, &((stbtt_Font*)fid)->ftex);
 		delete (stbtt_Font*)fid;
 	}
@@ -349,7 +355,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 	glBegin(GL_QUADS);
 	glColor3ubv((GLubyte*)&fore);
 	float x = rc.left, y=ybase;
-	while (*s) {
+	while (len--) {
 		if (*s >= 32 && *s < 128) {
 			stbtt_aligned_quad q;
 			stbtt_GetBakedQuad(realFont->cdata, 512,512, *s-32, &x,&y,&q,1);//1=opengl,0=old d3d
@@ -393,7 +399,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 		int advance, leftBearing;
 		stbtt_GetCodepointHMetrics(&realFont->fontinfo, *s++, &advance, &leftBearing);
 		position+=advance;//TODO: +Kerning
-		*positions++ = position*0.0052910051*2;
+		*positions++ = position*realFont->scale;
 	}
 }
 
@@ -407,14 +413,14 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 		stbtt_GetCodepointHMetrics(&realFont->fontinfo, *s++, &advance, &leftBearing);
 		position+=advance;//TODO: +Kerning
 	}
-	return position*0.0052910051*2;
+	return position*realFont->scale;
 }
 
 int SurfaceImpl::WidthChar(Font &font_, char ch) {
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int advance, leftBearing;
 	stbtt_GetCodepointHMetrics(&realFont->fontinfo, ch, &advance, &leftBearing);
-	return advance*0.0052910051*2;
+	return advance*realFont->scale;
 }
 
 int SurfaceImpl::Ascent(Font &font_) {
@@ -422,7 +428,7 @@ int SurfaceImpl::Ascent(Font &font_) {
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int ascent, descent, lineGap;
 	stbtt_GetFontVMetrics(&realFont->fontinfo, &ascent, &descent, &lineGap);
-	return ascent*0.0052910051*2;
+	return floor(ascent*realFont->scale+0.5);
 }
 
 int SurfaceImpl::Descent(Font &font_) {
@@ -430,7 +436,7 @@ int SurfaceImpl::Descent(Font &font_) {
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int ascent, descent, lineGap;
 	stbtt_GetFontVMetrics(&realFont->fontinfo, &ascent, &descent, &lineGap);
-	return -descent*0.0052910051*2;
+	return floor(-descent*realFont->scale+0.5);
 }
 
 int SurfaceImpl::InternalLeading(Font &) {
@@ -438,9 +444,12 @@ int SurfaceImpl::InternalLeading(Font &) {
 	return 0;
 }
 
-int SurfaceImpl::ExternalLeading(Font &) {
+int SurfaceImpl::ExternalLeading(Font& font_) {
 	//WTF is this?????
-	return 0;
+	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
+	int ascent, descent, lineGap;
+	stbtt_GetFontVMetrics(&realFont->fontinfo, &ascent, &descent, &lineGap);
+	return floor(lineGap*realFont->scale+0.5);
 }
 
 int SurfaceImpl::Height(Font &font_) {

@@ -50,7 +50,13 @@
 
 class MyEditor: public Editor
 {
+	size_t nextTime;
+	static const size_t tickInterval = 100; 
 public:
+	MyEditor()
+	{
+		nextTime = timeGetTime()+tickInterval;
+	}
 	virtual void Initialise() {}
 	virtual void SetVerticalScrollPos() {}
 	virtual void SetHorizontalScrollPos() {}
@@ -65,6 +71,14 @@ public:
 	virtual void SetMouseCapture(bool on) {}
 	virtual bool HaveMouseCapture() {return false;}
 	virtual sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {return 0;}
-	void Paint(/*Surface *surfaceWindow,*/ PRectangle rcArea) {Tick(); Editor::Paint(/*surfaceWindow, */rcArea);}
+	void Paint(/*Surface *surfaceWindow,*/ PRectangle rcArea)
+	{
+		if (timeGetTime()>nextTime)
+		{
+			Tick();
+			nextTime = timeGetTime()+tickInterval;
+		}
+		Editor::Paint(/*surfaceWindow, */rcArea);
+	}
 	void AddCharUTF(char c) {Editor::AddCharUTF(&c, 1);}
 };
