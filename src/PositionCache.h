@@ -41,7 +41,7 @@ public:
 	unsigned char *styles;
 	int styleBitsSet;
 	char *indicators;
-	int *positions;
+	float *positions;
 	char bracePreviousStyles[2];
 
 	// Hotspot support
@@ -107,9 +107,9 @@ class PositionCacheEntry {
 public:
 	PositionCacheEntry();
 	~PositionCacheEntry();
-	void Set(unsigned int styleNumber_, const char *s_, unsigned int len_, int *positions_, unsigned int clock);
+	void Set(unsigned int styleNumber_, const char *s_, unsigned int len_, float *positions_, unsigned int clock);
 	void Clear();
-	bool Retrieve(unsigned int styleNumber_, const char *s_, unsigned int len_, int *positions_) const;
+	bool Retrieve(unsigned int styleNumber_, const char *s_, unsigned int len_, float *positions_) const;
 	static int Hash(unsigned int styleNumber, const char *s, unsigned int len);
 	bool NewerThan(const PositionCacheEntry &other) const;
 	void ResetClock();
@@ -154,7 +154,7 @@ public:
 	void SetSize(size_t size_);
 	int GetSize() const { return size; }
 	void MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned int styleNumber,
-		const char *s, unsigned int len, int *positions);
+		const char *s, unsigned int len, float *positions);
 };
 
 inline bool IsSpaceOrTab(int ch) {

@@ -57,7 +57,7 @@ static inline bool IsUpperCase(char ch) {
 }
 
 void LexInterface::Colourise(int start, int end) {
-	ElapsedTime et;
+	//ElapsedTime et;
 	if (pdoc && instance && !performingStyle) {
 		// Protect against reentrance, which may occur, for example, when
 		// fold points are discovered while performing styling and the folding
@@ -137,7 +137,8 @@ Document::~Document() {
 	lenWatchers = 0;
 	delete regex;
 	regex = 0;
-	delete pli;
+	//Whoever created lexerinterface he should delete it
+	//delete pli;
 	pli = 0;
 }
 

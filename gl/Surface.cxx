@@ -26,6 +26,7 @@ namespace Scintilla {
 #endif
 class SurfaceImpl : public Surface {
 	//encodingType et;
+	Colour penColour;
 	int x;
 	int y;
 	bool inited;
@@ -44,9 +45,9 @@ public:
 	bool Initialised();
 	void PenColour(Colour/*Allocated*/ fore);
 	int LogPixelsY();
-	int DeviceHeightFont(int points);
-	void MoveTo(int x_, int y_);
-	void LineTo(int x_, int y_);
+	float DeviceHeightFont(int points);
+	void MoveTo(float x_, float y_);
+	void LineTo(float x_, float y_);
 	void Polygon(Point *pts, int npts, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
 	void RectangleDraw(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
 	void FillRectangle(PRectangle rc, Colour/*Allocated*/ back);
@@ -57,19 +58,19 @@ public:
 	void Ellipse(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
-	void DrawTextBase(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore);
-	void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
-	void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
-	void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore);
-	void MeasureWidths(Font &font_, const char *s, int len, int *positions);
-	int WidthText(Font &font_, const char *s, int len);
-	int WidthChar(Font &font_, char ch);
-	int Ascent(Font &font_);
-	int Descent(Font &font_);
-	int InternalLeading(Font &font_);
-	int ExternalLeading(Font &font_);
-	int Height(Font &font_);
-	int AverageCharWidth(Font &font_);
+	void DrawTextBase(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore);
+	void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
+	void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore);
+	void MeasureWidths(Font &font_, const char *s, int len, float *positions);
+	float WidthText(Font &font_, const char *s, int len);
+	float WidthChar(Font &font_, char ch);
+	float Ascent(Font &font_);
+	float Descent(Font &font_);
+	float InternalLeading(Font &font_);
+	float ExternalLeading(Font &font_);
+	float Height(Font &font_);
+	float AverageCharWidth(Font &font_);
 
 	//int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
@@ -83,7 +84,7 @@ public:
 #endif
 
 
-void SurfaceImpl::SetConverter(int characterSet_) {
+void SurfaceImpl::SetConverter(int /*characterSet_*/) {
 	assert(0);
 }
 
@@ -106,71 +107,72 @@ bool SurfaceImpl::Initialised() {
 	return true;//return inited;
 }
 
-void SurfaceImpl::Init(WindowID wid) {
+void SurfaceImpl::Init(WindowID /*wid*/) {
 	assert(0);
 	inited = true;
 }
 
-void SurfaceImpl::Init(SurfaceID sid, WindowID wid) {
+void SurfaceImpl::Init(SurfaceID /*sid*/, WindowID /*wid*/) {
 	assert(0);
 	inited = true;
 }
 
-void SurfaceImpl::InitPixMap(int width, int height, Surface *surface_, WindowID wid) {
+void SurfaceImpl::InitPixMap(int /*width*/, int /*height*/, Surface* /*surface_*/, WindowID /*wid*/) {
 	assert(0);
 	createdGC = true;
 	inited = true;
 }
 
 void SurfaceImpl::PenColour(Colour/*Allocated*/ fore) {
-	assert(0);
+	//assert(0);
+	penColour = fore;
 }
 
 int SurfaceImpl::LogPixelsY() {
 	return 72;
 }
 
-int SurfaceImpl::DeviceHeightFont(int points) {
+float SurfaceImpl::DeviceHeightFont(int points) {
 	//assert(0);
 	int logPix = LogPixelsY();
 	return (points * logPix + logPix / 2) / 72;
 }
 
-void SurfaceImpl::MoveTo(int x_, int y_) {
+void SurfaceImpl::MoveTo(float x_, float y_) {
 	assert(0);
 	x = x_;
 	y = y_;
 }
 
-void SurfaceImpl::LineTo(int x_, int y_) {
+void SurfaceImpl::LineTo(float /*x_*/, float /*y_*/) {
 	assert(0);
 }
 
-void SurfaceImpl::Polygon(Point *pts, int npts, Colour/*Allocated*/ fore,
-                          Colour/*Allocated*/ back) {
+void SurfaceImpl::Polygon(Point* /*pts*/, int /*npts*/, Colour/*Allocated*/ /*fore*/,
+                          Colour/*Allocated*/ /*back*/) {
 	assert(0);
 }
 
-void SurfaceImpl::RectangleDraw(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+void SurfaceImpl::RectangleDraw(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
 	assert(0);
 }
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Colour/*Allocated*/ back) {
 	glColor4ubv((GLubyte*)&back);
 	glBegin(GL_QUADS);
-	glVertex2i(rc.left,  rc.top);
-	glVertex2i(rc.right, rc.top);
-	glVertex2i(rc.right, rc.bottom);
-	glVertex2i(rc.left,  rc.bottom);
+	glVertex2f(rc.left,  rc.top);
+	glVertex2f(rc.right, rc.top);
+	glVertex2f(rc.right, rc.bottom);
+	glVertex2f(rc.left,  rc.bottom);
 	glEnd();
 	//assert(0);
 }
 
-void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
+void SurfaceImpl::FillRectangle(PRectangle /*rc*/, Surface &/*surfacePattern*/) {
 	assert(0);
 }
 
-void SurfaceImpl::RoundedRectangle(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+void SurfaceImpl::RoundedRectangle(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
 	assert(0);
 }
 
@@ -186,16 +188,16 @@ void SurfaceImpl::RoundedRectangle(PRectangle rc, Colour/*Allocated*/ fore, Colo
 //	return co & 0xff;
 //}
 
-void SurfaceImpl::AlphaRectangle(PRectangle rc, int cornerSize, Colour/*Allocated*/ fill, int alphaFill,
-		Colour/*Allocated*/ outline, int alphaOutline, int flags) {
+void SurfaceImpl::AlphaRectangle(PRectangle /*rc*/, int /*cornerSize*/, Colour/*Allocated*/ /*fill*/, int /*alphaFill*/,
+		Colour/*Allocated*/ /*outline*/, int /*alphaOutline*/, int /*flags*/) {
 	assert(0);
 }
 
-void SurfaceImpl::Ellipse(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+void SurfaceImpl::Ellipse(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
 	assert(0);
 }
 
-void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
+void SurfaceImpl::Copy(PRectangle /*rc*/, Point /*from*/, Surface &/*surfaceSource*/) {
 	assert(0);
 }
 
@@ -216,7 +218,7 @@ char *UTF8FromLatin1(const char *s, int &len) {
 	return utfForm;
 }
 
-static char *UTF8FromDBCS(const char *s, int &len) {
+static char *UTF8FromDBCS(const char* /*s*/, int& /*len*/) {
 	return 0;
 }
 
@@ -298,7 +300,7 @@ namespace platform
 	}
 }
 
-void Font::Create(const char *faceName, int characterSet, int size,	bool bold, bool italic, int)
+void Font::Create(const char *faceName, int /*characterSet*/, int size,	bool /*bold*/, bool /*italic*/, int)
 {
 	stbtt_Font* newFont = new stbtt_Font;
 	size_t len;
@@ -343,7 +345,7 @@ void Font::Release()
 	}
 }
 
-void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, float ybase, const char *s, int len,
                                  Colour/*Allocated*/ fore) {
 	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
@@ -359,6 +361,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 		if (*s >= 32 && *s < 128) {
 			stbtt_aligned_quad q;
 			stbtt_GetBakedQuad(realFont->cdata, 512,512, *s-32, &x,&y,&q,1);//1=opengl,0=old d3d
+			//x = floor(x);
 			glTexCoord2f(q.s0,q.t0); glVertex2f(q.x0,q.y0);
 			glTexCoord2f(q.s1,q.t0); glVertex2f(q.x1,q.y0);
 			glTexCoord2f(q.s1,q.t1); glVertex2f(q.x1,q.y1);
@@ -371,26 +374,41 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 	glDisable(GL_BLEND);
 }
 
-void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len,
-                                 Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len,
+                                 Colour/*Allocated*/ fore, Colour/*Allocated*/ /*back*/) {
 	//assert(0);
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
 // On GTK+, exactly same as DrawTextNoClip
-void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len,
-                                  Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len,
+                                  Colour/*Allocated*/ fore, Colour/*Allocated*/ /*back*/) {
 	//assert(0);
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
-void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len,
+void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, float ybase, const char *s, int len,
                                   Colour/*Allocated*/ fore) {
 	//assert(0);
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
-void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
+void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, float *positions) {
+	//assert(0);
+	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
+	//TODO: implement proper UTF-8 handling
+	float position = 0;
+	while (len--) {
+		int advance, leftBearing;
+		
+		stbtt_GetCodepointHMetrics(&realFont->fontinfo, *s++, &advance, &leftBearing);
+		
+		position     += advance;//TODO: +Kerning
+		*positions++  = position*realFont->scale;
+	}
+}
+
+float SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	//TODO: implement proper UTF-8 handling
@@ -398,65 +416,52 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 	while (len--) {
 		int advance, leftBearing;
 		stbtt_GetCodepointHMetrics(&realFont->fontinfo, *s++, &advance, &leftBearing);
-		position+=advance;//TODO: +Kerning
-		*positions++ = position*realFont->scale;
+		position += advance*realFont->scale;//TODO: +Kerning
 	}
+	return position;
 }
 
-int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
-	//assert(0);
-	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
-	//TODO: implement proper UTF-8 handling
-	int position = 0;
-	while (len--) {
-		int advance, leftBearing;
-		stbtt_GetCodepointHMetrics(&realFont->fontinfo, *s++, &advance, &leftBearing);
-		position+=advance;//TODO: +Kerning
-	}
-	return position*realFont->scale;
-}
-
-int SurfaceImpl::WidthChar(Font &font_, char ch) {
+float SurfaceImpl::WidthChar(Font &font_, char ch) {
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int advance, leftBearing;
 	stbtt_GetCodepointHMetrics(&realFont->fontinfo, ch, &advance, &leftBearing);
 	return advance*realFont->scale;
 }
 
-int SurfaceImpl::Ascent(Font &font_) {
+float SurfaceImpl::Ascent(Font &font_) {
 	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int ascent, descent, lineGap;
 	stbtt_GetFontVMetrics(&realFont->fontinfo, &ascent, &descent, &lineGap);
-	return floor(ascent*realFont->scale+0.5);
+	return ascent*realFont->scale;
 }
 
-int SurfaceImpl::Descent(Font &font_) {
+float SurfaceImpl::Descent(Font &font_) {
 	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int ascent, descent, lineGap;
 	stbtt_GetFontVMetrics(&realFont->fontinfo, &ascent, &descent, &lineGap);
-	return floor(-descent*realFont->scale+0.5);
+	return -descent*realFont->scale;
 }
 
-int SurfaceImpl::InternalLeading(Font &) {
+float SurfaceImpl::InternalLeading(Font &) {
 	//WTF is this?????
 	return 0;
 }
 
-int SurfaceImpl::ExternalLeading(Font& font_) {
+float SurfaceImpl::ExternalLeading(Font& font_) {
 	//WTF is this?????
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int ascent, descent, lineGap;
 	stbtt_GetFontVMetrics(&realFont->fontinfo, &ascent, &descent, &lineGap);
-	return floor(lineGap*realFont->scale+0.5);
+	return lineGap*realFont->scale;
 }
 
-int SurfaceImpl::Height(Font &font_) {
+float SurfaceImpl::Height(Font &font_) {
 	return Ascent(font_) + Descent(font_);
 }
 
-int SurfaceImpl::AverageCharWidth(Font &font_) {
+float SurfaceImpl::AverageCharWidth(Font &font_) {
 	return WidthChar(font_, 'n');
 }
 
@@ -472,12 +477,12 @@ void SurfaceImpl::SetClip(PRectangle rc) {
 
 void SurfaceImpl::FlushCachedState() {}
 
-void SurfaceImpl::SetUnicodeMode(bool unicodeMode_) {
+void SurfaceImpl::SetUnicodeMode(bool /*unicodeMode_*/) {
 	//if (unicodeMode_)
 	//	et = UTF8;
 }
 
-void SurfaceImpl::SetDBCSMode(int codePage) {
+void SurfaceImpl::SetDBCSMode(int /*codePage*/) {
 	//if (codePage && (codePage != SC_CP_UTF8))
 	//	et = dbcs;
 }

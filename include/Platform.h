@@ -72,10 +72,10 @@ typedef void *IdlerID;
  */
 class Point {
 public:
-	int x;
-	int y;
+	float x;
+	float y;
 
-	explicit Point(int x_=0, int y_=0) : x(x_), y(y_) {
+	explicit Point(float x_=0, float y_=0) : x(x_), y(y_) {
 	}
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
@@ -90,12 +90,12 @@ public:
  */
 class PRectangle {
 public:
-	int left;
-	int top;
-	int right;
-	int bottom;
+	float left;
+	float top;
+	float right;
+	float bottom;
 
-	PRectangle(int left_=0, int top_=0, int right_=0, int bottom_ = 0) :
+	PRectangle(float left_=0, float top_=0, float right_=0, float bottom_ = 0) :
 		left(left_), top(top_), right(right_), bottom(bottom_) {
 	}
 
@@ -117,14 +117,14 @@ public:
 		return (right > other.left) && (left < other.right) &&
 			(bottom > other.top) && (top < other.bottom);
 	}
-	void Move(int xDelta, int yDelta) {
+	void Move(float xDelta, float yDelta) {
 		left += xDelta;
 		top += yDelta;
 		right += xDelta;
 		bottom += yDelta;
 	}
-	int Width() { return right - left; }
-	int Height() { return bottom - top; }
+	float Width() { return right - left; }
+	float Height() { return bottom - top; }
 	bool Empty() {
 		return (Height() <= 0) || (Width() <= 0);
 	}
@@ -156,7 +156,7 @@ inline int GetAlpha(Colour c)
 	return (c>>24)&0xFF;
 }
 
-inline unsigned int ValueOfHex(const char ch) {
+inline unsigned char ValueOfHex(const char ch) {
 	if (ch >= '0' && ch <= '9')
 		return ch - '0';
 	else if (ch >= 'A' && ch <= 'F')
@@ -171,9 +171,9 @@ inline Colour ColourFromText(const char *val) {
 	if (*val == '#') {
 		val++;
 	}
-	unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
-	unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
-	unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
+	unsigned char r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
+	unsigned char g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
+	unsigned char b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
 	return MakeRGBA(r, g, b);
 }
 
@@ -375,9 +375,9 @@ public:
 	virtual bool Initialised()=0;
 	virtual void PenColour(Colour/*Allocated*/ fore)=0;
 	virtual int LogPixelsY()=0;
-	virtual int DeviceHeightFont(int points)=0;
-	virtual void MoveTo(int x_, int y_)=0;
-	virtual void LineTo(int x_, int y_)=0;
+	virtual float DeviceHeightFont(int points)=0;
+	virtual void MoveTo(float x_, float y_)=0;
+	virtual void LineTo(float x_, float y_)=0;
 	virtual void Polygon(Point *pts, int npts, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
 	virtual void RectangleDraw(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
 	virtual void FillRectangle(PRectangle rc, Colour/*Allocated*/ back)=0;
@@ -388,18 +388,18 @@ public:
 	virtual void Ellipse(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 
-	virtual void DrawTextNoClip(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
-	virtual void DrawTextClipped(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
-	virtual void DrawTextTransparent(PRectangle rc, Font &font_, int ybase, const char *s, int len, Colour/*Allocated*/ fore)=0;
-	virtual void MeasureWidths(Font &font_, const char *s, int len, int *positions)=0;
-	virtual int WidthText(Font &font_, const char *s, int len)=0;
-	virtual int WidthChar(Font &font_, char ch)=0;
-	virtual int Ascent(Font &font_)=0;
-	virtual int Descent(Font &font_)=0;
-	virtual int InternalLeading(Font &font_)=0;
-	virtual int ExternalLeading(Font &font_)=0;
-	virtual int Height(Font &font_)=0;
-	virtual int AverageCharWidth(Font &font_)=0;
+	virtual void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	virtual void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	virtual void DrawTextTransparent(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore)=0;
+	virtual void MeasureWidths(Font &font_, const char *s, int len, float *positions)=0;
+	virtual float WidthText(Font &font_, const char *s, int len)=0;
+	virtual float WidthChar(Font &font_, char ch)=0;
+	virtual float Ascent(Font &font_)=0;
+	virtual float Descent(Font &font_)=0;
+	virtual float InternalLeading(Font &font_)=0;
+	virtual float ExternalLeading(Font &font_)=0;
+	virtual float Height(Font &font_)=0;
+	virtual float AverageCharWidth(Font &font_)=0;
 
 	//virtual int SetPalette(Palette *pal, bool inBackGround)=0;
 	virtual void SetClip(PRectangle rc)=0;

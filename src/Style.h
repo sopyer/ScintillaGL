@@ -34,12 +34,12 @@ public:
 
 	Font font;
 	int sizeZoomed;
-	unsigned int lineHeight;
-	unsigned int ascent;
-	unsigned int descent;
-	unsigned int externalLeading;
-	unsigned int aveCharWidth;
-	unsigned int spaceWidth;
+	float lineHeight;
+	float ascent;
+	float descent;
+	float externalLeading;
+	float aveCharWidth;
+	float spaceWidth;
 
 	Style();
 	Style(const Style &source);

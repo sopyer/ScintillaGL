@@ -48,184 +48,129 @@ void DMApp::SetAStyle(int style, COLORREF fore, COLORREF back, int size, const c
 		SendEditor(SCI_STYLESETFONT, style, reinterpret_cast<LPARAM>(face));
 }
 
-const char htmlKeyWords[] = 
-	"a abbr acronym address applet area b base basefont "
-	"bdo big blockquote body br button caption center "
-	"cite code col colgroup dd del dfn dir div dl dt em "
-	"fieldset font form frame frameset h1 h2 h3 h4 h5 h6 "
-	"head hr html i iframe img input ins isindex kbd label "
-	"legend li link map menu meta noframes noscript "
-	"object ol optgroup option p param pre q s samp "
-	"script select small span strike strong style sub sup "
-	"table tbody td textarea tfoot th thead title tr tt u ul "
-	"var xmlns "
-	"abbr accept-charset accept accesskey action align alink "
-	"alt archive axis background bgcolor border "
-	"cellpadding cellspacing char charoff charset checked cite "
-	"class classid clear codebase codetype color cols colspan "
-	"compact content coords "
-	"data datafld dataformatas datapagesize datasrc datetime "
-	"declare defer dir disabled enctype "
-	"face for frame frameborder "
-	"headers height href hreflang hspace http-equiv "
-	"id ismap label lang language link longdesc "
-	"marginwidth marginheight maxlength media method multiple "
-	"name nohref noresize noshade nowrap "
-	"object onblur onchange onclick ondblclick onfocus "
-	"onkeydown onkeypress onkeyup onload onmousedown "
-	"onmousemove onmouseover onmouseout onmouseup "
-	"onreset onselect onsubmit onunload "
-	"profile prompt readonly rel rev rows rowspan rules "
-	"scheme scope shape size span src standby start style "
-	"summary tabindex target text title type usemap "
-	"valign value valuetype version vlink vspace width "
-	"text password checkbox radio submit reset "
-	"file hidden image "
-	"public !doctype xml";
+const char glslKeyword[] =
+	"discard struct if else switch case default break goto return for while do continue";
 
-const char jsKeyWords[] = 
-	"break case catch continue default "
-	"do else for function if return throw try var while";
+const char glslType[] = 
+	"attribute const in inout out uniform varying invariant "
+	"centroid flat smooth noperspective layout patch sample "
+	"subroutine lowp mediump highp precision "
+	"void float vec2 vec3 vec4 bvec2 bvec3 bvec4 ivec2 ivec3 ivec4 "
+	"uvec2 uvec3 uvec4 dvec2 dvec3 dvec4 "
+	"sampler1D sampler2D sampler3D isampler2D isampler1D isampler3D "
+	"usampler1D usampler2D usampler3D "
+	"sampler1DShadow sampler2DShadow sampler1DArray sampler2DArray "
+	"sampler1DArrayShadow sampler2DArrayShadow "
+	"samplerCube samperCubeShadow samperCubeArrayShadow ";
 
-const char vbsKeyWords[] = 
-	"and as byref byval case call const "
-	"continue dim do each else elseif end error exit false for function global "
-	"goto if in loop me new next not nothing on optional or private public "
-	"redim rem resume select set sub then to true type while with "
-	"boolean byte currency date double integer long object single string type "
-	"variant";
+const char glslBuiltin[] = 
+	"radians degrees sin cos tan asin acos atan sinh "
+	"cosh tanh asinh acosh atanh pow exp log exp2 "
+	"log2 sqrt inversesqrt abs sign floor trunc round "
+	"roundEven ceil fract mod modf min max clamp mix "
+	"step smoothstep isnan isinf floatBitsToInt floatBitsToUint "
+	"intBitsToFloat uintBitsToFloat fma frexp ldexp packUnorm2x16 "
+	"packUnorm4x8 packSnorm4x8 unpackUnorm2x16 unpackUnorm4x8 "
+	"unpackSnorm4x8 packDouble2x32 unpackDouble2x32 length distance "
+	"dot cross normalize ftransform faceforward reflect "
+	"refract matrixCompMult outerProduct transpose determinant "
+	"inverse lessThan lessThanEqual greaterThan greaterThanEqual "
+	"equal notEqual any all not uaddCarry usubBorrow "
+	"umulExtended imulExtended bitfieldExtract bitfildInsert "
+	"bitfieldReverse bitCount findLSB findMSB textureSize "
+	"textureQueryLOD texture textureProj textureLod textureOffset "
+	"texelFetch texelFetchOffset textureProjOffset textureLodOffset "
+	"textureProjLod textureProjLodOffset textureGrad textureGradOffset "
+	"textureProjGrad textureProjGradOffset textureGather "
+	"textureGatherOffset texture1D texture2D texture3D texture1DProj "
+	"texture2DProj texture3DProj texture1DLod texture2DLod "
+	"texture3DLod texture1DProjLod texture2DProjLod texture3DProjLod "
+	"textureCube textureCubeLod shadow1D shadow2D shadow1DProj "
+	"shadow2DProj shadow1DLod shadow2DLod shadow1DProjLod "
+	"shadow2DProjLod dFdx dFdy fwidth interpolateAtCentroid "
+	"interpolateAtSample interpolateAtOffset noise1 noise2 noise3 "
+	"noise4 EmitStreamVertex EndStreamPrimitive EmitVertex "
+	"EndPrimitive barrier "
+	"gl_VertexID gl_InstanceID gl_Position gl_PointSize "
+	"gl_ClipDistance gl_PrimitiveIDIn gl_InvocationID gl_PrimitiveID "
+	"gl_Layer gl_PatchVerticesIn gl_TessLevelOuter gl_TessLevelInner "
+	"gl_TessCoord gl_FragCoord gl_FrontFacing gl_PointCoord "
+	"gl_SampleID gl_SamplePosition gl_FragColor gl_FragData "
+	"gl_FragDepth gl_SampleMask gl_ClipVertex gl_FrontColor "
+	"gl_BackColor gl_FrontSecondaryColor gl_BackSecondaryColor "
+	"gl_TexCoord gl_FogFragCoord gl_Color gl_SecondaryColor "
+	"gl_Normal gl_Vertex gl_MultiTexCoord0 gl_MultiTexCoord1 "
+	"gl_MultiTexCoord2 gl_MultiTexCoord3 gl_MultiTexCoord4 "
+	"gl_MultiTexCoord5 gl_MultiTexCoord6 gl_MultiTexCoord7 gl_FogCoord "
+	"gl_MaxVertexAttribs gl_MaxVertexUniformComponents gl_MaxVaryingFloats "
+	"gl_MaxVaryingComponents gl_MaxVertexOutputComponents "
+	"gl_MaxGeometryInputComponents gl_MaxGeometryOutputComponents "
+	"gl_MaxFragmentInputComponents gl_MaxVertexTextureImageUnits "
+	"gl_MaxCombinedTextureImageUnits gl_MaxTextureImageUnits "
+	"gl_MaxFragmentUniformComponents gl_MaxDrawBuffers gl_MaxClipDistances "
+	"gl_MaxGeometryTextureImageUnits gl_MaxGeometryOutputVertices "
+	"gl_MaxGeometryTotalOutputComponents gl_MaxGeometryUniformComponents "
+	"gl_MaxGeometryVaryingComponents gl_MaxTessControlInputComponents "
+	"gl_MaxTessControlOutputComponents gl_MaxTessControlTextureImageUnits "
+	"gl_MaxTessControlUniformComponents "
+	"gl_MaxTessControlTotalOutputComponents "
+	"gl_MaxTessEvaluationInputComponents gl_MaxTessEvaluationOutputComponents "
+	"gl_MaxTessEvaluationTextureImageUnits "
+	"gl_MaxTessEvaluationUniformComponents gl_MaxTessPatchComponents "
+	"gl_MaxPatchVertices gl_MaxTessGenLevel gl_MaxTextureUnits "
+	"gl_MaxTextureCoords gl_MaxClipPlanes "
+	"gl_DepthRange gl_ModelViewMatrix gl_ProjectionMatrix "
+	"gl_ModelViewProjectionMatrix gl_TextureMatrix gl_NormalMatrix "
+	"gl_ModelViewMatrixInverse gl_ProjectionMatrixInverse "
+	"gl_ModelViewProjectionMatrixInverse gl_TextureMatrixInverse "
+	"gl_ModelViewMatrixTranspose gl_ProjectionMatrixTranspose "
+	"gl_ModelViewProjectionMatrixTranspose gl_TextureMatrixTranspose "
+	"gl_ModelViewMatrixInverseTranspose gl_ProjectionMatrixInverseTranspose "
+	"gl_ModelViewProjectionMatrixInverseTranspose "
+	"gl_TextureMatrixInverseTranspose gl_NormalScale gl_ClipPlane "
+	"gl_Point gl_FrontMaterial gl_BackMaterial gl_LightSource "
+	"gl_LightModel gl_FrontLightModelProduct gl_BackLightModelProduct "
+	"gl_FrontLightProduct gl_BackLightProduct gl_TextureEnvColor "
+	"gl_EyePlaneS gl_EyePlaneT gl_EyePlaneR gl_EyePlaneQ "
+	"gl_ObjectPlaneS gl_ObjectPlaneT gl_ObjectPlaneR gl_ObjectPlaneQ "
+	"gl_Fog";
 
 void DMApp::InitialiseEditor() {
-	SendEditor(SCI_SETLEXER, SCLEX_HTML);
+	//SendEditor(SCI_SETLEXER, SCLEX_HTML);
+	myEd.ls.SetLexer(SCLEX_CPP);
+
 	SendEditor(SCI_SETSTYLEBITS, 7);
 
-	SendEditor(SCI_SETKEYWORDS, 0, 
-		reinterpret_cast<LPARAM>(htmlKeyWords));
-	SendEditor(SCI_SETKEYWORDS, 1, 
-		reinterpret_cast<LPARAM>(jsKeyWords));
-	SendEditor(SCI_SETKEYWORDS, 2, 
-		reinterpret_cast<LPARAM>(vbsKeyWords));
+	myEd.ls.SetWordList(0, glslKeyword);
+	myEd.ls.SetWordList(1, glslType);
+	myEd.ls.SetWordList(4, glslBuiltin);
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
-	SetAStyle(STYLE_DEFAULT, black, white, 16, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_DEFAULT, 0xFFFFFFFF, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
 	SendEditor(SCI_STYLECLEARALL);	// Copies global style to all others
-
-	const COLORREF red = RGB(0xFF, 0, 0);
-	const COLORREF offWhite = RGB(0xFF, 0xFB, 0xF0);
-	const COLORREF darkGreen = RGB(0, 0x80, 0);
-	const COLORREF darkBlue = RGB(0, 0, 0x80);
-
-	// Hypertext default is used for all the document's text
-	SetAStyle(SCE_H_DEFAULT, black, white, 16, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_INDENTGUIDE, 0xFFC0C0C0, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_BRACELIGHT, 0xFF00FF00, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_BRACEBAD, 0xFF0000FF, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_LINENUMBER, 0xFFC0C0C0, 0xFF333333, 20, "c:/windows/fonts/cour.ttf");
+	SendEditor(SCI_SETFOLDMARGINCOLOUR, 1, 0xFF1A1A1A);
+	SendEditor(SCI_SETSELBACK, 1, 0xFFCC9966);
+	SendEditor(SCI_SETCARETFORE, 0xFFFFFFFF, 0);
+	SendEditor(SCI_SETCARETLINEVISIBLE, 1);
+	SendEditor(SCI_SETCARETLINEBACK, 0xFF333333);
 	
-	// Unknown tags and attributes are highlighed in red. 
-	// If a tag is actually OK, it should be added in lower case to the htmlKeyWords string.
-	SetAStyle(SCE_H_TAG, darkBlue);
-	SetAStyle(SCE_H_TAGUNKNOWN, red);
-	SetAStyle(SCE_H_ATTRIBUTE, darkBlue);
-	SetAStyle(SCE_H_ATTRIBUTEUNKNOWN, red);
-	SetAStyle(SCE_H_NUMBER, RGB(0x80,0,0x80));
-	SetAStyle(SCE_H_DOUBLESTRING, RGB(0,0x80,0));
-	SetAStyle(SCE_H_SINGLESTRING, RGB(0,0x80,0));
-	SetAStyle(SCE_H_OTHER, RGB(0x80,0,0x80));
-	SetAStyle(SCE_H_COMMENT, RGB(0x80,0x80,0));
-	SetAStyle(SCE_H_ENTITY, RGB(0x80,0,0x80));
+	SendEditor(SCI_SETUSETABS, 1);
+	SendEditor(SCI_SETTABWIDTH, 4);
+	//SendEditor(SCI_SETINDENTATIONGUIDES, SC_IV_LOOKBOTH);
 
-	SetAStyle(SCE_H_TAGEND, darkBlue);
-	SetAStyle(SCE_H_XMLSTART, darkBlue);	// <?
-	SetAStyle(SCE_H_XMLEND, darkBlue);		// ?>
-	SetAStyle(SCE_H_SCRIPT, darkBlue);		// <script
-	SetAStyle(SCE_H_ASP, RGB(0x4F, 0x4F, 0), RGB(0xFF, 0xFF, 0));	// <% ... %>
-	SetAStyle(SCE_H_ASPAT, RGB(0x4F, 0x4F, 0), RGB(0xFF, 0xFF, 0));	// <%@ ... %>
-
-	SetAStyle(SCE_HB_DEFAULT, black);
-	SetAStyle(SCE_HB_COMMENTLINE, darkGreen);
-	SetAStyle(SCE_HB_NUMBER, RGB(0,0x80,0x80));
-	SetAStyle(SCE_HB_WORD, darkBlue);
-	SendEditor(SCI_STYLESETBOLD, SCE_HB_WORD, 1);
-	SetAStyle(SCE_HB_STRING, RGB(0x80,0,0x80));
-	SetAStyle(SCE_HB_IDENTIFIER, black);
-	
-	// This light blue is found in the windows system palette so is safe to use even in 256 colour modes.
-	const COLORREF lightBlue = RGB(0xA6, 0xCA, 0xF0);
-	// Show the whole section of VBScript with light blue background
-	for (int bstyle=SCE_HB_DEFAULT; bstyle<=SCE_HB_STRINGEOL; bstyle++) {
-		SendEditor(SCI_STYLESETFONT, bstyle, 
-			reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
-		SendEditor(SCI_STYLESETBACK, bstyle, lightBlue);
-		// This call extends the backround colour of the last style on the line to the edge of the window
-		SendEditor(SCI_STYLESETEOLFILLED, bstyle, 1);
-	}
-	SendEditor(SCI_STYLESETBACK, SCE_HB_STRINGEOL, RGB(0x7F,0x7F,0xFF));
-	SendEditor(SCI_STYLESETFONT, SCE_HB_COMMENTLINE, 
-		reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
-
-	SetAStyle(SCE_HBA_DEFAULT, black);
-	SetAStyle(SCE_HBA_COMMENTLINE, darkGreen);
-	SetAStyle(SCE_HBA_NUMBER, RGB(0,0x80,0x80));
-	SetAStyle(SCE_HBA_WORD, darkBlue);
-	SendEditor(SCI_STYLESETBOLD, SCE_HBA_WORD, 1);
-	SetAStyle(SCE_HBA_STRING, RGB(0x80,0,0x80));
-	SetAStyle(SCE_HBA_IDENTIFIER, black);
-	
-	// Show the whole section of ASP VBScript with bright yellow background
-	for (int bastyle=SCE_HBA_DEFAULT; bastyle<=SCE_HBA_STRINGEOL; bastyle++) {
-		SendEditor(SCI_STYLESETFONT, bastyle, 
-			reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
-		SendEditor(SCI_STYLESETBACK, bastyle, RGB(0xFF, 0xFF, 0));
-		// This call extends the backround colour of the last style on the line to the edge of the window
-		SendEditor(SCI_STYLESETEOLFILLED, bastyle, 1);
-	}
-	SendEditor(SCI_STYLESETBACK, SCE_HBA_STRINGEOL, RGB(0xCF,0xCF,0x7F));
-	SendEditor(SCI_STYLESETFONT, SCE_HBA_COMMENTLINE, 
-		reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
-		
-	// If there is no need to support embedded Javascript, the following code can be dropped.
-	// Javascript will still be correctly processed but will be displayed in just the default style.
-	
-	SetAStyle(SCE_HJ_START, RGB(0x80,0x80,0));
-	SetAStyle(SCE_HJ_DEFAULT, black);
-	SetAStyle(SCE_HJ_COMMENT, darkGreen);
-	SetAStyle(SCE_HJ_COMMENTLINE, darkGreen);
-	SetAStyle(SCE_HJ_COMMENTDOC, darkGreen);
-	SetAStyle(SCE_HJ_NUMBER, RGB(0,0x80,0x80));
-	SetAStyle(SCE_HJ_WORD, black);
-	SetAStyle(SCE_HJ_KEYWORD, darkBlue);
-	SetAStyle(SCE_HJ_DOUBLESTRING, RGB(0x80,0,0x80));
-	SetAStyle(SCE_HJ_SINGLESTRING, RGB(0x80,0,0x80));
-	SetAStyle(SCE_HJ_SYMBOLS, black);
-
-	SetAStyle(SCE_HJA_START, RGB(0x80,0x80,0));
-	SetAStyle(SCE_HJA_DEFAULT, black);
-	SetAStyle(SCE_HJA_COMMENT, darkGreen);
-	SetAStyle(SCE_HJA_COMMENTLINE, darkGreen);
-	SetAStyle(SCE_HJA_COMMENTDOC, darkGreen);
-	SetAStyle(SCE_HJA_NUMBER, RGB(0,0x80,0x80));
-	SetAStyle(SCE_HJA_WORD, black);
-	SetAStyle(SCE_HJA_KEYWORD, darkBlue);
-	SetAStyle(SCE_HJA_DOUBLESTRING, RGB(0x80,0,0x80));
-	SetAStyle(SCE_HJA_SINGLESTRING, RGB(0x80,0,0x80));
-	SetAStyle(SCE_HJA_SYMBOLS, black);
-
-	// Show the whole section of Javascript with off white background
-	for (int jstyle=SCE_HJ_DEFAULT; jstyle<=SCE_HJ_SYMBOLS; jstyle++) {
-		SendEditor(SCI_STYLESETFONT, jstyle, 
-			reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
-		SendEditor(SCI_STYLESETBACK, jstyle, offWhite);
-		SendEditor(SCI_STYLESETEOLFILLED, jstyle, 1);
-	}
-	SendEditor(SCI_STYLESETBACK, SCE_HJ_STRINGEOL, RGB(0xDF, 0xDF, 0x7F));
-	SendEditor(SCI_STYLESETEOLFILLED, SCE_HJ_STRINGEOL, 1);
-
-	// Show the whole section of Javascript with brown background
-	for (int jastyle=SCE_HJA_DEFAULT; jastyle<=SCE_HJA_SYMBOLS; jastyle++) {
-		SendEditor(SCI_STYLESETFONT, jastyle, 
-			reinterpret_cast<LPARAM>("c:/windows/fonts/cour.ttf"));
-		SendEditor(SCI_STYLESETBACK, jastyle, RGB(0xDF, 0xDF, 0x7F));
-		SendEditor(SCI_STYLESETEOLFILLED, jastyle, 1);
-	}
-	SendEditor(SCI_STYLESETBACK, SCE_HJA_STRINGEOL, RGB(0x0,0xAF,0x5F));
-	SendEditor(SCI_STYLESETEOLFILLED, SCE_HJA_STRINGEOL, 1);
+	SetAStyle(SCE_C_DEFAULT, 0xFFFFFFFF, 0xFF000000, 16, "c:/windows/fonts/cour.ttf");
+	SetAStyle(SCE_C_WORD, 0xFF0066FF, 0xFF000000);
+	SetAStyle(SCE_C_WORD2, 0xFFFFFF00, 0xFF000000);
+	//WTF??? SetAStyle(SCE_C_GLOBALCLASS, 0xFF0000FF, 0xFF000000);
+	SetAStyle(SCE_C_PREPROCESSOR, 0xFFC0C0C0, 0xFF000000);
+	SetAStyle(SCE_C_NUMBER, 0xFF0080FF, 0xFF000000);
+	SetAStyle(SCE_C_OPERATOR, 0xFF00CCFF, 0xFF000000);
+	SetAStyle(SCE_C_COMMENT, 0xFF00FF00, 0xFF000000);
+	SetAStyle(SCE_C_COMMENTLINE, 0xFF00FF00, 0xFF000000);
 }
 
 #include <SDL.h>
@@ -234,7 +179,7 @@ void DMApp::InitialiseEditor() {
 void Platform_Initialise();
 void Platform_Finalise();
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char** /*argv*/)
 {
 	SDL_Surface* mScreen;
 
@@ -256,7 +201,8 @@ int main(int argc, char* argv[])
 	//SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 0 );
 	//SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
 
-	if(!(mScreen = SDL_SetVideoMode(800, 600, 32, flags)))
+	mScreen = SDL_SetVideoMode(800, 600, 32, flags);
+	if (!mScreen)
 	{
 		SDL_Quit();
 		return 0;															// And Exit
@@ -273,10 +219,12 @@ int main(int argc, char* argv[])
 
 	app.InitialiseEditor();
 
-	char str[] = "<HTML>\n\tHello Scintilla!\n</HTML>";
+	app.SendEditor(SCI_SETMARGINWIDTHN, 0, 44);//Calculate correct width
+
+	char str[] = "void main()\n{\n\tgl_FragColor=vec4(0, 0, 0, 1);\n}\n";
 	app.SendEditor(SCI_CANCEL);
 	app.SendEditor(SCI_SETUNDOCOLLECTION, 0);
-	app.SendEditor(SCI_ADDTEXT, sizeof(str), reinterpret_cast<LPARAM>((char*)str));
+	app.SendEditor(SCI_ADDTEXT, sizeof(str)-1, reinterpret_cast<LPARAM>((char*)str));
 	app.SendEditor(SCI_SETUNDOCOLLECTION, 1);
 	app.SendEditor(EM_EMPTYUNDOBUFFER);
 	app.SendEditor(SCI_SETSAVEPOINT);
@@ -342,15 +290,16 @@ int main(int argc, char* argv[])
 				if (sciKey)
 				{
 					bool consumed;
-
+					bool ctrlPressed = !!(E.key.keysym.mod&KMOD_LCTRL | E.key.keysym.mod&KMOD_RCTRL);
+					bool altPressed = !!(E.key.keysym.mod&KMOD_LALT | E.key.keysym.mod&KMOD_RALT);
 					app.myEd.KeyDown((SDLK_a<=sciKey && sciKey<=SDLK_z)?sciKey-'a'+'A':sciKey,
-						E.key.keysym.mod&KMOD_LSHIFT | E.key.keysym.mod&KMOD_RSHIFT,
-						E.key.keysym.mod&KMOD_LCTRL | E.key.keysym.mod&KMOD_RCTRL,
-						E.key.keysym.mod&KMOD_LALT | E.key.keysym.mod&KMOD_RALT,
+						!!(E.key.keysym.mod&KMOD_LSHIFT | E.key.keysym.mod&KMOD_RSHIFT),
+						ctrlPressed,
+						altPressed,
 						&consumed
 					);
-					if (!consumed && sciKey>=32 && sciKey<=128)
-						app.myEd.AddCharUTF(sciKey);
+					if (!consumed && sciKey>=32 && sciKey<=128 && !ctrlPressed && !altPressed)
+						app.myEd.AddCharUTF(E.key.keysym.unicode);
 				}
 			}
 		}
