@@ -170,7 +170,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	//Surface *pixmapLine;
 	//Surface *pixmapSelMargin;
-	Surface *pixmapSelPattern;
+	//Surface *pixmapSelPattern;
+	Pixmap	pixmapSelPattern;
 	Surface *pixmapIndentGuide;
 	Surface *pixmapIndentGuideHighlight;
 

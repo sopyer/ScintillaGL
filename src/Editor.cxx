@@ -165,7 +165,8 @@ Editor::Editor() {
 
 	//pixmapLine = Surface::Allocate();
 	//pixmapSelMargin = Surface::Allocate();
-	pixmapSelPattern = Surface::Allocate();
+	//pixmapSelPattern = Surface::Allocate();
+	pixmapSelPattern = CreatePixmap();
 	pixmapIndentGuide = Surface::Allocate();
 	pixmapIndentGuideHighlight = Surface::Allocate();
 
@@ -224,7 +225,8 @@ Editor::~Editor() {
 	DropGraphics();
 	//delete pixmapLine;
 	//delete pixmapSelMargin;
-	delete pixmapSelPattern;
+	//delete pixmapSelPattern;
+	DestroyPixmap(pixmapSelPattern);
 	delete pixmapIndentGuide;
 	delete pixmapIndentGuideHighlight;
 }
@@ -237,7 +239,7 @@ void Editor::Finalise() {
 void Editor::DropGraphics() {
 	//pixmapLine->Release();
 	//pixmapSelMargin->Release();
-	pixmapSelPattern->Release();
+	//pixmapSelPattern->Release();
 	pixmapIndentGuide->Release();
 	pixmapIndentGuideHighlight->Release();
 }
@@ -638,7 +640,7 @@ void Editor::RedrawRect(PRectangle rc) {
 //}
 
 void Editor::RedrawSelMargin(int line, bool allAfter) {
-	assert(!"Probably should not be used!!!");
+	//assert(!"Probably should not be used!!!");
 	if (!AbandonPaint()) {
 		if (vs.maskInLine) {
 			//Redraw();
@@ -1345,6 +1347,8 @@ void Editor::DropCaret() {
 }
 
 void Editor::InvalidateCaret() {
+	//assert(0);
+	//TODO: seem is not required for opengl
 	if (posDrag.IsValid()) {
 		//InvalidateRange(posDrag.Position(), posDrag.Position() + 1);
 	} else {
@@ -1676,7 +1680,8 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				*/
 				if (vs.ms[margin].mask & SC_MASK_FOLDERS)
 					// Required because of special way brush is created for selection margin
-					surface->FillRectangle(rcSelMargin, *pixmapSelPattern);
+					//surface->FillRectangle(rcSelMargin, *pixmapSelPattern);
+					surface->DrawPixmap(rcSelMargin, pixmapSelPattern);
 				else {
 					Colour/*Allocated*/ colour;
 					switch (vs.ms[margin].style) {
@@ -3146,16 +3151,17 @@ void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll,
 
 void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 	//assert(0);
-	return;
 
-	if (!pixmapSelPattern->Initialised()) {
-		const int patternSize = 8;
-		pixmapSelPattern->InitPixMap(patternSize, patternSize, surfaceWindow, wMain.GetID());
+	//TODO: Rework logic on force update
+	//if (!pixmapSelPattern->Initialised()) {
+	if (!IsPixmapInitialised(pixmapSelPattern)) {
+		//const int patternSize = 8;
+		//pixmapSelPattern->InitPixMap(patternSize, patternSize, surfaceWindow, wMain.GetID());
 		// This complex procedure is to reproduce the checkerboard dithered pattern used by windows
 		// for scroll bars and Visual Studio for its selection margin. The colour of this pattern is half
 		// way between the chrome colour and the chrome highlight colour making a nice transition
 		// between the window chrome and the content area. And it works in low colour depths.
-		PRectangle rcPattern(0, 0, patternSize, patternSize);
+		//PRectangle rcPattern(0, 0, patternSize, patternSize);
 
 		// Initialize default colours based on the chrome colour scheme.  Typically the highlight is white.
 		Colour/*Allocated*/ colourFMFill = vs.selbar/*.allocated*/;
@@ -3176,15 +3182,18 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 			colourFMStripes = vs.foldmarginHighlightColour/*.allocated*/;
 		}
 
-		pixmapSelPattern->FillRectangle(rcPattern, colourFMFill);
-		for (int y = 0; y < patternSize; y++) {
-			for (int x = y % 2; x < patternSize; x+=2) {
-				PRectangle rcPixel(x, y, x+1, y+1);
-				pixmapSelPattern->FillRectangle(rcPixel, colourFMStripes);
-			}
-		}
+		int pixmapData[] = {colourFMStripes, colourFMFill, colourFMFill, colourFMStripes};
+		UpdatePixmap(pixmapSelPattern, 2, 2, pixmapData);
+		//pixmapSelPattern->FillRectangle(rcPattern, colourFMFill);
+		//for (int y = 0; y < patternSize; y++) {
+		//	for (int x = y % 2; x < patternSize; x+=2) {
+		//		PRectangle rcPixel(x, y, x+1, y+1);
+		//		pixmapSelPattern->FillRectangle(rcPixel, colourFMStripes);
+		//	}
+		//}
 	}
 
+	return;
 	if (!pixmapIndentGuide->Initialised()) {
 		// 1 extra pixel in height so can handle odd/even positions and so produce a continuous line
 		pixmapIndentGuide->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
@@ -3349,7 +3358,8 @@ void Editor::Paint(/*Surface *surfaceWindow,*/ PRectangle rcArea) {
 		}
 		RefreshPixMaps(drawSurface);	// In case pixmaps invalidated by scrollbar change
 	}
-	PLATFORM_ASSERT(pixmapSelPattern->Initialised());
+	//PLATFORM_ASSERT(pixmapSelPattern->Initialised());
+	PLATFORM_ASSERT(IsPixmapInitialised(pixmapSelPattern));
 
 	if (paintState != paintAbandoned) {
 		PaintSelMargin(drawSurface, rcArea);

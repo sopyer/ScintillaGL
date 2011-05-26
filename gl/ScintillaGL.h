@@ -113,6 +113,15 @@ public:
 			}
 		}
 	}
+
+	void PropSet(const char *key, const char *val) {
+		if (instance) {
+			int firstModification = instance->PropertySet(key, val);
+			if (firstModification >= 0) {
+				pdoc->ModifiedAt(firstModification);
+			}
+		}
+	}
 	//const char *DescribeWordListSets();
 	//void SetWordList(int n, const char *wl);
 	//int GetStyleBitsNeeded() const;

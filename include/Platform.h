@@ -354,6 +354,13 @@ public:
         friend class SurfaceImpl;
 };
 
+struct PixmapInternal;
+typedef PixmapInternal* Pixmap;
+
+Pixmap	CreatePixmap();
+void	DestroyPixmap(Pixmap pixmap);
+void	UpdatePixmap(Pixmap pixmap, int w, int h, int* data);
+bool	IsPixmapInitialised(Pixmap pixmap);
 /**
  * A surface abstracts a place to draw.
  */
@@ -386,7 +393,10 @@ public:
 	virtual void AlphaRectangle(PRectangle rc, int cornerSize, Colour/*Allocated*/ fill, int alphaFill,
 		Colour/*Allocated*/ outline, int alphaOutline, int flags)=0;
 	virtual void Ellipse(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	
+	//TODO: Remove
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
+	virtual void DrawPixmap(PRectangle rc, Pixmap pixmap) = 0;
 
 	virtual void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
 	virtual void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;

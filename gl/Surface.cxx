@@ -56,7 +56,10 @@ public:
 	void AlphaRectangle(PRectangle rc, int cornerSize, Colour/*Allocated*/ fill, int alphaFill,
 		Colour/*Allocated*/ outline, int alphaOutline, int flags);
 	void Ellipse(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
+
+	//TODO: Remove
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
+	virtual void DrawPixmap(PRectangle rc, Pixmap pixmap);
 
 	void DrawTextBase(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore);
 	void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
@@ -155,6 +158,78 @@ void SurfaceImpl::Polygon(Point* /*pts*/, int /*npts*/, Colour/*Allocated*/ /*fo
 
 void SurfaceImpl::RectangleDraw(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
 	assert(0);
+}
+
+struct PixmapInternal
+{
+	GLuint tex;
+	float scalex, scaley;
+	bool initialised;
+};
+
+Pixmap	CreatePixmap()
+{
+	Pixmap pm = new PixmapInternal;
+	pm->scalex = 0;
+	pm->scaley = 0;
+	pm->initialised = false;
+
+	return pm;
+}
+
+bool	IsPixmapInitialised(Pixmap pixmap)
+{
+	return pixmap->initialised;
+}
+
+void	DestroyPixmap(Pixmap pixmap)
+{
+	glDeleteTextures(1, &pixmap->tex);
+	delete pixmap;
+}
+
+void	UpdatePixmap(Pixmap pixmap, int w, int h, int* data)
+{
+	if (!pixmap->initialised)
+	{
+		glGenTextures(1, &pixmap->tex);
+		glBindTexture(GL_TEXTURE_2D, pixmap->tex);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+	else
+	{
+		glBindTexture(GL_TEXTURE_2D, pixmap->tex);
+	}
+
+	pixmap->initialised = true;
+	pixmap->scalex = 1.0f/w;
+	pixmap->scaley = 1.0f/h;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void SurfaceImpl::DrawPixmap(PRectangle rc, Pixmap pixmap)
+{
+	float w = (rc.right-rc.left)*pixmap->scalex, h=(rc.bottom-rc.top)*pixmap->scaley;
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, pixmap->tex);
+	glColor4ub(0xFF, 0xFF, 0xFF, 0xFF);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0);
+	glVertex2f(rc.left,  rc.top);
+	glTexCoord2f(w, 0);
+	glVertex2f(rc.right, rc.top);
+	glTexCoord2f(w, h);
+	glVertex2f(rc.right, rc.bottom);
+	glTexCoord2f(0, h);
+	glVertex2f(rc.left,  rc.bottom);
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_TEXTURE_2D);
 }
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Colour/*Allocated*/ back) {

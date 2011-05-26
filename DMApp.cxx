@@ -135,6 +135,16 @@ const char glslBuiltin[] =
 	"gl_ObjectPlaneS gl_ObjectPlaneT gl_ObjectPlaneR gl_ObjectPlaneQ "
 	"gl_Fog";
 
+const size_t NB_FOLDER_STATE = 7;
+const size_t FOLDER_TYPE = 0;
+const int markersArray[][NB_FOLDER_STATE] = {
+  {SC_MARKNUM_FOLDEROPEN, SC_MARKNUM_FOLDER, SC_MARKNUM_FOLDERSUB, SC_MARKNUM_FOLDERTAIL, SC_MARKNUM_FOLDEREND,        SC_MARKNUM_FOLDEROPENMID,     SC_MARKNUM_FOLDERMIDTAIL},
+  {SC_MARK_MINUS,         SC_MARK_PLUS,      SC_MARK_EMPTY,        SC_MARK_EMPTY,         SC_MARK_EMPTY,               SC_MARK_EMPTY,                SC_MARK_EMPTY},
+  {SC_MARK_ARROWDOWN,     SC_MARK_ARROW,     SC_MARK_EMPTY,        SC_MARK_EMPTY,         SC_MARK_EMPTY,               SC_MARK_EMPTY,                SC_MARK_EMPTY},
+  {SC_MARK_CIRCLEMINUS,   SC_MARK_CIRCLEPLUS,SC_MARK_VLINE,        SC_MARK_LCORNERCURVE,  SC_MARK_CIRCLEPLUSCONNECTED, SC_MARK_CIRCLEMINUSCONNECTED, SC_MARK_TCORNERCURVE},
+  {SC_MARK_BOXMINUS,      SC_MARK_BOXPLUS,   SC_MARK_VLINE,        SC_MARK_LCORNER,       SC_MARK_BOXPLUSCONNECTED,    SC_MARK_BOXMINUSCONNECTED,    SC_MARK_TCORNER}
+};
+
 void DMApp::InitialiseEditor() {
 	//SendEditor(SCI_SETLEXER, SCLEX_HTML);
 	myEd.ls.SetLexer(SCLEX_CPP);
@@ -145,6 +155,8 @@ void DMApp::InitialiseEditor() {
 	myEd.ls.SetWordList(1, glslType);
 	myEd.ls.SetWordList(4, glslBuiltin);
 
+	//myEd.ls.PropSet("fold", "1");
+
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
 	SetAStyle(STYLE_DEFAULT, 0xFFFFFFFF, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
 	SendEditor(SCI_STYLECLEARALL);	// Copies global style to all others
@@ -153,14 +165,25 @@ void DMApp::InitialiseEditor() {
 	SetAStyle(STYLE_BRACEBAD, 0xFF0000FF, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
 	SetAStyle(STYLE_LINENUMBER, 0xFFC0C0C0, 0xFF333333, 20, "c:/windows/fonts/cour.ttf");
 	SendEditor(SCI_SETFOLDMARGINCOLOUR, 1, 0xFF1A1A1A);
+	SendEditor(SCI_SETFOLDMARGINHICOLOUR, 1, 0xFF1A1A1A);
 	SendEditor(SCI_SETSELBACK, 1, 0xFFCC9966);
 	SendEditor(SCI_SETCARETFORE, 0xFFFFFFFF, 0);
 	SendEditor(SCI_SETCARETLINEVISIBLE, 1);
 	SendEditor(SCI_SETCARETLINEBACK, 0xFF333333);
 	
+	app.SendEditor(SCI_SETMARGINWIDTHN, 0, 44);//Calculate correct width
+	app.SendEditor(SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS);//Calculate correct width
+
+	for (int i = 0 ; i < NB_FOLDER_STATE ; i++)
+	{
+		SendEditor(SCI_MARKERDEFINE, markersArray[FOLDER_TYPE][i], markersArray[FOLDER_TYPE][4]);
+		SendEditor(SCI_MARKERSETFORE, markersArray[FOLDER_TYPE][i], 0xFF6A6A6A);
+		SendEditor(SCI_MARKERSETBACK, markersArray[FOLDER_TYPE][i], 0xFF333333);
+	}
+
 	SendEditor(SCI_SETUSETABS, 1);
 	SendEditor(SCI_SETTABWIDTH, 4);
-	//SendEditor(SCI_SETINDENTATIONGUIDES, SC_IV_LOOKBOTH);
+	SendEditor(SCI_SETINDENTATIONGUIDES, SC_IV_LOOKBOTH);
 
 	SetAStyle(SCE_C_DEFAULT, 0xFFFFFFFF, 0xFF000000, 16, "c:/windows/fonts/cour.ttf");
 	SetAStyle(SCE_C_WORD, 0xFF0066FF, 0xFF000000);
@@ -218,8 +241,6 @@ int main(int /*argc*/, char** /*argv*/)
 	PRectangle rcPaint(0, 0, 800, 600);
 
 	app.InitialiseEditor();
-
-	app.SendEditor(SCI_SETMARGINWIDTHN, 0, 44);//Calculate correct width
 
 	char str[] = "void main()\n{\n\tgl_FragColor=vec4(0, 0, 0, 1);\n}\n";
 	app.SendEditor(SCI_CANCEL);
