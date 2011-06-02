@@ -166,6 +166,71 @@ public:
 	virtual void SetMouseCapture(bool /*on*/) {}
 	virtual bool HaveMouseCapture() {return false;}
 	virtual sptr_t DefWndProc(unsigned int /*iMessage*/, uptr_t /*wParam*/, sptr_t /*lParam*/) {return 0;}
+
+	LRESULT Command(UINT Msg, WPARAM wParam=0, LPARAM lParam=0) {
+		return WndProc(Msg, wParam, lParam);
+	}
+
+	void findMatchingBracePos(int & braceAtCaret, int & braceOpposite)
+	{
+		int caretPos = int(Command(SCI_GETCURRENTPOS));
+		braceAtCaret = -1;
+		braceOpposite = -1;
+		char charBefore = '\0';
+
+		int lengthDoc = int(Command(SCI_GETLENGTH));
+
+		if ((lengthDoc > 0) && (caretPos > 0)) 
+		{
+			charBefore = TCHAR(Command(SCI_GETCHARAT, caretPos - 1, 0));
+		}
+		// Priority goes to character before caret
+		if (charBefore && strchr("[](){}", charBefore))
+		{
+			braceAtCaret = caretPos - 1;
+		}
+
+		if (lengthDoc > 0  && (braceAtCaret < 0)) 
+		{
+			// No brace found so check other side
+			TCHAR charAfter = TCHAR(Command(SCI_GETCHARAT, caretPos, 0));
+			if (charAfter && strchr("[](){}", charAfter))
+			{
+				braceAtCaret = caretPos;
+			}
+		}
+		if (braceAtCaret >= 0) 
+			braceOpposite = int(Command(SCI_BRACEMATCH, braceAtCaret, 0));
+	}
+
+	// return true if 1 or 2 (matched) brace(s) is found
+	bool braceMatch() 
+	{
+		int braceAtCaret = -1;
+		int braceOpposite = -1;
+		findMatchingBracePos(braceAtCaret, braceOpposite);
+
+		if ((braceAtCaret != -1) && (braceOpposite == -1))
+		{
+			Command(SCI_BRACEBADLIGHT, braceAtCaret);
+			Command(SCI_SETHIGHLIGHTGUIDE, 0);
+		} 
+		else 
+		{
+			Command(SCI_BRACEHIGHLIGHT, braceAtCaret, braceOpposite);
+
+			//if (_pEditView->isShownIndentGuide())
+			{
+				int columnAtCaret = int(Command(SCI_GETCOLUMN, braceAtCaret));
+				int columnOpposite = int(Command(SCI_GETCOLUMN, braceOpposite));
+				Command(SCI_SETHIGHLIGHTGUIDE, (columnAtCaret < columnOpposite)?columnAtCaret:columnOpposite);
+			}
+		}
+
+		return (braceAtCaret != -1);
+	}
+
+
 	void Paint(/*Surface *surfaceWindow,*/ PRectangle rcArea)
 	{
 		if (timeGetTime()>nextTime)
@@ -173,6 +238,9 @@ public:
 			Tick();
 			nextTime = timeGetTime()+tickInterval;
 		}
+
+		braceMatch();
+
 		Editor::Paint(/*surfaceWindow, */rcArea);
 	}
 	void AddCharUTF(char c) {Editor::AddCharUTF(&c, 1);}

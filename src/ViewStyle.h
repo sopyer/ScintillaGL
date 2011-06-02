@@ -52,11 +52,11 @@ public:
 	Style *styles;
 	LineMarker markers[MARKER_MAX + 1];
 	Indicator indicators[INDIC_MAX + 1];
-	int lineHeight;
-	unsigned int maxAscent;
-	unsigned int maxDescent;
-	unsigned int aveCharWidth;
-	unsigned int spaceWidth;
+	float lineHeight;
+	/*unsigned int*/float maxAscent;
+	/*unsigned int*/float maxDescent;
+	/*unsigned int*/float aveCharWidth;
+	/*unsigned int*/float spaceWidth;
 	bool selforeset;
 	Colour/*Pair*/ selforeground;
 	Colour/*Pair*/ selAdditionalForeground;

@@ -396,7 +396,7 @@ public:
 	
 	//TODO: Remove
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
-	virtual void DrawPixmap(PRectangle rc, Pixmap pixmap) = 0;
+	virtual void DrawPixmap(PRectangle rc, Point from, Pixmap pixmap) = 0;
 
 	virtual void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
 	virtual void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;

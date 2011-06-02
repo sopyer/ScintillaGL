@@ -172,8 +172,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	//Surface *pixmapSelMargin;
 	//Surface *pixmapSelPattern;
 	Pixmap	pixmapSelPattern;
-	Surface *pixmapIndentGuide;
-	Surface *pixmapIndentGuideHighlight;
+	Pixmap	pixmapIndentGuide;
+	Pixmap	pixmapIndentGuideHighlight;
+	//Surface *pixmapIndentGuide;
+	//Surface *pixmapIndentGuideHighlight;
 
 	LineLayoutCache llc;
 	PositionCache posCache;
@@ -362,7 +364,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 		int width=LineLayout::wrapWidthInfinite);
 	Colour/*Allocated*/ SelectionBackground(ViewStyle &vsDraw, bool main);
 	Colour/*Allocated*/ TextBackground(ViewStyle &vsDraw, bool overrideBackground, Colour/*Allocated*/ background, int inSelection, bool inHotspot, int styleMain, int i, LineLayout *ll);
-	void DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight);
+	void DrawIndentGuide(Surface *surface, int lineVisible, float lineHeight, int start, PRectangle rcSegment, bool highlight);
 	void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, Colour/*Allocated*/ wrapColour);
 	void DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
 		int line, int lineEnd, int xStart, int subLine, int subLineStart,

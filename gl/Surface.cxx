@@ -59,7 +59,7 @@ public:
 
 	//TODO: Remove
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
-	virtual void DrawPixmap(PRectangle rc, Pixmap pixmap);
+	virtual void DrawPixmap(PRectangle rc, Point from, Pixmap pixmap);
 
 	void DrawTextBase(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore);
 	void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
@@ -211,21 +211,22 @@ void	UpdatePixmap(Pixmap pixmap, int w, int h, int* data)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void SurfaceImpl::DrawPixmap(PRectangle rc, Pixmap pixmap)
+void SurfaceImpl::DrawPixmap(PRectangle rc, Point offset, Pixmap pixmap)
 {
 	float w = (rc.right-rc.left)*pixmap->scalex, h=(rc.bottom-rc.top)*pixmap->scaley;
+	float u1 = offset.x*pixmap->scalex, v1 = offset.y*pixmap->scaley, u2 = u1+w, v2 = v1+h;
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, pixmap->tex);
 	glColor4ub(0xFF, 0xFF, 0xFF, 0xFF);
 	glBegin(GL_QUADS);
-	glTexCoord2f(0, 0);
+	glTexCoord2f(u1, v1);
 	glVertex2f(rc.left,  rc.top);
-	glTexCoord2f(w, 0);
+	glTexCoord2f(u2, v1);
 	glVertex2f(rc.right, rc.top);
-	glTexCoord2f(w, h);
+	glTexCoord2f(u2, v2);
 	glVertex2f(rc.right, rc.bottom);
-	glTexCoord2f(0, h);
+	glTexCoord2f(u1, v2);
 	glVertex2f(rc.left,  rc.bottom);
 	glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -263,9 +264,20 @@ void SurfaceImpl::RoundedRectangle(PRectangle /*rc*/, Colour/*Allocated*/ /*fore
 //	return co & 0xff;
 //}
 
-void SurfaceImpl::AlphaRectangle(PRectangle /*rc*/, int /*cornerSize*/, Colour/*Allocated*/ /*fill*/, int /*alphaFill*/,
+void SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, Colour/*Allocated*/ fill, int alphaFill,
 		Colour/*Allocated*/ /*outline*/, int /*alphaOutline*/, int /*flags*/) {
-	assert(0);
+	//assert(0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	unsigned int back = fill&0xFFFFFF | ((alphaFill&0xFF)<<24);
+	glColor4ubv((GLubyte*)&back);
+	glBegin(GL_QUADS);
+	glVertex2f(rc.left,  rc.top);
+	glVertex2f(rc.right, rc.top);
+	glVertex2f(rc.right, rc.bottom);
+	glVertex2f(rc.left,  rc.bottom);
+	glEnd();
+	glDisable(GL_BLEND);
 }
 
 void SurfaceImpl::Ellipse(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
@@ -546,6 +558,8 @@ float SurfaceImpl::AverageCharWidth(Font &font_) {
 //}
 
 void SurfaceImpl::SetClip(PRectangle rc) {
+	//TODO:HACK!!!!!!!!!!!!!!!!!!
+	glEnable(GL_SCISSOR_TEST);
 	glScissor(rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top);
 	//assert(0);
 }

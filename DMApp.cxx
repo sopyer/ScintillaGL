@@ -170,20 +170,21 @@ void DMApp::InitialiseEditor() {
 	SendEditor(SCI_SETCARETFORE, 0xFFFFFFFF, 0);
 	SendEditor(SCI_SETCARETLINEVISIBLE, 1);
 	SendEditor(SCI_SETCARETLINEBACK, 0xFF333333);
+	SendEditor(SCI_SETCARETLINEBACKALPHA, 0xA0);
 	
 	app.SendEditor(SCI_SETMARGINWIDTHN, 0, 44);//Calculate correct width
 	app.SendEditor(SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS);//Calculate correct width
 
-	for (int i = 0 ; i < NB_FOLDER_STATE ; i++)
-	{
-		SendEditor(SCI_MARKERDEFINE, markersArray[FOLDER_TYPE][i], markersArray[FOLDER_TYPE][4]);
-		SendEditor(SCI_MARKERSETFORE, markersArray[FOLDER_TYPE][i], 0xFF6A6A6A);
-		SendEditor(SCI_MARKERSETBACK, markersArray[FOLDER_TYPE][i], 0xFF333333);
-	}
+	//for (int i = 0 ; i < NB_FOLDER_STATE ; i++)
+	//{
+	//	SendEditor(SCI_MARKERDEFINE, markersArray[FOLDER_TYPE][i], markersArray[FOLDER_TYPE][4]);
+	//	SendEditor(SCI_MARKERSETFORE, markersArray[FOLDER_TYPE][i], 0xFF6A6A6A);
+	//	SendEditor(SCI_MARKERSETBACK, markersArray[FOLDER_TYPE][i], 0xFF333333);
+	//}
 
 	SendEditor(SCI_SETUSETABS, 1);
 	SendEditor(SCI_SETTABWIDTH, 4);
-	SendEditor(SCI_SETINDENTATIONGUIDES, SC_IV_LOOKBOTH);
+	SendEditor(SCI_SETINDENTATIONGUIDES, SC_IV_REAL);
 
 	SetAStyle(SCE_C_DEFAULT, 0xFFFFFFFF, 0xFF000000, 16, "c:/windows/fonts/cour.ttf");
 	SetAStyle(SCE_C_WORD, 0xFF0066FF, 0xFF000000);
@@ -336,6 +337,9 @@ int main(int /*argc*/, char** /*argv*/)
 		glOrtho(0, 800, 0, 600, 0, 500);
 		glTranslatef(0, 600, 0);
 		glScalef(1, -1, 1);
+
+		//TODO: HACK!!!!!!!!!!!!!!!!!!
+		glDisable(GL_SCISSOR_TEST);
 		app.myEd.Paint(/*s,*/ rcPaint);
 
 		SDL_GL_SwapBuffers();

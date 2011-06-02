@@ -33,7 +33,7 @@ public:
 	bool hotspot;
 
 	Font font;
-	int sizeZoomed;
+	float sizeZoomed;
 	float lineHeight;
 	float ascent;
 	float descent;

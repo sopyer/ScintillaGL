@@ -92,13 +92,13 @@ void Style::Clear(Colour/*Desired*/ fore_, Colour/*Desired*/ back_, int size_,
 	else
 		font.Release();
 	aliasOfDefaultFont = false;
-	sizeZoomed = 2;
-	lineHeight = 2;
-	ascent = 1;
-	descent = 1;
-	externalLeading = 0;
-	aveCharWidth = 1;
-	spaceWidth = 1;
+	sizeZoomed = 2.0f;
+	lineHeight = 2.0f;
+	ascent = 1.0f;
+	descent = 1.0f;
+	externalLeading = 0.0f;
+	aveCharWidth = 1.0f;
+	spaceWidth = 1.0f;
 }
 
 void Style::ClearTo(const Style &source) {

@@ -167,8 +167,10 @@ Editor::Editor() {
 	//pixmapSelMargin = Surface::Allocate();
 	//pixmapSelPattern = Surface::Allocate();
 	pixmapSelPattern = CreatePixmap();
-	pixmapIndentGuide = Surface::Allocate();
-	pixmapIndentGuideHighlight = Surface::Allocate();
+	pixmapIndentGuide = CreatePixmap();
+	pixmapIndentGuideHighlight = CreatePixmap();
+	//pixmapIndentGuide = Surface::Allocate();
+	//pixmapIndentGuideHighlight = Surface::Allocate();
 
 	targetStart = 0;
 	targetEnd = 0;
@@ -227,8 +229,10 @@ Editor::~Editor() {
 	//delete pixmapSelMargin;
 	//delete pixmapSelPattern;
 	DestroyPixmap(pixmapSelPattern);
-	delete pixmapIndentGuide;
-	delete pixmapIndentGuideHighlight;
+	DestroyPixmap(pixmapIndentGuide);
+	DestroyPixmap(pixmapIndentGuideHighlight);
+	//delete pixmapIndentGuide;
+	//delete pixmapIndentGuideHighlight;
 }
 
 void Editor::Finalise() {
@@ -240,8 +244,8 @@ void Editor::DropGraphics() {
 	//pixmapLine->Release();
 	//pixmapSelMargin->Release();
 	//pixmapSelPattern->Release();
-	pixmapIndentGuide->Release();
-	pixmapIndentGuideHighlight->Release();
+	//pixmapIndentGuide->Release();
+	//pixmapIndentGuideHighlight->Release();
 }
 
 void Editor::InvalidateStyleData() {
@@ -1681,7 +1685,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				if (vs.ms[margin].mask & SC_MASK_FOLDERS)
 					// Required because of special way brush is created for selection margin
 					//surface->FillRectangle(rcSelMargin, *pixmapSelPattern);
-					surface->DrawPixmap(rcSelMargin, pixmapSelPattern);
+					surface->DrawPixmap(rcSelMargin, Point(0, 0), pixmapSelPattern);
 				else {
 					Colour/*Allocated*/ colour;
 					switch (vs.ms[margin].style) {
@@ -2274,11 +2278,13 @@ Colour/*Allocated*/ Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackg
 	return vsDraw.styles[styleMain].back/*.allocated*/;
 }
 
-void Editor::DrawIndentGuide(Surface *surface, int lineVisible, int lineHeight, int start, PRectangle rcSegment, bool highlight) {
-	Point from(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
+void Editor::DrawIndentGuide(Surface *surface, int lineVisible, float lineHeight, int start, PRectangle rcSegment, bool highlight) {
+	//Point from(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
 	PRectangle rcCopyArea(start + 1, rcSegment.top, start + 2, rcSegment.bottom);
-	surface->Copy(rcCopyArea, from,
-	        highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
+	//surface->Copy(rcCopyArea, from,
+	//        highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
+	surface->DrawPixmap(rcCopyArea, Point(0, lineHeight*lineVisible),
+	        highlight ? pixmapIndentGuideHighlight : pixmapIndentGuide);
 }
 
 void Editor::DrawWrapMarker(Surface *surface, PRectangle rcPlace,
@@ -3193,21 +3199,27 @@ void Editor::RefreshPixMaps(Surface *surfaceWindow) {
 		//}
 	}
 
-	return;
-	if (!pixmapIndentGuide->Initialised()) {
+	//return;
+	//if (!pixmapIndentGuide->Initialised()) {
+	if (!IsPixmapInitialised(pixmapIndentGuide)) {
+		int pixmapIndentGuideData[] = {vs.styles[STYLE_INDENTGUIDE].back, vs.styles[STYLE_INDENTGUIDE].fore};
+		UpdatePixmap(pixmapIndentGuide, 1, 2, pixmapIndentGuideData);
+
+		int pixmapIndentGuideHighlightData[] = {vs.styles[STYLE_BRACELIGHT].back, vs.styles[STYLE_BRACELIGHT].fore};
+		UpdatePixmap(pixmapIndentGuideHighlight, 1, 2, pixmapIndentGuideHighlightData);
 		// 1 extra pixel in height so can handle odd/even positions and so produce a continuous line
-		pixmapIndentGuide->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
-		pixmapIndentGuideHighlight->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
-		PRectangle rcIG(0, 0, 1, vs.lineHeight);
-		pixmapIndentGuide->FillRectangle(rcIG, vs.styles[STYLE_INDENTGUIDE].back/*.allocated*/);
-		pixmapIndentGuide->PenColour(vs.styles[STYLE_INDENTGUIDE].fore/*.allocated*/);
-		pixmapIndentGuideHighlight->FillRectangle(rcIG, vs.styles[STYLE_BRACELIGHT].back/*.allocated*/);
-		pixmapIndentGuideHighlight->PenColour(vs.styles[STYLE_BRACELIGHT].fore/*.allocated*/);
-		for (int stripe = 1; stripe < vs.lineHeight + 1; stripe += 2) {
-			PRectangle rcPixel(0, stripe, 1, stripe+1);
-			pixmapIndentGuide->FillRectangle(rcPixel, vs.styles[STYLE_INDENTGUIDE].fore/*.allocated*/);
-			pixmapIndentGuideHighlight->FillRectangle(rcPixel, vs.styles[STYLE_BRACELIGHT].fore/*.allocated*/);
-		}
+		//pixmapIndentGuide->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
+		//pixmapIndentGuideHighlight->InitPixMap(1, vs.lineHeight + 1, surfaceWindow, wMain.GetID());
+		//PRectangle rcIG(0, 0, 1, vs.lineHeight);
+		//pixmapIndentGuide->FillRectangle(rcIG, vs.styles[STYLE_INDENTGUIDE].back/*.allocated*/);
+		//pixmapIndentGuide->PenColour(vs.styles[STYLE_INDENTGUIDE].fore/*.allocated*/);
+		//pixmapIndentGuideHighlight->FillRectangle(rcIG, vs.styles[STYLE_BRACELIGHT].back/*.allocated*/);
+		//pixmapIndentGuideHighlight->PenColour(vs.styles[STYLE_BRACELIGHT].fore/*.allocated*/);
+		//for (int stripe = 1; stripe < vs.lineHeight + 1; stripe += 2) {
+		//	PRectangle rcPixel(0, stripe, 1, stripe+1);
+		//	pixmapIndentGuide->FillRectangle(rcPixel, vs.styles[STYLE_INDENTGUIDE].fore/*.allocated*/);
+		//	pixmapIndentGuideHighlight->FillRectangle(rcPixel, vs.styles[STYLE_BRACELIGHT].fore/*.allocated*/);
+		//}
 	}
 
 	//if (bufferedDraw) {
@@ -4242,6 +4254,8 @@ void Editor::NotifyHotSpotReleaseClick(int position, bool shift, bool ctrl, bool
 }
 
 void Editor::NotifyUpdateUI() {
+	//WTF
+	//assert(0);
 	SCNotification scn = {0};
 	scn.nmhdr.code = SCN_UPDATEUI;
 	scn.updated = needUpdateUI;
@@ -4249,6 +4263,8 @@ void Editor::NotifyUpdateUI() {
 }
 
 void Editor::NotifyPainted() {
+	//WTF
+	//assert(0);
 	SCNotification scn = {0};
 	scn.nmhdr.code = SCN_PAINTED;
 	NotifyParent(scn);
