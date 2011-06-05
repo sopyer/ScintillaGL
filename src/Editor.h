@@ -279,6 +279,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void RefreshStyleData();
 	void DropGraphics();
 
+	PRectangle clientRect;
+
 	virtual PRectangle GetClientRectangle();
 	PRectangle GetTextRectangle();
 
@@ -381,7 +383,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DrawCarets(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
 	void RefreshPixMaps(Surface *surfaceWindow);
-	void Paint(/*Surface *surfaceWindow, */PRectangle rcArea);
+	void Paint(/*Surface *surfaceWindow, PRectangle rcArea*/);
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr);
 	int TextWidth(int style, const char *text);
 
@@ -542,6 +544,10 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	static sptr_t StringResult(sptr_t lParam, const char *val);
 
 public:
+	void SetSize(float width, float height)
+	{
+		clientRect = PRectangle(0, 0, width, height);
+	}
 	Surface*	drawSurface;
 	// Public so the COM thunks can access it.
 	int KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);

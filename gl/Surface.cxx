@@ -573,9 +573,16 @@ float SurfaceImpl::AverageCharWidth(Font &font_) {
 //}
 
 void SurfaceImpl::SetClip(PRectangle rc) {
-	//TODO:HACK!!!!!!!!!!!!!!!!!!
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top);
+	double plane[][4] = {
+		{ 1,  0, 0, -rc.left  },
+		{-1,  0, 0,  rc.right },
+		{ 0,  1, 0, -rc.top   },
+		{ 0, -1, 0,  rc.bottom},
+	};
+	glClipPlane(GL_CLIP_PLANE0, plane[0]);
+	glClipPlane(GL_CLIP_PLANE1, plane[1]);
+	glClipPlane(GL_CLIP_PLANE2, plane[2]);
+	glClipPlane(GL_CLIP_PLANE3, plane[3]);
 	//assert(0);
 }
 

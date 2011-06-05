@@ -53,6 +53,8 @@
 #include "Catalogue.h"
 #endif
 
+#include <gl/glee.h>
+
 class LexState2 : public LexInterface {
 	const LexerModule *lexCurrent;
 public:
@@ -231,7 +233,7 @@ public:
 	}
 
 
-	void Paint(/*Surface *surfaceWindow,*/ PRectangle rcArea)
+	void Paint(/*Surface *surfaceWindow, PRectangle rcArea*/)
 	{
 		if (timeGetTime()>nextTime)
 		{
@@ -241,7 +243,7 @@ public:
 
 		braceMatch();
 
-		Editor::Paint(/*surfaceWindow, */rcArea);
+		Editor::Paint(/*surfaceWindow, rcArea*/);
 	}
 	void AddCharUTF(char c) {Editor::AddCharUTF(&c, 1);}
 };

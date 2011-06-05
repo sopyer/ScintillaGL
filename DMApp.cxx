@@ -158,18 +158,18 @@ void DMApp::InitialiseEditor() {
 	myEd.ls.PropSet("fold", "1");
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
-	SetAStyle(STYLE_DEFAULT,     0xFFFFFFFF, 0xF0000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_DEFAULT,     0xFFFFFFFF, 0xD0000000, 20, "c:/windows/fonts/cour.ttf");
 	SendEditor(SCI_STYLECLEARALL);	// Copies global style to all others
-	SetAStyle(STYLE_INDENTGUIDE, 0xFFC0C0C0, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_BRACELIGHT,  0xFF00FF00, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_BRACEBAD,    0xFF0000FF, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_LINENUMBER,  0xFFC0C0C0, 0xF0333333, 20, "c:/windows/fonts/cour.ttf");
-	SendEditor(SCI_SETFOLDMARGINCOLOUR,   1, 0xF01A1A1A);
-	SendEditor(SCI_SETFOLDMARGINHICOLOUR, 1, 0xF01A1A1A);
-	SendEditor(SCI_SETSELBACK, 1, 0xFFCC9966);
-	SendEditor(SCI_SETCARETFORE, 0xFFFFFFFF, 0);
-	SendEditor(SCI_SETCARETLINEVISIBLE, 1);
-	SendEditor(SCI_SETCARETLINEBACK, 0xFFFFFFFF);
+	SetAStyle(STYLE_INDENTGUIDE, 0xFFC0C0C0, 0xD0000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_BRACELIGHT,  0xFF00FF00, 0xD0000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_BRACEBAD,    0xFF0000FF, 0xD0000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_LINENUMBER,  0xFFC0C0C0, 0xD0333333, 20, "c:/windows/fonts/cour.ttf");
+	SendEditor(SCI_SETFOLDMARGINCOLOUR,   1, 0xD01A1A1A);
+	SendEditor(SCI_SETFOLDMARGINHICOLOUR, 1, 0xD01A1A1A);
+	SendEditor(SCI_SETSELBACK,            1, 0xD0CC9966);
+	SendEditor(SCI_SETCARETFORE,          0xFFFFFFFF, 0);
+	SendEditor(SCI_SETCARETLINEVISIBLE,   1);
+	SendEditor(SCI_SETCARETLINEBACK,      0xFFFFFFFF);
 	SendEditor(SCI_SETCARETLINEBACKALPHA, 0x20);
 	
 	app.SendEditor(SCI_SETMARGINWIDTHN, 0, 44);//Calculate correct width
@@ -187,15 +187,15 @@ void DMApp::InitialiseEditor() {
 	SendEditor(SCI_SETTABWIDTH, 4);
 	SendEditor(SCI_SETINDENTATIONGUIDES, SC_IV_REAL);
 
-	SetAStyle(SCE_C_DEFAULT,      0xFFFFFFFF, 0xF0000000, 16, "c:/windows/fonts/cour.ttf");
-	SetAStyle(SCE_C_WORD,         0xFF0066FF, 0xF0000000);
-	SetAStyle(SCE_C_WORD2,        0xFFFFFF00, 0xF0000000);
+	SetAStyle(SCE_C_DEFAULT,      0xFFFFFFFF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
+	SetAStyle(SCE_C_WORD,         0xFF0066FF, 0xD0000000);
+	SetAStyle(SCE_C_WORD2,        0xFFFFFF00, 0xD0000000);
 	//WTF??? SetAStyle(SCE_C_GLOBALCLASS, 0xFF0000FF, 0xFF000000);
-	SetAStyle(SCE_C_PREPROCESSOR, 0xFFC0C0C0, 0xF0000000);
-	SetAStyle(SCE_C_NUMBER,       0xFF0080FF, 0xF0000000);
-	SetAStyle(SCE_C_OPERATOR,     0xFF00CCFF, 0xF0000000);
-	SetAStyle(SCE_C_COMMENT,      0xFF00FF00, 0xF0000000);
-	SetAStyle(SCE_C_COMMENTLINE,  0xFF00FF00, 0xF0000000);
+	SetAStyle(SCE_C_PREPROCESSOR, 0xFFC0C0C0, 0xD0000000);
+	SetAStyle(SCE_C_NUMBER,       0xFF0080FF, 0xD0000000);
+	SetAStyle(SCE_C_OPERATOR,     0xFF00CCFF, 0xD0000000);
+	SetAStyle(SCE_C_COMMENT,      0xFF00FF00, 0xD0000000);
+	SetAStyle(SCE_C_COMMENTLINE,  0xFF00FF00, 0xD0000000);
 }
 
 #include <SDL.h>
@@ -240,9 +240,13 @@ int main(int /*argc*/, char** /*argv*/)
 
 	Surface* s = Surface::Allocate();
 	app.myEd.drawSurface = s;
-	PRectangle rcPaint(0, 0, 800, 600);
+	//PRectangle rcPaint(0, 0, 800, 600);
+
+	float w=400, h=540;
 
 	app.InitialiseEditor();
+	//Set these values first otherwise there will be incorrect state
+	app.myEd.SetSize(w, h);
 
 	char str[] = "void main()\n{\n\tgl_FragColor=vec4(0, 0, 0, 1);\n}\n";
 	app.SendEditor(SCI_CANCEL);
@@ -253,7 +257,6 @@ int main(int /*argc*/, char** /*argv*/)
 	app.SendEditor(SCI_SETSAVEPOINT);
 	app.SendEditor(SCI_GOTOPOS, 0);
 	app.myEd.SetFocusState(true);
-
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
 #endif
@@ -329,9 +332,11 @@ int main(int /*argc*/, char** /*argv*/)
 
 		Uint8* curState = SDL_GetKeyState(0);
 		
-		glClearColor(0.88, 0.88, 0.88, 1);
+		glClearColor(0.08f, 0.18f, 0.18f, 1);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 		
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 
@@ -341,7 +346,7 @@ int main(int /*argc*/, char** /*argv*/)
 		glColor3f(0, 1, 0);
 		glVertex2f( 0.5f, -0.3f);
 		glColor3f(0, 0, 1);
-		glVertex2f( 0.0f,  0.2);
+		glVertex2f( 0.0f,  0.2f);
 		glEnd();
 
 		glLoadIdentity();
@@ -350,11 +355,33 @@ int main(int /*argc*/, char** /*argv*/)
 		glTranslatef(0, 600, 0);
 		glScalef(1, -1, 1);
 
-		//TODO: HACK!!!!!!!!!!!!!!!!!!
-		glDisable(GL_SCISSOR_TEST);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(370, 30, 0); //apply MODELVIEW matrix
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		app.myEd.Paint(/*s,*/ rcPaint);
+
+		glEnable(GL_CLIP_PLANE0);
+		glEnable(GL_CLIP_PLANE1);
+		glEnable(GL_CLIP_PLANE2);
+		glEnable(GL_CLIP_PLANE3);
+		double plane0[] = { 1,  0, 0, 0 };
+		double plane1[] = {-1,  0, 0, w };
+		double plane2[] = { 0,  1, 0, 0 };
+		double plane3[] = { 0, -1, 0, h };
+		glClipPlane(GL_CLIP_PLANE0, plane0);
+		glClipPlane(GL_CLIP_PLANE1, plane1);
+		glClipPlane(GL_CLIP_PLANE2, plane2);
+		glClipPlane(GL_CLIP_PLANE3, plane3);
+
+		app.myEd.Paint(/*s, rcPaint*/);
+
+		glDisable(GL_CLIP_PLANE0);
+		glDisable(GL_CLIP_PLANE1);
+		glDisable(GL_CLIP_PLANE2);
+		glDisable(GL_CLIP_PLANE3);
+
 		glDisable(GL_BLEND);
 
 		SDL_GL_SwapBuffers();

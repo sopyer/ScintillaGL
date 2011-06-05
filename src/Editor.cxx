@@ -291,7 +291,7 @@ void Editor::RefreshStyleData() {
 }
 
 PRectangle Editor::GetClientRectangle() {
-	return wMain.GetClientPosition();
+	return clientRect;//wMain.GetClientPosition();
 }
 
 PRectangle Editor::GetTextRectangle() {
@@ -3316,9 +3316,10 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 	}
 }
 
-void Editor::Paint(/*Surface *surfaceWindow,*/ PRectangle rcArea) {
+void Editor::Paint(/*Surface *surfaceWindow, PRectangle rcArea*/) {
 	//Platform::DebugPrintf("Paint:%1d (%3d,%3d) ... (%3d,%3d)\n",
 	//	paintingAllText, rcArea.left, rcArea.top, rcArea.right, rcArea.bottom);
+	PRectangle rcArea(clientRect);
 
 	StyleToPositionInView(PositionAfterArea(rcArea));
 
