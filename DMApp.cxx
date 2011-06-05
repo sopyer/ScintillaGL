@@ -155,46 +155,47 @@ void DMApp::InitialiseEditor() {
 	myEd.ls.SetWordList(1, glslType);
 	myEd.ls.SetWordList(4, glslBuiltin);
 
-	//myEd.ls.PropSet("fold", "1");
+	myEd.ls.PropSet("fold", "1");
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
-	SetAStyle(STYLE_DEFAULT, 0xFFFFFFFF, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_DEFAULT,     0xFFFFFFFF, 0xF0000000, 20, "c:/windows/fonts/cour.ttf");
 	SendEditor(SCI_STYLECLEARALL);	// Copies global style to all others
 	SetAStyle(STYLE_INDENTGUIDE, 0xFFC0C0C0, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_BRACELIGHT, 0xFF00FF00, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_BRACEBAD, 0xFF0000FF, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_LINENUMBER, 0xFFC0C0C0, 0xFF333333, 20, "c:/windows/fonts/cour.ttf");
-	SendEditor(SCI_SETFOLDMARGINCOLOUR, 1, 0xFF1A1A1A);
-	SendEditor(SCI_SETFOLDMARGINHICOLOUR, 1, 0xFF1A1A1A);
+	SetAStyle(STYLE_BRACELIGHT,  0xFF00FF00, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_BRACEBAD,    0xFF0000FF, 0xFF000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_LINENUMBER,  0xFFC0C0C0, 0xF0333333, 20, "c:/windows/fonts/cour.ttf");
+	SendEditor(SCI_SETFOLDMARGINCOLOUR,   1, 0xF01A1A1A);
+	SendEditor(SCI_SETFOLDMARGINHICOLOUR, 1, 0xF01A1A1A);
 	SendEditor(SCI_SETSELBACK, 1, 0xFFCC9966);
 	SendEditor(SCI_SETCARETFORE, 0xFFFFFFFF, 0);
 	SendEditor(SCI_SETCARETLINEVISIBLE, 1);
-	SendEditor(SCI_SETCARETLINEBACK, 0xFF333333);
-	SendEditor(SCI_SETCARETLINEBACKALPHA, 0xA0);
+	SendEditor(SCI_SETCARETLINEBACK, 0xFFFFFFFF);
+	SendEditor(SCI_SETCARETLINEBACKALPHA, 0x20);
 	
 	app.SendEditor(SCI_SETMARGINWIDTHN, 0, 44);//Calculate correct width
+	app.SendEditor(SCI_SETMARGINWIDTHN, 1, 20);//Calculate correct width
 	app.SendEditor(SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS);//Calculate correct width
 
-	//for (int i = 0 ; i < NB_FOLDER_STATE ; i++)
-	//{
-	//	SendEditor(SCI_MARKERDEFINE, markersArray[FOLDER_TYPE][i], markersArray[FOLDER_TYPE][4]);
-	//	SendEditor(SCI_MARKERSETFORE, markersArray[FOLDER_TYPE][i], 0xFF6A6A6A);
-	//	SendEditor(SCI_MARKERSETBACK, markersArray[FOLDER_TYPE][i], 0xFF333333);
-	//}
+	for (int i = 0 ; i < NB_FOLDER_STATE ; i++)
+	{
+		SendEditor(SCI_MARKERDEFINE, markersArray[FOLDER_TYPE][i], markersArray[4][i]);
+		SendEditor(SCI_MARKERSETBACK, markersArray[FOLDER_TYPE][i], 0xFF6A6A6A);
+		SendEditor(SCI_MARKERSETFORE, markersArray[FOLDER_TYPE][i], 0xFF333333);
+	}
 
 	SendEditor(SCI_SETUSETABS, 1);
 	SendEditor(SCI_SETTABWIDTH, 4);
 	SendEditor(SCI_SETINDENTATIONGUIDES, SC_IV_REAL);
 
-	SetAStyle(SCE_C_DEFAULT, 0xFFFFFFFF, 0xFF000000, 16, "c:/windows/fonts/cour.ttf");
-	SetAStyle(SCE_C_WORD, 0xFF0066FF, 0xFF000000);
-	SetAStyle(SCE_C_WORD2, 0xFFFFFF00, 0xFF000000);
+	SetAStyle(SCE_C_DEFAULT,      0xFFFFFFFF, 0xF0000000, 16, "c:/windows/fonts/cour.ttf");
+	SetAStyle(SCE_C_WORD,         0xFF0066FF, 0xF0000000);
+	SetAStyle(SCE_C_WORD2,        0xFFFFFF00, 0xF0000000);
 	//WTF??? SetAStyle(SCE_C_GLOBALCLASS, 0xFF0000FF, 0xFF000000);
-	SetAStyle(SCE_C_PREPROCESSOR, 0xFFC0C0C0, 0xFF000000);
-	SetAStyle(SCE_C_NUMBER, 0xFF0080FF, 0xFF000000);
-	SetAStyle(SCE_C_OPERATOR, 0xFF00CCFF, 0xFF000000);
-	SetAStyle(SCE_C_COMMENT, 0xFF00FF00, 0xFF000000);
-	SetAStyle(SCE_C_COMMENTLINE, 0xFF00FF00, 0xFF000000);
+	SetAStyle(SCE_C_PREPROCESSOR, 0xFFC0C0C0, 0xF0000000);
+	SetAStyle(SCE_C_NUMBER,       0xFF0080FF, 0xF0000000);
+	SetAStyle(SCE_C_OPERATOR,     0xFF00CCFF, 0xF0000000);
+	SetAStyle(SCE_C_COMMENT,      0xFF00FF00, 0xF0000000);
+	SetAStyle(SCE_C_COMMENTLINE,  0xFF00FF00, 0xF0000000);
 }
 
 #include <SDL.h>
@@ -328,10 +329,21 @@ int main(int /*argc*/, char** /*argv*/)
 
 		Uint8* curState = SDL_GetKeyState(0);
 		
-		glClearColor(0, 0, 0, 1);
+		glClearColor(0.88, 0.88, 0.88, 1);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 		
 		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+
+		glBegin(GL_TRIANGLES);
+		glColor3f(1, 0, 0);
+		glVertex2f(-0.5f, -0.3f);
+		glColor3f(0, 1, 0);
+		glVertex2f( 0.5f, -0.3f);
+		glColor3f(0, 0, 1);
+		glVertex2f( 0.0f,  0.2);
+		glEnd();
+
 		glLoadIdentity();
 
 		glOrtho(0, 800, 0, 600, 0, 500);
@@ -340,7 +352,10 @@ int main(int /*argc*/, char** /*argv*/)
 
 		//TODO: HACK!!!!!!!!!!!!!!!!!!
 		glDisable(GL_SCISSOR_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		app.myEd.Paint(/*s,*/ rcPaint);
+		glDisable(GL_BLEND);
 
 		SDL_GL_SwapBuffers();
 

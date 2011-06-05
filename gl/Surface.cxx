@@ -142,13 +142,20 @@ float SurfaceImpl::DeviceHeightFont(int points) {
 }
 
 void SurfaceImpl::MoveTo(float x_, float y_) {
-	assert(0);
+	//assert(0);
 	x = x_;
 	y = y_;
 }
 
-void SurfaceImpl::LineTo(float /*x_*/, float /*y_*/) {
-	assert(0);
+void SurfaceImpl::LineTo(float x_, float y_) {
+	//assert(0);
+	glColor4ubv((GLubyte*)&penColour);
+	glBegin(GL_LINES);
+	glVertex2f(x+0.5,  y+0.5);
+	glVertex2f(x_+0.5, y_+0.5);
+	glEnd();
+	x = x_;
+	y = y_;
 }
 
 void SurfaceImpl::Polygon(Point* /*pts*/, int /*npts*/, Colour/*Allocated*/ /*fore*/,
@@ -156,8 +163,16 @@ void SurfaceImpl::Polygon(Point* /*pts*/, int /*npts*/, Colour/*Allocated*/ /*fo
 	assert(0);
 }
 
-void SurfaceImpl::RectangleDraw(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
-	assert(0);
+void SurfaceImpl::RectangleDraw(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+	FillRectangle(rc, back);
+	glColor4ubv((GLubyte*)&fore);
+	glBegin(GL_LINE_STRIP);
+	glVertex2f(rc.left+0.5,  rc.top+0.5);
+	glVertex2f(rc.right-0.5, rc.top+0.5);
+	glVertex2f(rc.right-0.5, rc.bottom-0.5);
+	glVertex2f(rc.left+0.5,  rc.bottom-0.5);
+	glVertex2f(rc.left+0.5,  rc.top+0.5);
+	glEnd();
 }
 
 struct PixmapInternal
@@ -267,8 +282,8 @@ void SurfaceImpl::RoundedRectangle(PRectangle /*rc*/, Colour/*Allocated*/ /*fore
 void SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, Colour/*Allocated*/ fill, int alphaFill,
 		Colour/*Allocated*/ /*outline*/, int /*alphaOutline*/, int /*flags*/) {
 	//assert(0);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	unsigned int back = fill&0xFFFFFF | ((alphaFill&0xFF)<<24);
 	glColor4ubv((GLubyte*)&back);
 	glBegin(GL_QUADS);
@@ -277,7 +292,7 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, Colour/*Allo
 	glVertex2f(rc.right, rc.bottom);
 	glVertex2f(rc.left,  rc.bottom);
 	glEnd();
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 }
 
 void SurfaceImpl::Ellipse(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
@@ -437,12 +452,12 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, float ybase, const ch
 	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// assume orthographic projection with units = screen pixels, origin at top left
 	glBindTexture(GL_TEXTURE_2D, realFont->ftex);
-	glBegin(GL_QUADS);
 	glColor3ubv((GLubyte*)&fore);
+	glBegin(GL_QUADS);
 	float x = rc.left, y=ybase;
 	while (len--) {
 		if (*s >= 32 && *s < 128) {
@@ -458,7 +473,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, float ybase, const ch
 	}
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 }
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len,

@@ -990,7 +990,7 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 }
 
 void Editor::ScrollText(int /* linesToMove */) {
-	assert(!"WTF");
+	//assert(!"WTF");
 	//Platform::DebugPrintf("Editor::ScrollText %d\n", linesToMove);
 	//Redraw();
 }
