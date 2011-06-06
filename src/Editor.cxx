@@ -643,25 +643,25 @@ void Editor::RedrawRect(PRectangle rc) {
 	//wMain.InvalidateAll();
 //}
 
-void Editor::RedrawSelMargin(int line, bool allAfter) {
-	//assert(!"Probably should not be used!!!");
-	if (!AbandonPaint()) {
-		if (vs.maskInLine) {
-			//Redraw();
-		} else {
-			PRectangle rcSelMargin = GetClientRectangle();
-			rcSelMargin.right = vs.fixedColumnWidth;
-			if (line != -1) {
-				int position = pdoc->LineStart(line);
-				PRectangle rcLine = RectangleFromRange(position, position);
-				rcSelMargin.top = rcLine.top;
-				if (!allAfter)
-					rcSelMargin.bottom = rcLine.bottom;
-			}
-			//wMain.InvalidateRectangle(rcSelMargin);
-		}
-	}
-}
+//void Editor::RedrawSelMargin(int line, bool allAfter) {
+//	//assert(!"Probably should not be used!!!");
+//	if (!AbandonPaint()) {
+//		if (vs.maskInLine) {
+//			//Redraw();
+//		} else {
+//			PRectangle rcSelMargin = GetClientRectangle();
+//			rcSelMargin.right = vs.fixedColumnWidth;
+//			if (line != -1) {
+//				int position = pdoc->LineStart(line);
+//				PRectangle rcLine = RectangleFromRange(position, position);
+//				rcSelMargin.top = rcLine.top;
+//				if (!allAfter)
+//					rcSelMargin.bottom = rcLine.bottom;
+//			}
+//			//wMain.InvalidateRectangle(rcSelMargin);
+//		}
+//	}
+//}
 
 PRectangle Editor::RectangleFromRange(int start, int end) {
 	int minPos = start;
@@ -3155,7 +3155,7 @@ void Editor::DrawBlockCaret(Surface *surface, ViewStyle &vsDraw, LineLayout *ll,
 	        caretColour);
 }
 
-void Editor::RefreshPixMaps(Surface *surfaceWindow) {
+void Editor::RefreshPixMaps(Surface* /*surfaceWindow*/) {
 	//assert(0);
 
 	//TODO: Rework logic on force update
@@ -4492,16 +4492,16 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 		SetScrollBars();
 	}
 
-	if ((mh.modificationType & SC_MOD_CHANGEMARKER) || (mh.modificationType & SC_MOD_CHANGEMARGIN)) {
-		if ((paintState == notPainting) || !PaintContainsMargin()) {
-			if (mh.modificationType & SC_MOD_CHANGEFOLD) {
-				// Fold changes can affect the drawing of following lines so redraw whole margin
-				RedrawSelMargin(mh.line-1, true);
-			} else {
-				RedrawSelMargin(mh.line);
-			}
-		}
-	}
+	//if ((mh.modificationType & SC_MOD_CHANGEMARKER) || (mh.modificationType & SC_MOD_CHANGEMARGIN)) {
+	//	if ((paintState == notPainting) || !PaintContainsMargin()) {
+	//		if (mh.modificationType & SC_MOD_CHANGEFOLD) {
+	//			// Fold changes can affect the drawing of following lines so redraw whole margin
+	//			RedrawSelMargin(mh.line-1, true);
+	//		} else {
+	//			RedrawSelMargin(mh.line);
+	//		}
+	//	}
+	//}
 
 	// NOW pay the piper WRT "deferred" visual updates
 	if (IsLastStep(mh)) {
@@ -6461,11 +6461,11 @@ bool Editor::PaintContains(PRectangle rc) {
 	}
 }
 
-bool Editor::PaintContainsMargin() {
-	PRectangle rcSelMargin = GetClientRectangle();
-	rcSelMargin.right = vs.fixedColumnWidth;
-	return PaintContains(rcSelMargin);
-}
+//bool Editor::PaintContainsMargin() {
+//	PRectangle rcSelMargin = GetClientRectangle();
+//	rcSelMargin.right = vs.fixedColumnWidth;
+//	return PaintContains(rcSelMargin);
+//}
 
 void Editor::CheckForChangeOutsidePaint(Range r) {
 	if (paintState == painting && !paintingAllText) {
@@ -7761,7 +7761,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (wParam <= MARKER_MAX)
 			vs.markers[wParam].markType = lParam;
 		InvalidateStyleData();
-		RedrawSelMargin();
+		//RedrawSelMargin();
 		break;
 
 	case SCI_MARKERSYMBOLDEFINED:
@@ -7774,13 +7774,13 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (wParam <= MARKER_MAX)
 			vs.markers[wParam].fore/*.desired*/ = Colour/*Desired*/(lParam);
 		InvalidateStyleData();
-		RedrawSelMargin();
+		//RedrawSelMargin();
 		break;
 	case SCI_MARKERSETBACK:
 		if (wParam <= MARKER_MAX)
 			vs.markers[wParam].back/*.desired*/ = Colour/*Desired*/(lParam);
 		InvalidateStyleData();
-		RedrawSelMargin();
+		//RedrawSelMargin();
 		break;
 	case SCI_MARKERSETALPHA:
 		if (wParam <= MARKER_MAX)
@@ -7829,7 +7829,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			vs.markers[wParam].SetXPM(CharPtrFromSPtr(lParam));
 		};
 		InvalidateStyleData();
-		RedrawSelMargin();
+		//RedrawSelMargin();
 		break;
 
 	case SCI_SETMARGINTYPEN:
@@ -7987,8 +7987,8 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETFOLDLEVEL: {
 			int prev = pdoc->SetLevel(wParam, lParam);
-			if (prev != lParam)
-				RedrawSelMargin();
+			//if (prev != lParam)
+			//	RedrawSelMargin();
 			return prev;
 		}
 
@@ -8019,7 +8019,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETFOLDEXPANDED:
 		if (cs.SetExpanded(wParam, lParam != 0)) {
-			RedrawSelMargin();
+			//RedrawSelMargin();
 		}
 		break;
 

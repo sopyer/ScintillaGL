@@ -83,8 +83,8 @@
     <ClCompile Include="DMApp.cxx" />
     <ClCompile Include="external\GLee.c" />
     <ClCompile Include="gl\DefaultFontData.cpp" />
-    <ClCompile Include="gl\Font.cxx" />
     <ClCompile Include="gl\PlatGL.cxx" />
+    <ClCompile Include="gl\ScintillaGL.cxx" />
     <ClCompile Include="gl\Surface.cxx" />
     <ClCompile Include="lexers\LexA68k.cxx" />
     <ClCompile Include="lexers\LexAbaqus.cxx" />

@@ -302,7 +302,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool AbandonPaint();
 	void RedrawRect(PRectangle rc);
 	//void Redraw();
-	void RedrawSelMargin(int line=-1, bool allAfter=false);
+	//void RedrawSelMargin(int line=-1, bool allAfter=false);
 	PRectangle RectangleFromRange(int start, int end);
 	//void InvalidateRange(int start, int end);
 
@@ -509,7 +509,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void QueueStyling(int upTo);
 
 	virtual bool PaintContains(PRectangle rc);
-	bool PaintContainsMargin();
+	//bool PaintContainsMargin();
 	void CheckForChangeOutsidePaint(Range r);
 	void SetBraceHighlight(Position pos0, Position pos1, int matchStyle);
 

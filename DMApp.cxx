@@ -158,12 +158,12 @@ void DMApp::InitialiseEditor() {
 	myEd.ls.PropSet("fold", "1");
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
-	SetAStyle(STYLE_DEFAULT,     0xFFFFFFFF, 0xD0000000, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_DEFAULT,     0xFFFFFFFF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
 	SendEditor(SCI_STYLECLEARALL);	// Copies global style to all others
-	SetAStyle(STYLE_INDENTGUIDE, 0xFFC0C0C0, 0xD0000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_BRACELIGHT,  0xFF00FF00, 0xD0000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_BRACEBAD,    0xFF0000FF, 0xD0000000, 20, "c:/windows/fonts/cour.ttf");
-	SetAStyle(STYLE_LINENUMBER,  0xFFC0C0C0, 0xD0333333, 20, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_INDENTGUIDE, 0xFFC0C0C0, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_BRACELIGHT,  0xFF00FF00, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_BRACEBAD,    0xFF0000FF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
+	SetAStyle(STYLE_LINENUMBER,  0xFFC0C0C0, 0xD0333333, 16, "c:/windows/fonts/cour.ttf");
 	SendEditor(SCI_SETFOLDMARGINCOLOUR,   1, 0xD01A1A1A);
 	SendEditor(SCI_SETFOLDMARGINHICOLOUR, 1, 0xD01A1A1A);
 	SendEditor(SCI_SETSELBACK,            1, 0xD0CC9966);
@@ -332,7 +332,7 @@ int main(int /*argc*/, char** /*argv*/)
 
 		Uint8* curState = SDL_GetKeyState(0);
 		
-		glClearColor(0.08f, 0.18f, 0.18f, 1);
+		glClearColor(0.08f, 0.18f, 0.18f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 		
 		glMatrixMode(GL_MODELVIEW);
@@ -357,32 +357,9 @@ int main(int /*argc*/, char** /*argv*/)
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		glTranslatef(370, 30, 0); //apply MODELVIEW matrix
+		glTranslatef(370, 30, 0);
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glEnable(GL_CLIP_PLANE0);
-		glEnable(GL_CLIP_PLANE1);
-		glEnable(GL_CLIP_PLANE2);
-		glEnable(GL_CLIP_PLANE3);
-		double plane0[] = { 1,  0, 0, 0 };
-		double plane1[] = {-1,  0, 0, w };
-		double plane2[] = { 0,  1, 0, 0 };
-		double plane3[] = { 0, -1, 0, h };
-		glClipPlane(GL_CLIP_PLANE0, plane0);
-		glClipPlane(GL_CLIP_PLANE1, plane1);
-		glClipPlane(GL_CLIP_PLANE2, plane2);
-		glClipPlane(GL_CLIP_PLANE3, plane3);
-
-		app.myEd.Paint(/*s, rcPaint*/);
-
-		glDisable(GL_CLIP_PLANE0);
-		glDisable(GL_CLIP_PLANE1);
-		glDisable(GL_CLIP_PLANE2);
-		glDisable(GL_CLIP_PLANE3);
-
-		glDisable(GL_BLEND);
+		app.myEd.Paint();
 
 		SDL_GL_SwapBuffers();
 
