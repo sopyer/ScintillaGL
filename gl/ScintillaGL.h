@@ -142,24 +142,30 @@ class MyEditor: public Editor
 {
 	size_t nextTime;
 	static const size_t tickInterval = 100;
+	CLIPFORMAT cfColumnSelect;
+	CLIPFORMAT cfLineSelect;
 public:
+	HWND hWnd;
 	LexState2 ls;
-	MyEditor():ls(pdoc)
-	{
-		nextTime = 0;
-		pdoc->pli = &ls;
-	}
+	
+	MyEditor();
 
 	virtual void Initialise() {}
+
 	virtual void SetVerticalScrollPos() {}
 	virtual void SetHorizontalScrollPos() {}
 	virtual bool ModifyScrollBars(int /*nMax*/, int /*nPage*/) {return true;}
-	virtual void Copy() {}
-	virtual void Paste() {}
+
+	void InsertPasteText(const char *text, int len, SelectionPosition selStart, bool isRectangular, bool isLine);
+	bool CanPaste();
+
+	virtual void Copy();// {}
+	virtual void Paste();// {}
+	virtual void CopyToClipboard(const SelectionText &/*selectedText*/);// {}
+
 	virtual void ClaimSelection() {}
 	virtual void NotifyChange() {}
 	virtual void NotifyParent(SCNotification /*scn*/) {}
-	virtual void CopyToClipboard(const SelectionText &/*selectedText*/) {}
 	virtual void SetTicking(bool /*on*/) {}
 	virtual void SetMouseCapture(bool /*on*/) {}
 	virtual bool HaveMouseCapture() {return false;}

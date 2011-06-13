@@ -3,6 +3,247 @@
 
 #include "ScintillaGL.h"
 
+MyEditor::MyEditor():ls(pdoc)
+{
+	// There does not seem to be a real standard for indicating that the clipboard
+	// contains a rectangular selection, so copy Developer Studio.
+	cfColumnSelect = static_cast<CLIPFORMAT>(
+		::RegisterClipboardFormat(TEXT("MSDEVColumnSelect")));
+
+	// Likewise for line-copy (copies a full line when no text is selected)
+	cfLineSelect = static_cast<CLIPFORMAT>(
+		::RegisterClipboardFormat(TEXT("MSDEVLineSelect")));
+	nextTime = 0;
+	pdoc->pli = &ls;
+}
+
+class GlobalMemory {
+	HGLOBAL hand;
+public:
+	void *ptr;
+	GlobalMemory() : hand(0), ptr(0) {
+	}
+	GlobalMemory(HGLOBAL hand_) : hand(hand_), ptr(0) {
+		if (hand) {
+			ptr = ::GlobalLock(hand);
+		}
+	}
+	~GlobalMemory() {
+		PLATFORM_ASSERT(!ptr);
+	}
+	void Allocate(size_t bytes) {
+		hand = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, bytes);
+		if (hand) {
+			ptr = ::GlobalLock(hand);
+		}
+	}
+	HGLOBAL Unlock() {
+		PLATFORM_ASSERT(ptr);
+		HGLOBAL handCopy = hand;
+		::GlobalUnlock(hand);
+		ptr = 0;
+		hand = 0;
+		return handCopy;
+	}
+	void SetClip(UINT uFormat) {
+		::SetClipboardData(uFormat, Unlock());
+	}
+	operator bool() const {
+		return ptr != 0;
+	}
+	SIZE_T Size() {
+		return ::GlobalSize(hand);
+	}
+};
+
+void MyEditor::CopyToClipboard(const SelectionText& selectedText) {
+	if (!::OpenClipboard(hWnd))
+		return;
+	::EmptyClipboard();
+
+	GlobalMemory uniText;
+
+	// Default Scintilla behaviour in Unicode mode
+	//if (IsUnicodeMode()) {
+	//	int uchars = UTF16Length(selectedText.s, selectedText.len);
+	//	uniText.Allocate(2 * uchars);
+	//	if (uniText) {
+	//		UTF16FromUTF8(selectedText.s, selectedText.len, static_cast<wchar_t *>(uniText.ptr), uchars);
+	//	}
+	//} else {
+		// Not Unicode mode
+		// Convert to Unicode using the current Scintilla code page
+		int uLen = ::MultiByteToWideChar(CP_UTF8, 0, selectedText.s, selectedText.len, 0, 0);
+		uniText.Allocate(2 * uLen);
+		if (uniText) {
+			::MultiByteToWideChar(CP_UTF8, 0, selectedText.s, selectedText.len,
+				static_cast<wchar_t *>(uniText.ptr), uLen);
+		}
+	//}
+
+	if (uniText) {
+	//	if (!IsNT()) {
+	//		// Copy ANSI text to clipboard on Windows 9x
+	//		// Convert from Unicode text, so other ANSI programs can
+	//		// paste the text
+	//		// Windows NT, 2k, XP automatically generates CF_TEXT
+	//		GlobalMemory ansiText;
+	//		ansiText.Allocate(selectedText.len);
+	//		if (ansiText) {
+	//			::WideCharToMultiByte(CP_ACP, 0, static_cast<wchar_t *>(uniText.ptr), -1,
+	//				static_cast<char *>(ansiText.ptr), selectedText.len, NULL, NULL);
+	//			ansiText.SetClip(CF_TEXT);
+	//		}
+	//	}
+		uniText.SetClip(CF_UNICODETEXT);
+	} else {
+		 //There was a failure - try to copy at least ANSI text
+		GlobalMemory ansiText;
+		ansiText.Allocate(selectedText.len);
+		if (ansiText) {
+			memcpy(static_cast<char *>(ansiText.ptr), selectedText.s, selectedText.len);
+			ansiText.SetClip(CF_TEXT);
+		}
+	}
+
+	if (selectedText.rectangular) {
+		::SetClipboardData(cfColumnSelect, 0);
+	}
+
+	if (selectedText.lineCopy) {
+		::SetClipboardData(cfLineSelect, 0);
+	}
+
+	::CloseClipboard();
+}
+
+void MyEditor::Copy() {
+	SelectionText selectedText;
+	CopySelectionRange(&selectedText, true);
+	CopyToClipboard(selectedText);
+}
+
+bool MyEditor::CanPaste() {
+	if (!Editor::CanPaste())
+		return false;
+	if (::IsClipboardFormatAvailable(CF_TEXT))
+		return true;
+	if (IsUnicodeMode())
+		return ::IsClipboardFormatAvailable(CF_UNICODETEXT) != 0;
+	return false;
+}
+
+void MyEditor::InsertPasteText(const char *text, int len, SelectionPosition selStart, bool isRectangular, bool isLine) {
+	if (isRectangular) {
+		PasteRectangular(selStart, text, len);
+	} else {
+		char *convertedText = 0;
+		if (convertPastes) {
+			// Convert line endings of the paste into our local line-endings mode
+			convertedText = Document::TransformLineEnds(&len, text, len, pdoc->eolMode);
+			text = convertedText;
+		}
+		if (isLine) {
+			int insertPos = pdoc->LineStart(pdoc->LineFromPosition(sel.MainCaret()));
+			pdoc->InsertString(insertPos, text, len);
+			// add the newline if necessary
+			if ((len > 0) && (text[len-1] != '\n' && text[len-1] != '\r')) {
+				const char *endline = StringFromEOLMode(pdoc->eolMode);
+				pdoc->InsertString(insertPos + len, endline, strlen(endline));
+				len += strlen(endline);
+			}
+			if (sel.MainCaret() == insertPos) {
+				SetEmptySelection(sel.MainCaret() + len);
+			}
+		} else {
+			InsertPaste(selStart, text, len);
+		}
+		delete []convertedText;
+	}
+}
+
+void MyEditor::Paste() {
+	if (!::OpenClipboard(hWnd))
+		return;
+	UndoGroup ug(pdoc);
+	bool isLine = SelectionEmpty() && (::IsClipboardFormatAvailable(cfLineSelect) != 0);
+	ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
+	SelectionPosition selStart = sel.IsRectangular() ?
+		sel.Rectangular().Start() :
+		sel.Range(sel.Main()).Start();
+	bool isRectangular = ::IsClipboardFormatAvailable(cfColumnSelect) != 0;
+
+	// Always use CF_UNICODETEXT if available
+	GlobalMemory memUSelection(::GetClipboardData(CF_UNICODETEXT));
+	if (memUSelection) {
+		wchar_t *uptr = static_cast<wchar_t *>(memUSelection.ptr);
+		if (uptr) {
+			unsigned int len;
+			char *putf;
+			// Default Scintilla behaviour in Unicode mode
+			if (IsUnicodeMode()) {
+				unsigned int bytes = memUSelection.Size();
+				len = UTF8Length(uptr, bytes / 2);
+				putf = new char[len + 1];
+				UTF8FromUTF16(uptr, bytes / 2, putf, len);
+			} else {
+				// CF_UNICODETEXT available, but not in Unicode mode
+				// Convert from Unicode to current Scintilla code page
+				//UINT cpDest = CodePageOfDocument();
+				len = ::WideCharToMultiByte(CP_ACP, 0, uptr, -1,
+				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
+				putf = new char[len + 1];
+				::WideCharToMultiByte(CP_ACP, 0, uptr, -1,
+					                      putf, len + 1, NULL, NULL);
+			}
+
+			InsertPasteText(putf, len, selStart, isRectangular, isLine);
+			delete []putf;
+		}
+		memUSelection.Unlock();
+	} else {
+		// CF_UNICODETEXT not available, paste ANSI text
+		GlobalMemory memSelection(::GetClipboardData(CF_TEXT));
+		if (memSelection) {
+			char *ptr = static_cast<char *>(memSelection.ptr);
+			if (ptr) {
+				unsigned int bytes = memSelection.Size();
+				unsigned int len = bytes;
+				for (unsigned int i = 0; i < bytes; i++) {
+					if ((len == bytes) && (0 == ptr[i]))
+						len = i;
+				}
+
+				// In Unicode mode, convert clipboard text to UTF-8
+				if (IsUnicodeMode()) {
+					wchar_t *uptr = new wchar_t[len+1];
+
+					unsigned int ulen = ::MultiByteToWideChar(CP_ACP, 0,
+					                    ptr, len, uptr, len+1);
+
+					unsigned int mlen = UTF8Length(uptr, ulen);
+					char *putf = new char[mlen + 1];
+					if (putf) {
+						// CP_UTF8 not available on Windows 95, so use UTF8FromUTF16()
+						UTF8FromUTF16(uptr, ulen, putf, mlen);
+					}
+
+					delete []uptr;
+
+					if (putf) {
+						InsertPasteText(putf, mlen, selStart, isRectangular, isLine);
+						delete []putf;
+					}
+				} else {
+					InsertPasteText(ptr, len, selStart, isRectangular, isLine);
+				}
+			}
+			memSelection.Unlock();
+		}
+	}
+	::CloseClipboard();
+}
+
 void MyEditor::FindMatchingBracePos(int & braceAtCaret, int & braceOpposite)
 {
 	int caretPos = int(Command(SCI_GETCURRENTPOS));

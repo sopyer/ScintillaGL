@@ -218,6 +218,7 @@ void DMApp::InitialiseEditor2() {
 }
 
 #include <SDL.h>
+#include <SDL_syswm.h>
 #include <gl/glee.h>
 
 void Platform_Initialise();
@@ -326,6 +327,11 @@ int main(int /*argc*/, char** /*argv*/)
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
 #endif
+
+	SDL_SysWMinfo info = {{0, 0}, 0, 0};
+	SDL_GetWMInfo(&info);
+	app.myEd.hWnd = info.window;
+	app.myEd2.hWnd = info.window;
 
 	Uint8	prevKState[SDLK_LAST] = {0};
 	bool run = true;
@@ -446,10 +452,10 @@ int main(int /*argc*/, char** /*argv*/)
 		glUseProgram(program);
 		glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
 		glBegin(GL_QUADS);
-		glVertex2f(-0.80f, -0.80f);
-		glVertex2f( 0.80f, -0.80f);
-		glVertex2f( 0.80f,  0.80f);
-		glVertex2f(-0.80f,  0.80f);
+		glTexCoord2f(0.0f, 0.0f); glVertex2f(-0.80f, -0.80f);
+		glTexCoord2f(1.0f, 0.0f); glVertex2f( 0.80f, -0.80f);
+		glTexCoord2f(1.0f, 1.0f); glVertex2f( 0.80f,  0.80f);
+		glTexCoord2f(0.0f, 1.0f); glVertex2f(-0.80f,  0.80f);
 		glEnd();
 		glUseProgram(0);
 
