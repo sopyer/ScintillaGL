@@ -64,13 +64,13 @@ void MyEditor::CopyToClipboard(const SelectionText& selectedText) {
 	GlobalMemory uniText;
 
 	// Default Scintilla behaviour in Unicode mode
-	//if (IsUnicodeMode()) {
-	//	int uchars = UTF16Length(selectedText.s, selectedText.len);
-	//	uniText.Allocate(2 * uchars);
-	//	if (uniText) {
-	//		UTF16FromUTF8(selectedText.s, selectedText.len, static_cast<wchar_t *>(uniText.ptr), uchars);
-	//	}
-	//} else {
+	if (IsUnicodeMode()) {
+		int uchars = UTF16Length(selectedText.s, selectedText.len);
+		uniText.Allocate(2 * uchars);
+		if (uniText) {
+			UTF16FromUTF8(selectedText.s, selectedText.len, static_cast<wchar_t *>(uniText.ptr), uchars);
+		}
+	} else {
 		// Not Unicode mode
 		// Convert to Unicode using the current Scintilla code page
 		int uLen = ::MultiByteToWideChar(CP_UTF8, 0, selectedText.s, selectedText.len, 0, 0);
@@ -79,22 +79,9 @@ void MyEditor::CopyToClipboard(const SelectionText& selectedText) {
 			::MultiByteToWideChar(CP_UTF8, 0, selectedText.s, selectedText.len,
 				static_cast<wchar_t *>(uniText.ptr), uLen);
 		}
-	//}
+	}
 
 	if (uniText) {
-	//	if (!IsNT()) {
-	//		// Copy ANSI text to clipboard on Windows 9x
-	//		// Convert from Unicode text, so other ANSI programs can
-	//		// paste the text
-	//		// Windows NT, 2k, XP automatically generates CF_TEXT
-	//		GlobalMemory ansiText;
-	//		ansiText.Allocate(selectedText.len);
-	//		if (ansiText) {
-	//			::WideCharToMultiByte(CP_ACP, 0, static_cast<wchar_t *>(uniText.ptr), -1,
-	//				static_cast<char *>(ansiText.ptr), selectedText.len, NULL, NULL);
-	//			ansiText.SetClip(CF_TEXT);
-	//		}
-	//	}
 		uniText.SetClip(CF_UNICODETEXT);
 	} else {
 		 //There was a failure - try to copy at least ANSI text

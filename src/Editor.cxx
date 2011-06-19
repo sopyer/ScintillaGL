@@ -3540,7 +3540,7 @@ void Editor::Paint(/*Surface *surfaceWindow, PRectangle rcArea*/) {
 		//Platform::DebugPrintf(
 		//"Layout:%9.6g    Paint:%9.6g    Ratio:%9.6g   Copy:%9.6g   Total:%9.6g\n",
 		//durLayout, durPaint, durLayout / durPaint, durCopy, etWhole.Duration());
-		NotifyPainted();
+		//NotifyPainted();
 	}
 }
 
@@ -4263,13 +4263,13 @@ void Editor::NotifyUpdateUI() {
 	NotifyParent(scn);
 }
 
-void Editor::NotifyPainted() {
-	//WTF
-	//assert(0);
-	SCNotification scn = {0};
-	scn.nmhdr.code = SCN_PAINTED;
-	NotifyParent(scn);
-}
+//void Editor::NotifyPainted() {
+//	//WTF
+//	//assert(0);
+//	SCNotification scn = {0};
+//	scn.nmhdr.code = SCN_PAINTED;
+//	NotifyParent(scn);
+//}
 
 void Editor::NotifyIndicatorClick(bool click, int position, bool shift, bool ctrl, bool alt) {
 	int mask = pdoc->decorations.AllOnFor(position);

@@ -257,6 +257,12 @@ onSuccess:
 	return prg;
 }
 
+bool isModEnabled(int mod, int modState)
+{
+	int mask = ~(KMOD_NUM|KMOD_CAPS|KMOD_MODE|mod);
+	return (modState&mask)==0 && ((modState&mod)!=0 || mod==0); 
+}
+
 int main(int /*argc*/, char** /*argv*/)
 {
 	SDL_Surface* mScreen;
@@ -386,17 +392,17 @@ int main(int /*argc*/, char** /*argv*/)
 					default:					sciKey = E.key.keysym.sym;
 				}
 
-				if (E.key.keysym.sym==SDLK_TAB && E.key.keysym.mod==KMOD_LCTRL)
+				if (E.key.keysym.sym==SDLK_TAB && isModEnabled(KMOD_CTRL, E.key.keysym.mod))
 				{
 					curEd->SetFocusState(false);
 					curEd = (curEd==&app.myEd)?&app.myEd2:&app.myEd;
 					curEd->SetFocusState(true);
 				}
-				if (E.key.keysym.sym==SDLK_F5 && E.key.keysym.mod==0)
+				if (E.key.keysym.sym==SDLK_F5 && isModEnabled(0, E.key.keysym.mod))
 				{
 					visible = !visible;
 				}
-				if (visible && E.key.keysym.sym==SDLK_F7 && E.key.keysym.mod==0)
+				if (visible && E.key.keysym.sym==SDLK_F7 && isModEnabled(0, E.key.keysym.mod))
 				{
 					//grab source from scintilla
 					GLint lengthDoc = app.myEd.Command(SCI_GETLENGTH);
