@@ -21,7 +21,7 @@ int Scintilla_ReleaseResources();
 #include "gl/ScintillaGL.h"
 
 struct DMApp {
-	MyEditor myEd, myEd2;
+	MyEditor myEd, myEd2, shaderList;
 	HINSTANCE hInstance;
 	HWND currentDialog;
 	HWND wMain;
@@ -36,6 +36,7 @@ struct DMApp {
 	void SetAStyle(MyEditor& ed, int style, COLORREF fore, COLORREF back=white, int size=-1, const char *face=0);
 	void InitialiseEditor();
 	void InitialiseEditor2();
+	void InitialiseEditor3();
 };
 
 static DMApp app;
@@ -217,9 +218,28 @@ void DMApp::InitialiseEditor2() {
 	app.myEd2.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
 }
 
+void DMApp::InitialiseEditor3() {
+	SendEditor(SCI_SETSTYLEBITS, 7);
+
+	// Set up the global default style. These attributes are used wherever no explicit choices are made.
+	SetAStyle(shaderList, STYLE_DEFAULT,     0xFFFFFFFF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
+	app.shaderList.Command(SCI_STYLECLEARALL);	// Copies global style to all others
+	app.shaderList.Command(SCI_SETMARGINWIDTHN, 1, 0);//Calculate correct width
+
+	app.shaderList.Command(SCI_SETUSETABS, 1);
+	app.shaderList.Command(SCI_SETTABWIDTH, 4);
+	
+	app.shaderList.Command(SCI_SETSELBACK,            1, 0xD0CC9966);
+	app.shaderList.Command(SCI_SETCARETFORE,          0x00FFFFFF, 0);
+	app.shaderList.Command(SCI_SETCARETLINEVISIBLE,   1);
+	app.shaderList.Command(SCI_SETCARETLINEBACK,      0xFFFFFFFF);
+	app.shaderList.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
+}
+
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <gl/glee.h>
+#include "gldebug.h"
 
 void Platform_Initialise();
 void Platform_Finalise();
@@ -263,6 +283,68 @@ bool isModEnabled(int mod, int modState)
 	return (modState&mask)==0 && ((modState&mod)!=0 || mod==0); 
 }
 
+int curMode=0;
+GLuint curPrg=0, curSh=0;
+GLuint prgs[24], shdrs[24];
+GLint attachedCount;
+
+void saveShaderSource()
+{
+	if (curPrg&&curSh)
+	{
+		GLint lengthDoc = app.myEd.Command(SCI_GETLENGTH);
+		TextRange tr;
+		tr.chrg.cpMin = 0;
+		tr.chrg.cpMax = lengthDoc;
+		tr.lpstrText = fragmentSource;
+		app.myEd.Command(SCI_GETTEXTRANGE, 0, reinterpret_cast<LPARAM>(&tr));
+		const char* ptr = fragmentSource;
+		glShaderSource(curSh, 1, (const char**)&ptr, &lengthDoc);
+	}
+}
+
+void compileProgram()
+{
+	saveShaderSource();
+	GLint type;
+	glGetShaderiv(curSh, GL_SHADER_TYPE, &type);
+	GLuint sh = glCreateShader(type);
+	const char* ptr=fragmentSource;
+	glShaderSource(sh, 1, &ptr, 0);
+	glCompileShader(sh);
+	GLint size;
+	glGetShaderInfoLog(sh, 65536, &size, errbuf);
+	GLint res;
+	glGetShaderiv(sh, GL_COMPILE_STATUS, &res);
+
+	if (!res) {glDeleteShader(sh); return;}
+	else
+	{
+		glCompileShader(curSh);
+		glGetShaderiv(curSh, GL_COMPILE_STATUS, &res);
+		assert(res);
+	}
+
+	GLuint prg = glCreateProgram();
+
+
+	for (int i=0; i<attachedCount; ++i)
+	{
+		glAttachShader(prg, shdrs[i]==curSh?sh:shdrs[i]);
+	}
+	glDeleteShader(sh);
+	glLinkProgram(prg);
+	glGetProgramInfoLog(prg, 65536-size, &size, errbuf+size);
+	glGetProgramiv(prg, GL_LINK_STATUS, &res);
+	if (res)
+	{
+		glLinkProgram(curPrg);
+		glGetProgramiv(curPrg, GL_LINK_STATUS, &res);
+		assert(res);
+	}
+	glDeleteProgram(prg);
+}
+
 int main(int /*argc*/, char** /*argv*/)
 {
 	SDL_Surface* mScreen;
@@ -300,9 +382,10 @@ int main(int /*argc*/, char** /*argv*/)
 	Surface* s = Surface::Allocate();
 	app.myEd.drawSurface = s;
 	app.myEd2.drawSurface = s;
+	app.shaderList.drawSurface = s;
 	//PRectangle rcPaint(0, 0, 800, 600);
 
-	float w=740, h=410;
+	float w=500, h=410;
 
 	app.InitialiseEditor();
 	//Set these values first otherwise there will be incorrect state
@@ -311,25 +394,32 @@ int main(int /*argc*/, char** /*argv*/)
 	app.InitialiseEditor2();
 	app.myEd2.SetSize(w, 100);
 
+	app.InitialiseEditor3();
+	app.shaderList.SetSize(w-300, h+100+25);
+
 	app.myEd.Command(SCI_CANCEL);
 	app.myEd.Command(SCI_SETUNDOCOLLECTION, 0);
-	app.myEd.Command(SCI_ADDTEXT, strlen(fragmentSource), reinterpret_cast<LPARAM>((char*)fragmentSource));
+	//app.myEd.Command(SCI_ADDTEXT, strlen(fragmentSource), reinterpret_cast<LPARAM>((char*)fragmentSource));
 	app.myEd.Command(SCI_SETUNDOCOLLECTION, 1);
 	app.myEd.Command(EM_EMPTYUNDOBUFFER);
 	app.myEd.Command(SCI_SETSAVEPOINT);
 	app.myEd.Command(SCI_GOTOPOS, 0);
-	app.myEd.SetFocusState(true);
+	app.myEd.SetFocusState(false);
 
 	program = CompileProgram(strlen(fragmentSource), fragmentSource, sizeof(errbuf), errbuf);
 
 	app.myEd2.Command(SCI_CANCEL);
 	app.myEd2.Command(SCI_SETUNDOCOLLECTION, 0);
-	app.myEd2.Command(SCI_ADDTEXT, strlen(errbuf), reinterpret_cast<LPARAM>((char*)errbuf));
+	//app.myEd2.Command(SCI_ADDTEXT, strlen(errbuf), reinterpret_cast<LPARAM>((char*)errbuf));
 	app.myEd2.Command(SCI_SETUNDOCOLLECTION, 1);
 	app.myEd2.Command(EM_EMPTYUNDOBUFFER);
 	app.myEd2.Command(SCI_SETSAVEPOINT);
 	app.myEd2.Command(SCI_GOTOPOS, 0);
 	app.myEd2.SetFocusState(false);
+
+	app.shaderList.Command(SCI_GOTOPOS, 0);
+	app.shaderList.SetFocusState(true);
+
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
 #endif
@@ -342,18 +432,16 @@ int main(int /*argc*/, char** /*argv*/)
 	Uint8	prevKState[SDLK_LAST] = {0};
 	bool run = true;
 	bool visible = false;
-	MyEditor* curEd = &app.myEd;
+	MyEditor* curEd = &app.shaderList;
 	while (run)
 	{
 		SDL_Event	E;
 		while (SDL_PollEvent(&E))
 		{
-			if (E.type==SDL_QUIT)
-			{
-					run=false;
-			}
+			if (E.type==SDL_QUIT) run=false;
 			else if (E.type == SDL_KEYDOWN)
 			{
+				if (E.key.keysym.sym==SDLK_ESCAPE) run=false;
 				int sciKey;
 				switch(E.key.keysym.sym)
 				{
@@ -392,32 +480,76 @@ int main(int /*argc*/, char** /*argv*/)
 					default:					sciKey = E.key.keysym.sym;
 				}
 
-				if (E.key.keysym.sym==SDLK_TAB && isModEnabled(KMOD_CTRL, E.key.keysym.mod))
-				{
-					curEd->SetFocusState(false);
-					curEd = (curEd==&app.myEd)?&app.myEd2:&app.myEd;
-					curEd->SetFocusState(true);
-				}
 				if (E.key.keysym.sym==SDLK_F5 && isModEnabled(0, E.key.keysym.mod))
 				{
 					visible = !visible;
-				}
-				if (visible && E.key.keysym.sym==SDLK_F7 && isModEnabled(0, E.key.keysym.mod))
-				{
-					//grab source from scintilla
-					GLint lengthDoc = app.myEd.Command(SCI_GETLENGTH);
-					TextRange tr;
-					tr.chrg.cpMin = 0;
-					tr.chrg.cpMax = lengthDoc;
-					tr.lpstrText = fragmentSource;
-					app.myEd.Command(SCI_GETTEXTRANGE, 0, reinterpret_cast<LPARAM>(&tr));
-					//compile source
-					GLuint prg = CompileProgram(strlen(fragmentSource), fragmentSource, sizeof(errbuf), errbuf);
-					if (prg)
+					if (visible)
 					{
-						glDeleteProgram(program);
-						program = prg;
+						GLsizei cnt = gldGetProgramCount();
+						gldGetPrograms(prgs, 24);
+
+						app.shaderList.Command(SCI_CANCEL);
+						app.shaderList.Command(SCI_SETUNDOCOLLECTION, 0);
+						app.shaderList.Command(SCI_CLEARALL);
+						for (int i=0; i<cnt; ++i)
+						{
+							char str[128];
+							_snprintf(str, 128, "%sProgram #%d", (i==0)?"":"\n", prgs[i]);
+							app.shaderList.Command(SCI_ADDTEXT, strlen(str), reinterpret_cast<LPARAM>(str));
+						}
+						app.shaderList.Command(SCI_SETUNDOCOLLECTION, 1);
+						app.shaderList.Command(EM_EMPTYUNDOBUFFER);
+						app.shaderList.Command(SCI_SETSAVEPOINT);
+						app.shaderList.Command(SCI_GOTOPOS, 0);
+						curMode=0;
+						curSh=0;
+						curPrg=0;
+						app.myEd.Command(SCI_CANCEL);
+						app.myEd.Command(SCI_CLEARALL);
+						app.myEd.Command(SCI_SETUNDOCOLLECTION, 0);
+						app.myEd.Command(SCI_SETUNDOCOLLECTION, 1);
+						app.myEd.Command(EM_EMPTYUNDOBUFFER);
+						app.myEd.Command(SCI_SETSAVEPOINT);
+						app.myEd.Command(SCI_GOTOPOS, 0);
 					}
+				}
+				
+				if (!visible) continue;
+
+				//Handle keys only when visible
+				if (sciKey=='s' && isModEnabled(KMOD_CTRL, E.key.keysym.mod))
+				{
+					saveShaderSource();
+				}
+				if ('1'<=sciKey && sciKey<='3' && isModEnabled(KMOD_ALT, E.key.keysym.mod))
+				{
+					curEd->SetFocusState(false);
+					//curEd = (curEd==&app.myEd)?&app.myEd2:((curEd==&app.myEd2)?&app.shaderList:&app.myEd);
+					switch(sciKey)
+					{
+						case '1': curEd=&app.shaderList; break;
+						case '2': curEd=&app.myEd; break;
+						case '3': curEd=&app.myEd2; break;
+					}
+					curEd->SetFocusState(true);
+				}
+				if (E.key.keysym.sym==SDLK_F7 && isModEnabled(0, E.key.keysym.mod)&&curSh&&curPrg)
+				{
+					compileProgram();
+					//grab source from scintilla
+					//GLint lengthDoc = app.myEd.Command(SCI_GETLENGTH);
+					//TextRange tr;
+					//tr.chrg.cpMin = 0;
+					//tr.chrg.cpMax = lengthDoc;
+					//tr.lpstrText = fragmentSource;
+					//app.myEd.Command(SCI_GETTEXTRANGE, 0, reinterpret_cast<LPARAM>(&tr));
+					////compile source
+					//GLuint prg = CompileProgram(strlen(fragmentSource), fragmentSource, sizeof(errbuf), errbuf);
+					//if (prg)
+					//{
+					//	glDeleteProgram(program);
+					//	program = prg;
+					//}
 					//update result window
 					app.myEd2.Command(SCI_CANCEL);
 					app.myEd2.Command(SCI_SETUNDOCOLLECTION, 0);
@@ -428,7 +560,97 @@ int main(int /*argc*/, char** /*argv*/)
 					app.myEd2.Command(SCI_SETSAVEPOINT);
 					app.myEd2.Command(SCI_GOTOPOS, 0);
 				}
-				else if (sciKey && visible)
+				else if (curEd==&app.shaderList)
+				{
+					switch (sciKey)
+					{
+						case SCK_UP:
+						case SCK_DOWN:
+						{
+							bool consumed;
+							bool ctrlPressed = !!(E.key.keysym.mod&KMOD_LCTRL | E.key.keysym.mod&KMOD_RCTRL);
+							bool altPressed = !!(E.key.keysym.mod&KMOD_LALT | E.key.keysym.mod&KMOD_RALT);
+							curEd->KeyDown((SDLK_a<=sciKey && sciKey<=SDLK_z)?sciKey-'a'+'A':sciKey,
+								!!(E.key.keysym.mod&KMOD_LSHIFT | E.key.keysym.mod&KMOD_RSHIFT),
+								ctrlPressed,
+								altPressed,
+								&consumed
+							);
+							break;
+						}
+						case SCK_RETURN:
+							if (curMode==0)
+							{
+								int pos = (int)app.shaderList.Command(SCI_GETCURRENTPOS);
+								int line = app.shaderList.Command(SCI_LINEFROMPOSITION, pos);
+								curPrg = prgs[line];
+								glGetAttachedShaders(curPrg, 24, &attachedCount, shdrs);
+								app.shaderList.Command(SCI_CANCEL);
+								app.shaderList.Command(SCI_SETUNDOCOLLECTION, 0);
+								app.shaderList.Command(SCI_CLEARALL);
+								for (int i=0; i<attachedCount; ++i)
+								{
+									char str[128];
+									GLint type;
+									glGetShaderiv(shdrs[i], GL_SHADER_TYPE, &type);
+									_snprintf(str, 128, "%s%s #%d",
+										(i==0)?"":"\n",
+										type==GL_VERTEX_SHADER?"GL_VERTEX_SHADER":"GL_FRAGMENT_SHADER",
+										shdrs[i]);
+									app.shaderList.Command(SCI_ADDTEXT, strlen(str), reinterpret_cast<LPARAM>(str));
+								}
+								app.shaderList.Command(SCI_SETUNDOCOLLECTION, 1);
+								app.shaderList.Command(EM_EMPTYUNDOBUFFER);
+								app.shaderList.Command(SCI_SETSAVEPOINT);
+								app.shaderList.Command(SCI_GOTOPOS, 0);
+								curMode=1;
+							}
+							else
+							{
+								int pos = (int)app.shaderList.Command(SCI_GETCURRENTPOS);
+								int line = app.shaderList.Command(SCI_LINEFROMPOSITION, pos);
+								
+								GLint len;
+								char buf[65536];
+								curSh = shdrs[line];
+								glGetShaderSource(curSh, 65536, &len, buf);
+
+								app.myEd.Command(SCI_CANCEL);
+								app.myEd.Command(SCI_CLEARALL);
+								app.myEd.Command(SCI_SETUNDOCOLLECTION, 0);
+								app.myEd.Command(SCI_ADDTEXT, len, reinterpret_cast<LPARAM>(buf));
+								app.myEd.Command(SCI_SETUNDOCOLLECTION, 1);
+								app.myEd.Command(EM_EMPTYUNDOBUFFER);
+								app.myEd.Command(SCI_SETSAVEPOINT);
+								app.myEd.Command(SCI_GOTOPOS, 0);
+							}
+							break;
+						case SCK_BACK:
+							if (curMode==1)
+							{
+								GLsizei cnt = gldGetProgramCount();
+								gldGetPrograms(prgs, 24);
+
+								app.shaderList.Command(SCI_CANCEL);
+								app.shaderList.Command(SCI_SETUNDOCOLLECTION, 0);
+								app.shaderList.Command(SCI_CLEARALL);
+								for (int i=0; i<cnt; ++i)
+								{
+									char str[128];
+									_snprintf(str, 128, "%sProgram #%d", (i==0)?"":"\n", prgs[i]);
+									app.shaderList.Command(SCI_ADDTEXT, strlen(str), reinterpret_cast<LPARAM>(str));
+								}
+								app.shaderList.Command(SCI_SETUNDOCOLLECTION, 1);
+								app.shaderList.Command(EM_EMPTYUNDOBUFFER);
+								app.shaderList.Command(SCI_SETSAVEPOINT);
+								app.shaderList.Command(SCI_GOTOPOS, 0);
+								curMode=0;
+							}
+							break;
+					}
+
+				}
+				else if (sciKey)
 				{
 					bool consumed;
 					bool ctrlPressed = !!(E.key.keysym.mod&KMOD_LCTRL | E.key.keysym.mod&KMOD_RCTRL);
@@ -476,13 +698,19 @@ int main(int /*argc*/, char** /*argv*/)
 
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
+
 			glTranslatef(30, 30, 0);
+
+			app.shaderList.Paint();
+
+			glTranslatef(w-300+30, 0, 0);
 
 			app.myEd.Paint();
 
 			glTranslatef(0, 430, 0);
 
 			app.myEd2.Paint();
+
 		}
 
 		SDL_GL_SwapBuffers();

@@ -14,10 +14,11 @@
     <ProjectGuid>{79829619-D8D1-47D1-87E2-9273231D1747}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>scintilla</RootNamespace>
+    <ProjectName>scintillaGL</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -40,7 +41,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)/external/include/gl;$(SolutionDir)/external/include;./lexlib;./src;./include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath>$(SolutionDir)/external/lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -58,6 +59,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>winmm.lib;opengl32.lib;sdl_d.lib;sdlmain_d.lib;imm32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -77,11 +83,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ResourceCompile Include="DMApp.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="DMApp.cxx" />
-    <ClCompile Include="external\GLee.c" />
     <ClCompile Include="gl\DefaultFontData.cpp" />
     <ClCompile Include="gl\PlatGL.cxx" />
     <ClCompile Include="gl\ScintillaGL.cxx" />
@@ -220,7 +221,6 @@
     <ClInclude Include="lexlib\SparseState.h" />
     <ClInclude Include="lexlib\StyleContext.h" />
     <ClInclude Include="lexlib\WordList.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="src\AutoComplete.h" />
     <ClInclude Include="src\CallTip.h" />
     <ClInclude Include="src\Catalogue.h" />

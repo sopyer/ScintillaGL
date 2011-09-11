@@ -1,7 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scintilla", "scintilla.vcxproj", "{79829619-D8D1-47D1-87E2-9273231D1747}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scintillaGL", "scintilla.vcxproj", "{79829619-D8D1-47D1-87E2-9273231D1747}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sampleApp", "sampleApp.vcxproj", "{64121079-AEDF-41DB-8468-BF3C04379EA7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{79829619-D8D1-47D1-87E2-9273231D1747} = {79829619-D8D1-47D1-87E2-9273231D1747}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +18,10 @@ Global
 		{79829619-D8D1-47D1-87E2-9273231D1747}.Debug|Win32.Build.0 = Debug|Win32
 		{79829619-D8D1-47D1-87E2-9273231D1747}.Release|Win32.ActiveCfg = Release|Win32
 		{79829619-D8D1-47D1-87E2-9273231D1747}.Release|Win32.Build.0 = Release|Win32
+		{64121079-AEDF-41DB-8468-BF3C04379EA7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{64121079-AEDF-41DB-8468-BF3C04379EA7}.Debug|Win32.Build.0 = Debug|Win32
+		{64121079-AEDF-41DB-8468-BF3C04379EA7}.Release|Win32.ActiveCfg = Release|Win32
+		{64121079-AEDF-41DB-8468-BF3C04379EA7}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

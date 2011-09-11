@@ -131,7 +131,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	 * When a style attribute is changed, this cache is flushed. */
 	bool stylesValid;
 	ViewStyle vs;
-	//Palette palette;
 
 	int printMagnification;
 	int printColourMode;
@@ -168,14 +167,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int virtualSpaceOptions;
 
-	//Surface *pixmapLine;
-	//Surface *pixmapSelMargin;
-	//Surface *pixmapSelPattern;
 	Pixmap	pixmapSelPattern;
 	Pixmap	pixmapIndentGuide;
 	Pixmap	pixmapIndentGuideHighlight;
-	//Surface *pixmapIndentGuide;
-	//Surface *pixmapIndentGuideHighlight;
 
 	LineLayoutCache llc;
 	PositionCache posCache;

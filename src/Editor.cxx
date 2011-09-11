@@ -163,14 +163,9 @@ Editor::Editor() {
 	additionalCaretsVisible = true;
 	virtualSpaceOptions = SCVS_NONE;
 
-	//pixmapLine = Surface::Allocate();
-	//pixmapSelMargin = Surface::Allocate();
-	//pixmapSelPattern = Surface::Allocate();
 	pixmapSelPattern = CreatePixmap();
 	pixmapIndentGuide = CreatePixmap();
 	pixmapIndentGuideHighlight = CreatePixmap();
-	//pixmapIndentGuide = Surface::Allocate();
-	//pixmapIndentGuideHighlight = Surface::Allocate();
 
 	targetStart = 0;
 	targetEnd = 0;
@@ -267,7 +262,7 @@ void Editor::RefreshStyleData() {
 }
 
 PRectangle Editor::GetClientRectangle() {
-	return clientRect;//wMain.GetClientPosition();
+	return clientRect;
 }
 
 PRectangle Editor::GetTextRectangle() {
@@ -1578,11 +1573,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 		return;
 
 	Surface *surface;
-	//if (bufferedDraw) {
-	//	surface = pixmapSelMargin;
-	//} else {
-		surface = surfWindow;
-	//}
+	surface = surfWindow;
 
 	PRectangle rcSelMargin = rcMargin;
 	rcSelMargin.right = rcMargin.left;
@@ -1783,10 +1774,6 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	PRectangle rcBlankMargin = rcMargin;
 	rcBlankMargin.left = rcSelMargin.right;
 	surface->FillRectangle(rcBlankMargin, vs.styles[STYLE_DEFAULT].back);
-
-	//if (bufferedDraw) {
-	//	surfWindow->Copy(rcMargin, Point(), *pixmapSelMargin);
-	//}
 }
 
 void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid) {
@@ -4117,14 +4104,6 @@ void Editor::NotifyUpdateUI() {
 	scn.updated = needUpdateUI;
 	NotifyParent(scn);
 }
-
-//void Editor::NotifyPainted() {
-//	//WTF
-//	//assert(0);
-//	SCNotification scn = {0};
-//	scn.nmhdr.code = SCN_PAINTED;
-//	NotifyParent(scn);
-//}
 
 void Editor::NotifyIndicatorClick(bool click, int position, bool shift, bool ctrl, bool alt) {
 	int mask = pdoc->decorations.AllOnFor(position);

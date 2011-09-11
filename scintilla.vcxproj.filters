@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="LexLib">
       <UniqueIdentifier>{1ff234b0-2bd3-4fa0-a298-85ac6c1e2031}</UniqueIdentifier>
     </Filter>
@@ -20,11 +16,6 @@
     <Filter Include="src">
       <UniqueIdentifier>{70d496a6-77c0-41dc-82b3-04c66fb6ca6b}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="DMApp.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lexlib\Accessor.cxx">
@@ -297,7 +288,6 @@
     <ClCompile Include="lexers\LexYAML.cxx">
       <Filter>Lexers</Filter>
     </ClCompile>
-    <ClCompile Include="DMApp.cxx" />
     <ClCompile Include="src\AutoComplete.cxx">
       <Filter>src</Filter>
     </ClCompile>
@@ -370,7 +360,6 @@
     <ClCompile Include="gl\PlatGL.cxx">
       <Filter>gl</Filter>
     </ClCompile>
-    <ClCompile Include="external\GLee.c" />
     <ClCompile Include="gl\Surface.cxx">
       <Filter>gl</Filter>
     </ClCompile>
@@ -418,7 +407,6 @@
     <ClInclude Include="lexlib\WordList.h">
       <Filter>LexLib</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h" />
     <ClInclude Include="include\ILexer.h">
       <Filter>include</Filter>
     </ClInclude>
