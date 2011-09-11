@@ -275,9 +275,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void InvalidateStyleData();
 	void InvalidateStyleRedraw();
-	//virtual void RefreshColourPalette(Palette &pal, bool want);
 	void RefreshStyleData();
-	void DropGraphics();
 
 	PRectangle clientRect;
 
