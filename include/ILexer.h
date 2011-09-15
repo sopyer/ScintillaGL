@@ -39,8 +39,6 @@ public:
 	virtual void SCI_METHOD DecorationSetCurrentIndicator(int indicator) = 0;
 	virtual void SCI_METHOD DecorationFillRange(int position, int value, int fillLength) = 0;
 	virtual void SCI_METHOD ChangeLexerState(int start, int end) = 0;
-	virtual int SCI_METHOD CodePage() const = 0;
-	virtual bool SCI_METHOD IsDBCSLeadByte(char ch) const = 0;
 	virtual const char * SCI_METHOD BufferPointer() = 0;
 	virtual int SCI_METHOD GetLineIndentation(int line) = 0;
 };

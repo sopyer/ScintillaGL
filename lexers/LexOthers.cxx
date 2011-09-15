@@ -1189,11 +1189,6 @@ static void ColouriseLatexDoc(unsigned int startPos, int length, int initStyle,
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			i++;
-			continue;
-		}
 		switch (state) {
 		case SCE_L_DEFAULT :
 			switch (ch) {

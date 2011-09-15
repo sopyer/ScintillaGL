@@ -75,28 +75,24 @@ public:
 	int len;
 	bool rectangular;
 	bool lineCopy;
-	int codePage;
-	int characterSet;
-	SelectionText() : s(0), len(0), rectangular(false), lineCopy(false), codePage(0), characterSet(0) {}
+	SelectionText() : s(0), len(0), rectangular(false), lineCopy(false)/*, codePage(0), characterSet(0)*/ {}
 	~SelectionText() {
 		Free();
 	}
 	void Free() {
-		Set(0, 0, 0, 0, false, false);
+		Set(0, 0, false, false);
 	}
-	void Set(char *s_, int len_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
+	void Set(char *s_, int len_, bool rectangular_, bool lineCopy_) {
 		delete []s;
 		s = s_;
 		if (s)
 			len = len_;
 		else
 			len = 0;
-		codePage = codePage_;
-		characterSet = characterSet_;
 		rectangular = rectangular_;
 		lineCopy = lineCopy_;
 	}
-	void Copy(const char *s_, int len_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
+	void Copy(const char *s_, int len_, bool rectangular_, bool lineCopy_) {
 		delete []s;
 		s = 0;
 		s = new char[len_];
@@ -104,13 +100,11 @@ public:
 		for (int i = 0; i < len_; i++) {
 			s[i] = s_[i];
 		}
-		codePage = codePage_;
-		characterSet = characterSet_;
 		rectangular = rectangular_;
 		lineCopy = lineCopy_;
 	}
 	void Copy(const SelectionText &other) {
-		Copy(other.s, other.len, other.codePage, other.characterSet, other.rectangular, other.lineCopy);
+		Copy(other.s, other.len, other.rectangular, other.lineCopy);
 	}
 };
 
@@ -389,7 +383,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void FilterSelections();
 	int InsertSpace(int position, unsigned int spaces);
 	void AddChar(char ch);
-	virtual void AddCharUTF(char *s, unsigned int len, bool treatAsDBCS=false);
+	virtual void AddCharUTF(char *s, unsigned int len);
 	void InsertPaste(SelectionPosition selStart, const char *text, int len);
 	void ClearSelection(bool retainMultipleSelections=false);
 	void ClearAll();
@@ -545,7 +539,6 @@ public:
 	int KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);
 	void SetFocusState(bool focusState);
 
-	bool IsUnicodeMode() const;
 	// Public so scintilla_send_message can use it.
 	virtual sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 	// Public so scintilla_set_id can use it.

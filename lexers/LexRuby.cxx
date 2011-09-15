@@ -748,13 +748,6 @@ static void ColouriseRbDoc(unsigned int startPos, int length, int initStyle,
 		chNext = styler.SafeGetCharAt(i + 1);
 		char chNext2 = styler.SafeGetCharAt(i + 2);
 
-        if (styler.IsLeadByte(ch)) {
-			chNext = chNext2;
-			chPrev = ' ';
-			i += 1;
-			continue;
-		}
-
         // skip on DOS/Windows
         //No, don't, because some things will get tagged on,
         // so we won't recognize keywords, for example

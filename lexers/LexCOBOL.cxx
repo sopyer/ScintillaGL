@@ -197,13 +197,6 @@ static void ColouriseCOBOLDoc(unsigned int startPos, int length, int initStyle, 
 				nContainment &= ~(NOT_HEADER | IN_DECLARATIVES | IN_SECTION);
         }
 
-        if (styler.IsLeadByte(ch)) {
-            chNext = styler.SafeGetCharAt(i + 2);
-            chPrev = ' ';
-            i += 1;
-            continue;
-        }
-
         if (state == SCE_C_DEFAULT) {
             if (isCOBOLwordstart(ch) || (ch == '$' && isascii(chNext) && isalpha(chNext))) {
                 ColourTo(styler, i-1, state);

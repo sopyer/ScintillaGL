@@ -414,9 +414,6 @@ public:
 	//virtual int SetPalette(Palette *pal, bool inBackGround)=0;
 	virtual void SetClip(PRectangle rc)=0;
 	virtual void FlushCachedState()=0;
-
-	virtual void SetUnicodeMode(bool unicodeMode_)=0;
-	virtual void SetDBCSMode(int codePage)=0;
 };
 
 /**

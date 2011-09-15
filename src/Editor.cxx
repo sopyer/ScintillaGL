@@ -2012,12 +2012,12 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		int ctrlCharWidth[32] = {0};
 		bool isControlNext = IsControlCharacter(ll->chars[0]);
 		int trailBytes = 0;
-		bool isBadUTFNext = IsUnicodeMode() && BadUTF(ll->chars, numCharsInLine, trailBytes);
+		bool isBadUTFNext = BadUTF(ll->chars, numCharsInLine, trailBytes);
 		for (int charInLine = 0; charInLine < numCharsInLine; charInLine++) {
 			bool isControl = isControlNext;
 			isControlNext = IsControlCharacter(ll->chars[charInLine + 1]);
 			bool isBadUTF = isBadUTFNext;
-			isBadUTFNext = IsUnicodeMode() && BadUTF(ll->chars + charInLine + 1, numCharsInLine - charInLine - 1, trailBytes);
+			isBadUTFNext = BadUTF(ll->chars + charInLine + 1, numCharsInLine - charInLine - 1, trailBytes);
 			if ((ll->styles[charInLine] != ll->styles[charInLine + 1]) ||
 			        isControl || isControlNext || isBadUTF || isBadUTFNext) {
 				ll->positions[startseg] = 0;
@@ -2650,7 +2650,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 	ll->psel = &sel;
 
-	BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible, selBackDrawn);
+	BreakFinder bfBack(ll, lineStart, lineEnd, posLineStart, xStartVisible, selBackDrawn);
 	int next = bfBack.First();
 
 	// Background drawing loop
@@ -2740,7 +2740,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 
 	inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 	// Foreground drawing loop
-	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, IsUnicodeMode(), xStartVisible,
+	BreakFinder bfFore(ll, lineStart, lineEnd, posLineStart, xStartVisible,
 		((!twoPhaseDraw && selBackDrawn) || vsDraw.selforeset));
 	next = bfFore.First();
 
@@ -2813,7 +2813,7 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 					        rcSegment.top + vsDraw.maxAscent,
 					        cc, 1, textBack, textFore);
 				}
-			} else if ((i == startseg) && (static_cast<unsigned char>(ll->chars[i]) >= 0x80) && IsUnicodeMode()) {
+			} else if ((i == startseg) && (static_cast<unsigned char>(ll->chars[i]) >= 0x80)) {
 				// A single byte >= 0x80 in UTF-8 is a bad byte and is displayed as its hex value
 				char hexits[4];
 				sprintf(hexits, "x%2X", ll->chars[i] & 0xff);
@@ -3260,8 +3260,6 @@ void Editor::Paint(/*Surface *surfaceWindow, PRectangle rcArea*/) {
 	if (rcArea.right > vs.fixedColumnWidth) {
 
 		Surface *surface = drawSurface;
-		surface->SetUnicodeMode(IsUnicodeMode());
-		surface->SetDBCSMode(CodePage());
 
 		int visibleLine = topLine + screenLinePaintFirst;
 
@@ -3667,7 +3665,7 @@ void Editor::FilterSelections() {
 }
 
 // AddCharUTF inserts an array of bytes which may or may not be in UTF-8.
-void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
+void Editor::AddCharUTF(char *s, unsigned int len) {
 	FilterSelections();
 	{
 		UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty() || inOverstrike);
@@ -3699,12 +3697,10 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 				sel.Range(r).ClearVirtualSpace();
 				// If in wrap mode rewrap current line so EnsureCaretVisible has accurate information
 				if (wrapState != eWrapNone) {
-					//AutoSurface surface(this);
 					if (drawSurface) {
 						if (WrapOneLine(drawSurface, pdoc->LineFromPosition(positionInsert))) {
 							SetScrollBars();
 							SetVerticalScrollPos();
-							//Redraw();
 						}
 					}
 				}
@@ -3724,10 +3720,7 @@ void Editor::AddCharUTF(char *s, unsigned int len, bool treatAsDBCS) {
 		SetLastXChosen();
 	}
 
-	if (treatAsDBCS) {
-		NotifyChar((static_cast<unsigned char>(s[0]) << 8) |
-		        static_cast<unsigned char>(s[1]));
-	} else {
+	{
 		int byte = static_cast<unsigned char>(s[0]);
 		if ((byte < 0xC0) || (1 == len)) {
 			// Handles UTF-8 characters between 0x01 and 0x7F and single byte
@@ -5518,8 +5511,7 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 				strncat(textWithEndl, "\r", textLen);
 			if (pdoc->eolMode != SC_EOL_CR)
 				strncat(textWithEndl, "\n", textLen);
-			ss->Set(textWithEndl, strlen(textWithEndl) + 1,
-				pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, true);
+			ss->Set(textWithEndl, strlen(textWithEndl) + 1, false, true);
 			delete []text;
 		}
 	} else {
@@ -5554,8 +5546,7 @@ void Editor::CopySelectionRange(SelectionText *ss, bool allowLineCopy) {
 			}
 		}
 		text[size] = '\0';
-		ss->Set(text, size + 1, pdoc->dbcsCodePage,
-			vs.styles[STYLE_DEFAULT].characterSet, sel.IsRectangular(), sel.selType == Selection::selLines);
+		ss->Set(text, size + 1, sel.IsRectangular(), sel.selType == Selection::selLines);
 	}
 }
 
@@ -5563,15 +5554,13 @@ void Editor::CopyRangeToClipboard(int start, int end) {
 	start = pdoc->ClampPositionIntoDocument(start);
 	end = pdoc->ClampPositionIntoDocument(end);
 	SelectionText selectedText;
-	selectedText.Set(CopyRange(start, end), end - start + 1,
-		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, false);
+	selectedText.Set(CopyRange(start, end), end - start + 1, false, false);
 	CopyToClipboard(selectedText);
 }
 
 void Editor::CopyText(int length, const char *text) {
 	SelectionText selectedText;
-	selectedText.Copy(text, length + 1,
-		pdoc->dbcsCodePage, vs.styles[STYLE_DEFAULT].characterSet, false, false);
+	selectedText.Copy(text, length + 1, false, false);
 	CopyToClipboard(selectedText);
 }
 
@@ -6545,17 +6534,6 @@ int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
 	pdoc->InsertString(targetStart, text, length);
 	targetEnd = targetStart + length;
 	return length;
-}
-
-bool Editor::IsUnicodeMode() const {
-	return pdoc && (SC_CP_UTF8 == pdoc->dbcsCodePage);
-}
-
-int Editor::CodePage() const {
-	if (pdoc)
-		return pdoc->dbcsCodePage;
-	else
-		return 0;
 }
 
 int Editor::WrapCount(int line) {
@@ -7551,7 +7529,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETINDENTATIONGUIDES:
 		vs.viewIndentationGuides = IndentView(wParam);
-		//Redraw();
 		break;
 
 	case SCI_GETINDENTATIONGUIDES:
@@ -7560,7 +7537,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SETHIGHLIGHTGUIDE:
 		if ((highlightGuideColumn != static_cast<int>(wParam)) || (wParam > 0)) {
 			highlightGuideColumn = wParam;
-			//Redraw();
 		}
 		break;
 
@@ -7570,30 +7546,11 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_GETLINEENDPOSITION:
 		return pdoc->LineEnd(wParam);
 
-	case SCI_SETCODEPAGE:
-		if (ValidCodePage(wParam)) {
-			pdoc->dbcsCodePage = wParam;
-			InvalidateStyleRedraw();
-		}
-		break;
-
-	case SCI_GETCODEPAGE:
-		return pdoc->dbcsCodePage;
-
-	//case SCI_SETUSEPALETTE:
-	//	palette.allowRealization = wParam != 0;
-	//	InvalidateStyleRedraw();
-	//	break;
-
-	//case SCI_GETUSEPALETTE:
-	//	return palette.allowRealization;
-
-		// Marker definition and setting
+	// Marker definition and setting
 	case SCI_MARKERDEFINE:
 		if (wParam <= MARKER_MAX)
 			vs.markers[wParam].markType = lParam;
 		InvalidateStyleData();
-		//RedrawSelMargin();
 		break;
 
 	case SCI_MARKERSYMBOLDEFINED:

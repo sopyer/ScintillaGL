@@ -55,12 +55,6 @@ static void ColouriseInnoDoc(unsigned int startPos, int length, int, WordList *k
 		ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			i++;
-			continue;
-		}
-
 		isBOL = (chPrev == 0) || (chPrev == '\n') || (chPrev == '\r' && ch != '\n');
 		isBOLWS = (isBOL) ? 1 : (isBOLWS && (chPrev == ' ' || chPrev == '\t'));
 		isEOL = (ch == '\n' || ch == '\r');

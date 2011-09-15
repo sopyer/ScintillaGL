@@ -92,12 +92,6 @@ static void ColouriseLispDoc(unsigned int startPos, int length, int initStyle, W
 
 		bool atEOL = (ch == '\r' && chNext != '\n') || (ch == '\n');
 
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			i += 1;
-			continue;
-		}
-
 		if (state == SCE_LISP_DEFAULT) {
 			if (ch == '#') {
 				styler.ColourTo(i - 1, state);

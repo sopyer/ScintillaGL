@@ -29,10 +29,6 @@ class StyleContext {
 	StyleContext &operator=(const StyleContext &);
 	void GetNextChar(unsigned int pos) {
 		chNext = static_cast<unsigned char>(styler.SafeGetCharAt(pos+1));
-		if (styler.IsLeadByte(static_cast<char>(chNext))) {
-			chNext = chNext << 8;
-			chNext |= static_cast<unsigned char>(styler.SafeGetCharAt(pos+2));
-		}
 		// End of line?
 		// Trigger on CR only (Mac style) or either on LF from CR+LF (Dos/Win)
 		// or on LF alone (Unix). Avoid triggering two times on Dos/Win.
@@ -65,11 +61,6 @@ public:
 		styler.StartSegment(startPos);
 		unsigned int pos = currentPos;
 		ch = static_cast<unsigned char>(styler.SafeGetCharAt(pos));
-		if (styler.IsLeadByte(static_cast<char>(ch))) {
-			pos++;
-			ch = ch << 8;
-			ch |= static_cast<unsigned char>(styler.SafeGetCharAt(pos));
-		}
 		GetNextChar(pos);
 	}
 	void Complete() {

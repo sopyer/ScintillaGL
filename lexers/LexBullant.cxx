@@ -119,13 +119,6 @@ static void ColouriseBullantDoc(unsigned int startPos, int length, int initStyle
 		if (!(isascii(ch) && isspace(ch)))
 			visibleChars++;
 
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			chPrev = ' ';
-			i += 1;
-			continue;
-		}
-
 		if (state == SCE_C_DEFAULT) {
 			if (iswordstart(ch)) {
 				styler.ColourTo(i-1, state);

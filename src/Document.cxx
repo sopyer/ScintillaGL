@@ -92,7 +92,6 @@ Document::Document() {
 #else
 	eolMode = SC_EOL_CRLF;
 #endif
-	dbcsCodePage = 0;
 	stylingBits = 5;
 	stylingBitsMask = 0x1F;
 	stylingMask = 0;
@@ -373,7 +372,7 @@ int Document::LenChar(int pos) {
 		return 1;
 	} else if (IsCrLf(pos)) {
 		return 2;
-	} else if (SC_CP_UTF8 == dbcsCodePage) {
+	} else {
 		unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
 		if (ch < 0x80)
 			return 1;
@@ -387,10 +386,6 @@ int Document::LenChar(int pos) {
 			return lengthDoc -pos;
 		else
 			return len;
-	} else if (dbcsCodePage) {
-		return IsDBCSLeadByte(cb.CharAt(pos)) ? 2 : 1;
-	} else {
-		return 1;
 	}
 }
 
@@ -464,45 +459,15 @@ int Document::MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd) {
 			return pos - 1;
 	}
 
-	if (dbcsCodePage) {
-		if (SC_CP_UTF8 == dbcsCodePage) {
-			unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
-			int startUTF = pos;
-			int endUTF = pos;
-			if (IsTrailByte(ch) && InGoodUTF8(pos, startUTF, endUTF)) {
-				// ch is a trail byte within a UTF-8 character
-				if (moveDir > 0)
-					pos = endUTF;
-				else
-					pos = startUTF;
-			}
-		} else {
-			// Anchor DBCS calculations at start of line because start of line can
-			// not be a DBCS trail byte.
-			int posStartLine = LineStart(LineFromPosition(pos));
-			if (pos == posStartLine)
-				return pos;
-
-			// Step back until a non-lead-byte is found.
-			int posCheck = pos;
-			while ((posCheck > posStartLine) && IsDBCSLeadByte(cb.CharAt(posCheck-1)))
-				posCheck--;
-
-			// Check from known start of character.
-			while (posCheck < pos) {
-				int mbsize = IsDBCSLeadByte(cb.CharAt(posCheck)) ? 2 : 1;
-				if (posCheck + mbsize == pos) {
-					return pos;
-				} else if (posCheck + mbsize > pos) {
-					if (moveDir > 0) {
-						return posCheck + mbsize;
-					} else {
-						return posCheck;
-					}
-				}
-				posCheck += mbsize;
-			}
-		}
+	unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
+	int startUTF = pos;
+	int endUTF = pos;
+	if (IsTrailByte(ch) && InGoodUTF8(pos, startUTF, endUTF)) {
+		// ch is a trail byte within a UTF-8 character
+		if (moveDir > 0)
+			pos = endUTF;
+		else
+			pos = startUTF;
 	}
 
 	return pos;
@@ -519,50 +484,16 @@ int Document::NextPosition(int pos, int moveDir) const {
 	if (pos + increment >= Length())
 		return Length();
 
-	if (dbcsCodePage) {
-		if (SC_CP_UTF8 == dbcsCodePage) {
-			pos += increment;
-			unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
-			int startUTF = pos;
-			int endUTF = pos;
-			if (IsTrailByte(ch) && InGoodUTF8(pos, startUTF, endUTF)) {
-				// ch is a trail byte within a UTF-8 character
-				if (moveDir > 0)
-					pos = endUTF;
-				else
-					pos = startUTF;
-			}
-		} else {
-			if (moveDir > 0) {
-				int mbsize = IsDBCSLeadByte(cb.CharAt(pos)) ? 2 : 1;
-				pos += mbsize;
-				if (pos > Length())
-					pos = Length();
-			} else {
-				// Anchor DBCS calculations at start of line because start of line can
-				// not be a DBCS trail byte.
-				int posStartLine = LineStart(LineFromPosition(pos));
-				// See http://msdn.microsoft.com/en-us/library/cc194792%28v=MSDN.10%29.aspx
-				// http://msdn.microsoft.com/en-us/library/cc194790.aspx
-				if ((pos - 1) <= posStartLine) {
-					return pos - 1;
-				} else if (IsDBCSLeadByte(cb.CharAt(pos - 1))) {
-					// Must actually be trail byte
-					return pos - 2;
-				} else {
-					// Otherwise, step back until a non-lead-byte is found.
-					int posTemp = pos - 1;
-					while (posStartLine <= --posTemp && IsDBCSLeadByte(cb.CharAt(posTemp)))
-						;
-					// Now posTemp+1 must point to the beginning of a character,
-					// so figure out whether we went back an even or an odd
-					// number of bytes and go back 1 or 2 bytes, respectively.
-					return (pos - 1 - ((pos - posTemp) & 1));
-				}
-			}
-		}
-	} else {
-		pos += increment;
+	pos += increment;
+	unsigned char ch = static_cast<unsigned char>(cb.CharAt(pos));
+	int startUTF = pos;
+	int endUTF = pos;
+	if (IsTrailByte(ch) && InGoodUTF8(pos, startUTF, endUTF)) {
+		// ch is a trail byte within a UTF-8 character
+		if (moveDir > 0)
+			pos = endUTF;
+		else
+			pos = startUTF;
 	}
 
 	return pos;
@@ -577,37 +508,6 @@ bool Document::NextCharacter(int &pos, int moveDir) {
 		pos = posNext;
 		return true;
 	}
-}
-
-int SCI_METHOD Document::CodePage() const {
-	return dbcsCodePage;
-}
-
-bool SCI_METHOD Document::IsDBCSLeadByte(char ch) const {
-	// Byte ranges found in Wikipedia articles with relevant search strings in each case
-	unsigned char uch = static_cast<unsigned char>(ch);
-	switch (dbcsCodePage) {
-		case 932:
-			// Shift_jis
-			return ((uch >= 0x81) && (uch <= 0x9F)) ||
-				((uch >= 0xE0) && (uch <= 0xEF));
-		case 936:
-			// GBK
-			return (uch >= 0x81) && (uch <= 0xFE);
-		case 949:
-			// Korean Wansung KS C-5601-1987
-			return (uch >= 0x81) && (uch <= 0xFE);
-		case 950:
-			// Big5
-			return (uch >= 0x81) && (uch <= 0xFE);
-		case 1361:
-			// Korean Johab KS C-5601-1992
-			return
-				((uch >= 0x84) && (uch <= 0xD3)) ||
-				((uch >= 0xD8) && (uch <= 0xDE)) ||
-				((uch >= 0xE0) && (uch <= 0xF9));
-	}
-	return false;
 }
 
 void Document::ModifiedAt(int pos) {
@@ -851,11 +751,9 @@ void Document::DelCharBack(int pos) {
 		return;
 	} else if (IsCrLf(pos - 2)) {
 		DeleteChars(pos - 2, 2);
-	} else if (dbcsCodePage) {
+	} else {
 		int startChar = NextPosition(pos, -1);
 		DeleteChars(startChar, pos - startChar);
-	} else {
-		DeleteChars(pos - 1, 1);
 	}
 }
 
@@ -1097,7 +995,7 @@ int Document::ParaDown(int pos) {
 }
 
 CharClassify::cc Document::WordCharClass(unsigned char ch) {
-	if ((SC_CP_UTF8 == dbcsCodePage) && (ch >= 0x80))
+	if (ch >= 0x80)
 		return CharClassify::ccWord;
 	return charClass.GetClass(ch);
 }
@@ -1327,7 +1225,7 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 				if (!NextCharacter(pos, increment))
 					break;
 			}
-		} else if (SC_CP_UTF8 == dbcsCodePage) {
+		} else {
 			const size_t maxBytesCharacter = 4;
 			const size_t maxFoldingExpansion = 4;
 			std::vector<char> searchThing(lengthFind * maxBytesCharacter * maxFoldingExpansion + 1);
@@ -1365,58 +1263,6 @@ long Document::FindText(int minPos, int maxPos, const char *search,
 					if (!NextCharacter(pos, increment))
 						break;
 				}
-			}
-		} else if (dbcsCodePage) {
-			const size_t maxBytesCharacter = 2;
-			const size_t maxFoldingExpansion = 4;
-			std::vector<char> searchThing(lengthFind * maxBytesCharacter * maxFoldingExpansion + 1);
-			const int lenSearch = pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
-			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				int indexDocument = 0;
-				int indexSearch = 0;
-				bool characterMatches = true;
-				while (characterMatches &&
-					((pos + indexDocument) < limitPos) &&
-					(indexSearch < lenSearch)) {
-					char bytes[maxBytesCharacter + 1];
-					bytes[0] = cb.CharAt(pos + indexDocument);
-					const int widthChar = IsDBCSLeadByte(bytes[0]) ? 2 : 1;
-					if (widthChar == 2)
-						bytes[1] = cb.CharAt(pos + indexDocument + 1);
-					char folded[maxBytesCharacter * maxFoldingExpansion + 1];
-					const int lenFlat = pcf->Fold(folded, sizeof(folded), bytes, widthChar);
-					folded[lenFlat] = 0;
-					// Does folded match the buffer
-					characterMatches = 0 == memcmp(folded, &searchThing[0] + indexSearch, lenFlat);
-					indexDocument += widthChar;
-					indexSearch += lenFlat;
-				}
-				if (characterMatches && (indexSearch == static_cast<int>(lenSearch))) {
-					if (MatchesWordOptions(word, wordStart, pos, indexDocument)) {
-						*length = indexDocument;
-						return pos;
-					}
-				}
-				if (!NextCharacter(pos, increment))
-					break;
-			}
-		} else {
-			CaseFolderTable caseFolder;
-			std::vector<char> searchThing(lengthFind + 1);
-			pcf->Fold(&searchThing[0], searchThing.size(), search, lengthFind);
-			while (forward ? (pos < endSearch) : (pos >= endSearch)) {
-				bool found = (pos + lengthFind) <= limitPos;
-				for (int indexSearch = 0; (indexSearch < lengthFind) && found; indexSearch++) {
-					char ch = CharAt(pos + indexSearch);
-					char folded[2];
-					pcf->Fold(folded, sizeof(folded), &ch, 1);
-					found = folded[0] == searchThing[indexSearch];
-				}
-				if (found && MatchesWordOptions(word, wordStart, pos, lengthFind)) {
-					return pos;
-				}
-				if (!NextCharacter(pos, increment))
-					break;
 			}
 		}
 	}

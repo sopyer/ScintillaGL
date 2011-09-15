@@ -149,13 +149,6 @@ static void ColouriseMSSQLDoc(unsigned int startPos, int length,
 			}
 		}
 
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			chPrev = ' ';
-			i += 1;
-			continue;
-		}
-
 		// When the last char isn't part of the state (have to deal with it too)...
 		if ( (state == SCE_MSSQL_IDENTIFIER) ||
                     (state == SCE_MSSQL_STORED_PROCEDURE) ||

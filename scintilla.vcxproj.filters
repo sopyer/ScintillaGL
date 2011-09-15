@@ -339,9 +339,6 @@
     <ClCompile Include="src\RunStyles.cxx">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\ScintillaBase.cxx">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Selection.cxx">
       <Filter>src</Filter>
     </ClCompile>
@@ -474,9 +471,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\RunStyles.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ScintillaBase.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Selection.h">

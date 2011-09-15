@@ -188,15 +188,6 @@ static void ColouriseSolDoc(unsigned int startPos, int length, int initStyle,
           atStartLine = true;
         }
 
-        if (styler.IsLeadByte(ch))
-         {
-             chNext = styler.SafeGetCharAt(i + 2);
-             chPrev  = ' ';
-             chPrev2 = ' ';
-             i += 1;
-             continue;
-         }
-
         if (state == SCE_SCRIPTOL_STRINGEOL)
          {
              if (ch != '\r' && ch != '\n')

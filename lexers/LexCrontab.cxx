@@ -54,11 +54,6 @@ static void ColouriseNncrontabDoc(unsigned int startPos, int length, int, WordLi
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			i++;
-			continue;
-		}
 		switch(state) {
 			case SCE_NNCRONTAB_DEFAULT:
 				if( ch == '\n' || ch == '\r' || ch == '\t' || ch == ' ') {

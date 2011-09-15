@@ -391,12 +391,11 @@ static int NextBadU(const char *s, int p, int len, int &trailBytes) {
 	return -1;
 }
 
-BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_, bool utf8_, int xStart, bool breakForSelection) :
+BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_, int xStart, bool breakForSelection) :
 	ll(ll_),
 	lineStart(lineStart_),
 	lineEnd(lineEnd_),
 	posLineStart(posLineStart_),
-	utf8(utf8_),
 	nextBreak(lineStart_),
 	saeSize(0),
 	saeLen(0),
@@ -435,15 +434,13 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 	Insert(ll->edgeColumn - 1);
 	Insert(lineEnd - 1);
 
-	if (utf8) {
-		int trailBytes=0;
-		for (int pos = -1;;) {
-			pos = NextBadU(ll->chars, pos, lineEnd, trailBytes);
-			if (pos < 0)
-				break;
-			Insert(pos-1);
-			Insert(pos);
-		}
+	int trailBytes=0;
+	for (int pos = -1;;) {
+		pos = NextBadU(ll->chars, pos, lineEnd, trailBytes);
+		if (pos < 0)
+			break;
+		Insert(pos-1);
+		Insert(pos);
 	}
 	saeNext = (saeLen > 0) ? selAndEdge[0] : -1;
 }
@@ -501,7 +498,7 @@ int BreakFinder::Next() {
 			if (static_cast<unsigned char>(ll->chars[j]) < 'A') {
 				lastOKBreak = j;
 			}
-			if (utf8 && !IsTrailByte(static_cast<unsigned char>(ll->chars[j]))) {
+			if (!IsTrailByte(static_cast<unsigned char>(ll->chars[j]))) {
 				lastUTF8Break = j;
 			}
 			if (((j - subBreak) >= lengthEachSubdivision) &&

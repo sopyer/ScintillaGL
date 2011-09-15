@@ -170,13 +170,6 @@ static void ColouriseTACLDoc(unsigned int startPos, int length, int initStyle, W
 			styler.SetLineState(currentLine, (bInClassDefinition ? 1 : 0));
 		}
 
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			chPrev = ' ';
-			i += 1;
-			continue;
-		}
-
 		if (state == SCE_C_DEFAULT) {
 			if (isTACLwordstart(ch)) {
 				ColourTo(styler, i-1, state, bInAsm);

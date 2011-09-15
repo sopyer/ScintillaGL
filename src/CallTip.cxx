@@ -266,8 +266,6 @@ PRectangle CallTip::CallTipStart(int pos, Point pt, const char *defn,
 	if (!surfaceMeasure)
 		return PRectangle();
 	surfaceMeasure->Init(wParent.GetID());
-	surfaceMeasure->SetUnicodeMode(SC_CP_UTF8 == codePage);
-	surfaceMeasure->SetDBCSMode(codePage);
 	startHighlight = 0;
 	endHighlight = 0;
 	inCallTipMode = true;

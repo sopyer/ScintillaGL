@@ -31,8 +31,6 @@ class SurfaceImpl : public Surface {
 	int y;
 	bool inited;
 	bool createdGC;
-	int characterSet;
-	void SetConverter(int characterSet_);
 public:
 	SurfaceImpl();
 	virtual ~SurfaceImpl();
@@ -78,22 +76,13 @@ public:
 	//int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
 	void FlushCachedState();
-
-	void SetUnicodeMode(bool unicodeMode_);
-	void SetDBCSMode(int codePage);
 };
 #ifdef SCI_NAMESPACE
 }
 #endif
 
-
-void SurfaceImpl::SetConverter(int /*characterSet_*/) {
-	assert(0);
-}
-
 SurfaceImpl::SurfaceImpl() : //et(singleByte),
-x(0), y(0), inited(false), createdGC(false)
-, characterSet(-1) {
+x(0), y(0), inited(false), createdGC(false) {
 	//assert(0);
 }
 
@@ -318,10 +307,6 @@ char *UTF8FromLatin1(const char *s, int &len) {
 	utfForm[lenU] = '\0';
 	len = lenU;
 	return utfForm;
-}
-
-static char *UTF8FromDBCS(const char* /*s*/, int& /*len*/) {
-	return 0;
 }
 
 static size_t UTF8CharLength(const char *s) {
@@ -587,16 +572,6 @@ void SurfaceImpl::SetClip(PRectangle rc) {
 }
 
 void SurfaceImpl::FlushCachedState() {}
-
-void SurfaceImpl::SetUnicodeMode(bool /*unicodeMode_*/) {
-	//if (unicodeMode_)
-	//	et = UTF8;
-}
-
-void SurfaceImpl::SetDBCSMode(int /*codePage*/) {
-	//if (codePage && (codePage != SC_CP_UTF8))
-	//	et = dbcs;
-}
 
 Surface *Surface::Allocate() {
 	return new SurfaceImpl;

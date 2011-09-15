@@ -63,34 +63,14 @@ void MyEditor::CopyToClipboard(const SelectionText& selectedText) {
 
 	GlobalMemory uniText;
 
-	// Default Scintilla behaviour in Unicode mode
-	if (IsUnicodeMode()) {
-		int uchars = UTF16Length(selectedText.s, selectedText.len);
-		uniText.Allocate(2 * uchars);
-		if (uniText) {
-			UTF16FromUTF8(selectedText.s, selectedText.len, static_cast<wchar_t *>(uniText.ptr), uchars);
-		}
-	} else {
-		// Not Unicode mode
-		// Convert to Unicode using the current Scintilla code page
-		int uLen = ::MultiByteToWideChar(CP_UTF8, 0, selectedText.s, selectedText.len, 0, 0);
-		uniText.Allocate(2 * uLen);
-		if (uniText) {
-			::MultiByteToWideChar(CP_UTF8, 0, selectedText.s, selectedText.len,
-				static_cast<wchar_t *>(uniText.ptr), uLen);
-		}
+	int uchars = UTF16Length(selectedText.s, selectedText.len);
+	uniText.Allocate(2 * uchars);
+	if (uniText) {
+		UTF16FromUTF8(selectedText.s, selectedText.len, static_cast<wchar_t *>(uniText.ptr), uchars);
 	}
 
 	if (uniText) {
 		uniText.SetClip(CF_UNICODETEXT);
-	} else {
-		 //There was a failure - try to copy at least ANSI text
-		GlobalMemory ansiText;
-		ansiText.Allocate(selectedText.len);
-		if (ansiText) {
-			memcpy(static_cast<char *>(ansiText.ptr), selectedText.s, selectedText.len);
-			ansiText.SetClip(CF_TEXT);
-		}
 	}
 
 	if (selectedText.rectangular) {
@@ -115,9 +95,7 @@ bool MyEditor::CanPaste() {
 		return false;
 	if (::IsClipboardFormatAvailable(CF_TEXT))
 		return true;
-	if (IsUnicodeMode())
-		return ::IsClipboardFormatAvailable(CF_UNICODETEXT) != 0;
-	return false;
+	return ::IsClipboardFormatAvailable(CF_UNICODETEXT) != 0;
 }
 
 void MyEditor::InsertPasteText(const char *text, int len, SelectionPosition selStart, bool isRectangular, bool isLine) {
@@ -167,22 +145,11 @@ void MyEditor::Paste() {
 		if (uptr) {
 			unsigned int len;
 			char *putf;
-			// Default Scintilla behaviour in Unicode mode
-			if (IsUnicodeMode()) {
-				unsigned int bytes = memUSelection.Size();
-				len = UTF8Length(uptr, bytes / 2);
-				putf = new char[len + 1];
-				UTF8FromUTF16(uptr, bytes / 2, putf, len);
-			} else {
-				// CF_UNICODETEXT available, but not in Unicode mode
-				// Convert from Unicode to current Scintilla code page
-				//UINT cpDest = CodePageOfDocument();
-				len = ::WideCharToMultiByte(CP_ACP, 0, uptr, -1,
-				                            NULL, 0, NULL, NULL) - 1; // subtract 0 terminator
-				putf = new char[len + 1];
-				::WideCharToMultiByte(CP_ACP, 0, uptr, -1,
-					                      putf, len + 1, NULL, NULL);
-			}
+
+			unsigned int bytes = memUSelection.Size();
+			len = UTF8Length(uptr, bytes / 2);
+			putf = new char[len + 1];
+			UTF8FromUTF16(uptr, bytes / 2, putf, len);
 
 			InsertPasteText(putf, len, selStart, isRectangular, isLine);
 			delete []putf;
@@ -201,28 +168,24 @@ void MyEditor::Paste() {
 						len = i;
 				}
 
-				// In Unicode mode, convert clipboard text to UTF-8
-				if (IsUnicodeMode()) {
-					wchar_t *uptr = new wchar_t[len+1];
+				// convert clipboard text to UTF-8
+				wchar_t *uptr = new wchar_t[len+1];
 
-					unsigned int ulen = ::MultiByteToWideChar(CP_ACP, 0,
-					                    ptr, len, uptr, len+1);
+				unsigned int ulen = ::MultiByteToWideChar(CP_ACP, 0,
+				                    ptr, len, uptr, len+1);
 
-					unsigned int mlen = UTF8Length(uptr, ulen);
-					char *putf = new char[mlen + 1];
-					if (putf) {
-						// CP_UTF8 not available on Windows 95, so use UTF8FromUTF16()
-						UTF8FromUTF16(uptr, ulen, putf, mlen);
-					}
+				unsigned int mlen = UTF8Length(uptr, ulen);
+				char *putf = new char[mlen + 1];
+				if (putf) {
+					// CP_UTF8 not available on Windows 95, so use UTF8FromUTF16()
+					UTF8FromUTF16(uptr, ulen, putf, mlen);
+				}
 
-					delete []uptr;
+				delete []uptr;
 
-					if (putf) {
-						InsertPasteText(putf, mlen, selStart, isRectangular, isLine);
-						delete []putf;
-					}
-				} else {
-					InsertPasteText(ptr, len, selStart, isRectangular, isLine);
+				if (putf) {
+					InsertPasteText(putf, mlen, selStart, isRectangular, isLine);
+					delete []putf;
 				}
 			}
 			memSelection.Unlock();

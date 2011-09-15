@@ -24,7 +24,6 @@ private:
 	char buf[bufferSize+1];
 	int startPos;
 	int endPos;
-	int codePage;
 	int lenDoc;
 	int mask;
 	char styleBuf[bufferSize];
@@ -51,7 +50,7 @@ private:
 public:
 	LexAccessor(IDocument *pAccess_) :
 		pAccess(pAccess_), startPos(extremePosition), endPos(0),
-		codePage(pAccess->CodePage()), lenDoc(pAccess->Length()),
+		lenDoc(pAccess->Length()),
 		mask(127), validLen(0), chFlags(0), chWhile(0),
 		startSeg(0), startPosStyling(0) {
 	}
@@ -71,9 +70,6 @@ public:
 			}
 		}
 		return buf[position - startPos];
-	}
-	bool IsLeadByte(char ch) {
-		return pAccess->IsDBCSLeadByte(ch);
 	}
 
 	bool Match(int pos, const char *s) {

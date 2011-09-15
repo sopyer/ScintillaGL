@@ -52,11 +52,6 @@ static void ColouriseConfDoc(unsigned int startPos, int length, int, WordList *k
 		char ch = chNext;
 		chNext = styler.SafeGetCharAt(i + 1);
 
-		if (styler.IsLeadByte(ch)) {
-			chNext = styler.SafeGetCharAt(i + 2);
-			i++;
-			continue;
-		}
 		switch(state) {
 			case SCE_CONF_DEFAULT:
 				if( ch == '\n' || ch == '\r' || ch == '\t' || ch == ' ') {

@@ -719,13 +719,6 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		int chNext = static_cast<unsigned char>(styler.SafeGetCharAt(i + 1));
 		const int chNext2 = static_cast<unsigned char>(styler.SafeGetCharAt(i + 2));
 
-		// Handle DBCS codepages
-		if (styler.IsLeadByte(static_cast<char>(ch))) {
-			chPrev = ' ';
-			i += 1;
-			continue;
-		}
-
 		if ((!IsASpace(ch) || !foldCompact) && fold)
 			visibleChars++;
 		if (!IsASpace(ch))

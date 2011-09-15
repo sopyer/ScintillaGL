@@ -198,7 +198,6 @@ public:
 
 	int eolMode;
 	/// Can also be SC_CP_UTF8 to enable UTF-8 mode
-	int dbcsCodePage;
 	int tabInChars;
 	int indentInChars;
 	int actualIndentInChars;
@@ -232,8 +231,6 @@ public:
 	int MovePositionOutsideChar(int pos, int moveDir, bool checkLineEnd=true);
 	int NextPosition(int pos, int moveDir) const;
 	bool NextCharacter(int &pos, int moveDir);	// Returns true if pos changed
-	int SCI_METHOD CodePage() const;
-	bool SCI_METHOD IsDBCSLeadByte(char ch) const;
 
 	// Gateways to modifying document
 	void ModifiedAt(int pos);

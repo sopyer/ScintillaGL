@@ -661,7 +661,7 @@ int main(int /*argc*/, char** /*argv*/)
 						altPressed,
 						&consumed
 					);
-					if (!consumed && sciKey>=32 && sciKey<=128 && !ctrlPressed && !altPressed && curEd==&app.myEd)
+					if (!consumed && E.key.keysym.unicode && E.key.keysym.unicode>32 && !ctrlPressed && !altPressed && curEd==&app.myEd)
 						curEd->AddCharUTF(E.key.keysym.unicode);
 				}
 			}
