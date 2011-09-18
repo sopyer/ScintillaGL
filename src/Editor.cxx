@@ -98,8 +98,6 @@ static inline bool IsAllSpacesOrTabs(char *s, unsigned int len) {
 }
 
 Editor::Editor() {
-	ctrlID = 0;
-
 	stylesValid = false;
 
 	printMagnification = 0;
@@ -573,17 +571,6 @@ SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 		return SelectionPosition(lineEnd + posLineStart, spaceOffset);
 	}
 	return SelectionPosition(retVal);
-}
-
-/**
- * If painting then abandon the painting because a wider redraw is needed.
- * @return true if calling code should stop drawing.
- */
-bool Editor::AbandonPaint() {
-	if ((paintState == painting) && !paintingAllText) {
-		paintState = paintAbandoned;
-	}
-	return paintState == paintAbandoned;
 }
 
 PRectangle Editor::RectangleFromRange(int start, int end) {
@@ -3223,9 +3210,7 @@ void Editor::Paint(/*Surface *surfaceWindow, PRectangle rcArea*/) {
 	if (WrapLines(false, startLineToWrap)) {
 		// The wrapping process has changed the height of some lines so
 		// abandon this paint for a complete repaint.
-		if (AbandonPaint()) {
-			return;
-		}
+		//TODO: meaningless????
 		RefreshPixMaps(drawSurface);	// In case pixmaps invalidated by scrollbar change
 	}
 	//PLATFORM_ASSERT(pixmapSelPattern->Initialised());
@@ -3619,12 +3604,7 @@ void Editor::SetScrollBars() {
 	if (topLine > MaxScrollPos()) {
 		SetTopLine(Platform::Clamp(topLine, 0, MaxScrollPos()));
 		SetVerticalScrollPos();
-		//Redraw();
 	}
-	//if (modified) {
-		//if (!AbandonPaint())
-			//Redraw();
-	//}
 	//Platform::DebugPrintf("end max = %d page = %d\n", nMax, nPage);
 }
 
@@ -3843,6 +3823,12 @@ void Editor::ClearDocumentStyle() {
 	pdoc->SetStyleFor(pdoc->Length(), 0);
 	cs.ShowAll();
 	pdoc->ClearLevels();
+}
+
+void Editor::Copy() {
+	SelectionText selectedText;
+	CopySelectionRange(&selectedText, true);
+	CopyToClipboard(selectedText);
 }
 
 void Editor::CopyAllowLine() {
@@ -4206,26 +4192,6 @@ static inline int MovePositionForDeletion(int position, int startDeletion, int l
 
 void Editor::NotifyModified(Document *, DocModification mh, void *) {
 	ContainerNeedsUpdate(SC_UPDATE_CONTENT);
-	if (paintState == painting) {
-		CheckForChangeOutsidePaint(Range(mh.position, mh.position + mh.length));
-	}
-	if (mh.modificationType & SC_MOD_CHANGELINESTATE) {
-		if (paintState == painting) {
-			CheckForChangeOutsidePaint(
-			    Range(pdoc->LineStart(mh.line), pdoc->LineStart(mh.line + 1)));
-		} else {
-			// Could check that change is before last visible line.
-			//Redraw();
-		}
-	}
-	if (mh.modificationType & SC_MOD_LEXERSTATE) {
-		if (paintState == painting) {
-			CheckForChangeOutsidePaint(
-			    Range(mh.position, mh.position + mh.length));
-		} else {
-			//Redraw();
-		}
-	}
 	if (mh.modificationType & (SC_MOD_CHANGESTYLE | SC_MOD_CHANGEINDICATOR)) {
 		if (mh.modificationType & SC_MOD_CHANGESTYLE) {
 			pdoc->IncrementStyleClock();
@@ -5220,7 +5186,7 @@ int Editor::KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed) {
 	if (msg) {
 		if (consumed)
 			*consumed = true;
-		return WndProc(msg, 0, 0);
+		return Command(msg, 0, 0);
 	} else {
 		if (consumed)
 			*consumed = false;
@@ -5578,13 +5544,6 @@ void Editor::SetDragPosition(SelectionPosition newPos) {
 	}
 }
 
-void Editor::DisplayCursor(Window::Cursor c) {
-	if (cursorMode == SC_CURSORNORMAL)
-		wMain.SetCursor(c);
-	else
-		wMain.SetCursor(static_cast<Window::Cursor>(cursorMode));
-}
-
 bool Editor::DragThreshold(Point ptStart, Point ptNow) {
 	int xMove = ptStart.x - ptNow.x;
 	int yMove = ptStart.y - ptNow.y;
@@ -5705,14 +5664,14 @@ bool Editor::PointInSelMargin(Point pt) {
 	}
 }
 
-Window::Cursor Editor::GetMarginCursor(Point pt) {
+Editor::Cursor Editor::GetMarginCursor(Point pt) {
 	int x = 0;
 	for (int margin = 0; margin < ViewStyle::margins; margin++) {
 		if ((pt.x >= x) && (pt.x < x + vs.ms[margin].width))
-			return static_cast<Window::Cursor>(vs.ms[margin].cursor);
+			return static_cast<Cursor>(vs.ms[margin].cursor);
 		x += vs.ms[margin].width;
 	}
-	return Window::cursorReverseArrow;
+	return cursorReverseArrow;
 }
 
 void Editor::LineSelection(int lineCurrent_, int lineAnchor_) {
@@ -6062,7 +6021,7 @@ void Editor::ButtonMove(Point pt) {
 
 		if (hotSpotClickPos != INVALID_POSITION && PositionFromLocation(pt,true,false) != hotSpotClickPos ) {
 			if (inDragDrop == ddNone) {
-				DisplayCursor(Window::cursorText);
+				NotifySetCursor(cursorText);
 			}
 			hotSpotClickPos = INVALID_POSITION;
 		}
@@ -6070,19 +6029,19 @@ void Editor::ButtonMove(Point pt) {
 	} else {
 		if (vs.fixedColumnWidth > 0) {	// There is a margin
 			if (PointInSelMargin(pt)) {
-				DisplayCursor(GetMarginCursor(pt));
+				NotifySetCursor(GetMarginCursor(pt));
 				SetHotSpotRange(NULL);
 				return; 	// No need to test for selection
 			}
 		}
 		// Display regular (drag) cursor over selection
 		if (PointInSelection(pt) && !SelectionEmpty()) {
-			DisplayCursor(Window::cursorArrow);
+			NotifySetCursor(cursorArrow);
 		} else if (PointIsHotspot(pt)) {
-			DisplayCursor(Window::cursorHand);
+			NotifySetCursor(cursorHand);
 			SetHotSpotRange(&pt);
 		} else {
-			DisplayCursor(Window::cursorText);
+			NotifySetCursor(cursorText);
 			SetHotSpotRange(NULL);
 		}
 	}
@@ -6105,9 +6064,9 @@ void Editor::ButtonUp(Point pt, unsigned int curTime, bool ctrl) {
 	}
 	if (HaveMouseCapture()) {
 		if (PointInSelMargin(pt)) {
-			DisplayCursor(GetMarginCursor(pt));
+			NotifySetCursor(GetMarginCursor(pt));
 		} else {
-			DisplayCursor(Window::cursorText);
+			NotifySetCursor(cursorText);
 			SetHotSpotRange(NULL);
 		}
 		ptMouseLast = pt;
@@ -6274,57 +6233,15 @@ void Editor::QueueStyling(int upTo) {
 	styleNeeded.NeedUpTo(upTo);
 }
 
-bool Editor::PaintContains(PRectangle rc) {
-	if (rc.Empty()) {
-		return true;
-	} else {
-		return rcPaint.Contains(rc);
-	}
-}
-
-//bool Editor::PaintContainsMargin() {
-//	PRectangle rcSelMargin = GetClientRectangle();
-//	rcSelMargin.right = vs.fixedColumnWidth;
-//	return PaintContains(rcSelMargin);
-//}
-
-void Editor::CheckForChangeOutsidePaint(Range r) {
-	if (paintState == painting && !paintingAllText) {
-		//Platform::DebugPrintf("Checking range in paint %d-%d\n", r.start, r.end);
-		if (!r.Valid())
-			return;
-
-		PRectangle rcRange = RectangleFromRange(r.start, r.end);
-		PRectangle rcText = GetTextRectangle();
-		if (rcRange.top < rcText.top) {
-			rcRange.top = rcText.top;
-		}
-		if (rcRange.bottom > rcText.bottom) {
-			rcRange.bottom = rcText.bottom;
-		}
-
-		if (!PaintContains(rcRange)) {
-			AbandonPaint();
-		}
-	}
-}
-
 void Editor::SetBraceHighlight(Position pos0, Position pos1, int matchStyle) {
 	if ((pos0 != braces[0]) || (pos1 != braces[1]) || (matchStyle != bracesMatchStyle)) {
 		if ((braces[0] != pos0) || (matchStyle != bracesMatchStyle)) {
-			CheckForChangeOutsidePaint(Range(braces[0]));
-			CheckForChangeOutsidePaint(Range(pos0));
 			braces[0] = pos0;
 		}
 		if ((braces[1] != pos1) || (matchStyle != bracesMatchStyle)) {
-			CheckForChangeOutsidePaint(Range(braces[1]));
-			CheckForChangeOutsidePaint(Range(pos1));
 			braces[1] = pos1;
 		}
 		bracesMatchStyle = matchStyle;
-		if (paintState == notPainting) {
-			//Redraw();
-		}
 	}
 }
 
@@ -6668,7 +6585,7 @@ sptr_t Editor::StringResult(sptr_t lParam, const char *val) {
 	return n;	// Not including NUL
 }
 
-sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
+sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	//Platform::DebugPrintf("S start wnd proc %d %d %d\n",iMessage, wParam, lParam);
 
 	// Optional macro recording hook
@@ -6913,7 +6830,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		xOffset = wParam;
 		ContainerNeedsUpdate(SC_UPDATE_H_SCROLL);
 		SetHorizontalScrollPos();
-		//Redraw();
 		break;
 
 	case SCI_GETXOFFSET:
@@ -6973,7 +6889,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_HIDESELECTION:
 		hideSelection = wParam != 0;
-		//Redraw();
 		break;
 
 	case SCI_FORMATRANGE:
@@ -7092,7 +7007,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (sel.IsRectangular()) {
 			sel.Rectangular().caret.SetPosition(wParam);
 			SetRectangularRange();
-			//Redraw();
 		} else {
 			SetSelection(wParam, sel.MainAnchor());
 		}
@@ -7105,7 +7019,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		if (sel.IsRectangular()) {
 			sel.Rectangular().anchor.SetPosition(wParam);
 			SetRectangularRange();
-			//Redraw();
 		} else {
 			SetSelection(sel.MainCaret(), wParam);
 		}
@@ -7196,7 +7109,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETVIEWWS:
 		vs.viewWhitespace = static_cast<WhiteSpaceVisibility>(wParam);
-		//Redraw();
 		break;
 
 	case SCI_GETWHITESPACESIZE:
@@ -7204,7 +7116,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETWHITESPACESIZE:
 		vs.whitespaceSize = static_cast<int>(wParam);
-		//Redraw();
 		break;
 
 	case SCI_POSITIONFROMPOINT:
@@ -7268,13 +7179,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			return 0;
 		pdoc->SetStyles(wParam, CharPtrFromSPtr(lParam));
 		break;
-
-	//case SCI_SETBUFFEREDDRAW:
-	//	bufferedDraw = wParam != 0;
-	//	break;
-
-	//case SCI_GETBUFFEREDDRAW:
-	//	return bufferedDraw;
 
 	case SCI_GETTWOPHASEDRAW:
 		return twoPhaseDraw;
@@ -8289,7 +8193,7 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETCURSOR:
 		cursorMode = wParam;
-		DisplayCursor(Window::cursorText);
+		NotifySetCursor(cursorText);
 		break;
 
 	case SCI_GETCURSOR:
@@ -8708,9 +8612,6 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_CHANGELEXERSTATE:
 		pdoc->ChangeLexerState(wParam, lParam);
 		break;
-
-	default:
-		return DefWndProc(iMessage, wParam, lParam);
 	}
 	//Platform::DebugPrintf("end wnd proc\n");
 	return 0l;

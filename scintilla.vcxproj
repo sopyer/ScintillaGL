@@ -74,7 +74,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>SCI_LEXER;STATIC_BUILD;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SCI_LEXER;STATIC_BUILD;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -178,8 +178,6 @@
     <ClCompile Include="lexlib\PropSetSimple.cxx" />
     <ClCompile Include="lexlib\StyleContext.cxx" />
     <ClCompile Include="lexlib\WordList.cxx" />
-    <ClCompile Include="src\AutoComplete.cxx" />
-    <ClCompile Include="src\CallTip.cxx" />
     <ClCompile Include="src\Catalogue.cxx" />
     <ClCompile Include="src\CellBuffer.cxx" />
     <ClCompile Include="src\CharClassify.cxx" />
@@ -221,8 +219,6 @@
     <ClInclude Include="lexlib\SparseState.h" />
     <ClInclude Include="lexlib\StyleContext.h" />
     <ClInclude Include="lexlib\WordList.h" />
-    <ClInclude Include="src\AutoComplete.h" />
-    <ClInclude Include="src\CallTip.h" />
     <ClInclude Include="src\Catalogue.h" />
     <ClInclude Include="src\CellBuffer.h" />
     <ClInclude Include="src\CharClassify.h" />

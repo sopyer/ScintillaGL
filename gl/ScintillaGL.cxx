@@ -84,12 +84,6 @@ void MyEditor::CopyToClipboard(const SelectionText& selectedText) {
 	::CloseClipboard();
 }
 
-void MyEditor::Copy() {
-	SelectionText selectedText;
-	CopySelectionRange(&selectedText, true);
-	CopyToClipboard(selectedText);
-}
-
 bool MyEditor::CanPaste() {
 	if (!Editor::CanPaste())
 		return false;

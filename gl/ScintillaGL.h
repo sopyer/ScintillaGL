@@ -15,22 +15,17 @@
 
 #include "ILexer.h"
 #include "Scintilla.h"
-#ifdef SCI_LEXER
-#include "SciLexer.h"
-#endif
 #include "SVector.h"
 #include "SplitVector.h"
 #include "Partitioning.h"
 #include "RunStyles.h"
 #include "ContractionState.h"
 #include "CellBuffer.h"
-#include "CallTip.h"
 #include "KeyMap.h"
 #include "Indicator.h"
 #include "XPM.h"
 #include "LineMarker.h"
 #include "Style.h"
-#include "AutoComplete.h"
 #include "ViewStyle.h"
 #include "Decoration.h"
 #include "CharClassify.h"
@@ -38,17 +33,15 @@
 #include "Selection.h"
 #include "PositionCache.h"
 #include "Editor.h"
-#include "ScintillaBase.h"
 #include "UniConversion.h"
 
 #ifdef SCI_LEXER
-#include "LexerModule.h"
-#include "ExternalLexer.h"
-#endif
-#ifdef SCI_LEXER
-#include "SciLexer.h"
-#include "LexerModule.h"
-#include "Catalogue.h"
+#	include "SciLexer.h"
+#	include "LexerModule.h"
+#	include "ExternalLexer.h"
+#	include "SciLexer.h"
+#	include "LexerModule.h"
+#	include "Catalogue.h"
 #endif
 
 class LexState2 : public LexInterface {
@@ -159,9 +152,8 @@ public:
 	void InsertPasteText(const char *text, int len, SelectionPosition selStart, bool isRectangular, bool isLine);
 	bool CanPaste();
 
-	virtual void Copy();// {}
-	virtual void Paste();// {}
-	virtual void CopyToClipboard(const SelectionText &/*selectedText*/);// {}
+	virtual void Paste();
+	virtual void CopyToClipboard(const SelectionText &selectedText);
 
 	virtual void ClaimSelection() {}
 	virtual void NotifyChange() {}
@@ -169,11 +161,6 @@ public:
 	virtual void SetTicking(bool /*on*/) {}
 	virtual void SetMouseCapture(bool /*on*/) {}
 	virtual bool HaveMouseCapture() {return false;}
-	virtual sptr_t DefWndProc(unsigned int /*iMessage*/, uptr_t /*wParam*/, sptr_t /*lParam*/) {return 0;}
-
-	LRESULT Command(UINT Msg, WPARAM wParam=0, LPARAM lParam=0) {
-		return WndProc(Msg, wParam, lParam);
-	}
 
 	void FindMatchingBracePos(int & braceAtCaret, int & braceOpposite);
 

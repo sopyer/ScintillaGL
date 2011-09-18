@@ -288,12 +288,6 @@
     <ClCompile Include="lexers\LexYAML.cxx">
       <Filter>Lexers</Filter>
     </ClCompile>
-    <ClCompile Include="src\AutoComplete.cxx">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CallTip.cxx">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Catalogue.cxx">
       <Filter>src</Filter>
     </ClCompile>
@@ -415,12 +409,6 @@
     </ClInclude>
     <ClInclude Include="include\Scintilla.h">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\AutoComplete.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CallTip.h">
-      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Catalogue.h">
       <Filter>src</Filter>

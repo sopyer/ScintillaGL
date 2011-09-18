@@ -29,9 +29,9 @@ struct DMApp {
 	bool isDirty;
 	char fullPath[MAX_PATH];
 
-	LRESULT SendEditor(UINT Msg, WPARAM wParam=0, LPARAM lParam=0) {
-		return myEd.WndProc(Msg, wParam, lParam);
-	}
+	//LRESULT SendEditor(UINT Msg, WPARAM wParam=0, LPARAM lParam=0) {
+	//	return myEd.WndProc(Msg, wParam, lParam);
+	//}
 
 	void SetAStyle(MyEditor& ed, int style, COLORREF fore, COLORREF back=white, int size=-1, const char *face=0);
 	void InitialiseEditor();
@@ -151,7 +151,7 @@ void DMApp::InitialiseEditor() {
 	//SendEditor(SCI_SETLEXER, SCLEX_HTML);
 	myEd.ls.SetLexer(SCLEX_CPP);
 
-	SendEditor(SCI_SETSTYLEBITS, 7);
+	myEd.Command(SCI_SETSTYLEBITS, 7);
 
 	myEd.ls.SetWordList(0, glslKeyword);
 	myEd.ls.SetWordList(1, glslType);
@@ -161,33 +161,33 @@ void DMApp::InitialiseEditor() {
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
 	SetAStyle(myEd, STYLE_DEFAULT,     0xFFFFFFFF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
-	SendEditor(SCI_STYLECLEARALL);	// Copies global style to all others
+	myEd.Command(SCI_STYLECLEARALL);	// Copies global style to all others
 	SetAStyle(myEd, STYLE_INDENTGUIDE, 0xFFC0C0C0, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
 	SetAStyle(myEd, STYLE_BRACELIGHT,  0xFF00FF00, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
 	SetAStyle(myEd, STYLE_BRACEBAD,    0xFF0000FF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
 	SetAStyle(myEd, STYLE_LINENUMBER,  0xFFC0C0C0, 0xD0333333, 16, "c:/windows/fonts/cour.ttf");
-	SendEditor(SCI_SETFOLDMARGINCOLOUR,   1, 0xD01A1A1A);
-	SendEditor(SCI_SETFOLDMARGINHICOLOUR, 1, 0xD01A1A1A);
-	SendEditor(SCI_SETSELBACK,            1, 0xD0CC9966);
-	SendEditor(SCI_SETCARETFORE,          0xFFFFFFFF, 0);
-	SendEditor(SCI_SETCARETLINEVISIBLE,   1);
-	SendEditor(SCI_SETCARETLINEBACK,      0xFFFFFFFF);
-	SendEditor(SCI_SETCARETLINEBACKALPHA, 0x20);
+	myEd.Command(SCI_SETFOLDMARGINCOLOUR,   1, 0xD01A1A1A);
+	myEd.Command(SCI_SETFOLDMARGINHICOLOUR, 1, 0xD01A1A1A);
+	myEd.Command(SCI_SETSELBACK,            1, 0xD0CC9966);
+	myEd.Command(SCI_SETCARETFORE,          0xFFFFFFFF, 0);
+	myEd.Command(SCI_SETCARETLINEVISIBLE,   1);
+	myEd.Command(SCI_SETCARETLINEBACK,      0xFFFFFFFF);
+	myEd.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
 	
-	app.SendEditor(SCI_SETMARGINWIDTHN, 0, 44);//Calculate correct width
-	app.SendEditor(SCI_SETMARGINWIDTHN, 1, 20);//Calculate correct width
-	app.SendEditor(SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS);//Calculate correct width
+	myEd.Command(SCI_SETMARGINWIDTHN, 0, 44);//Calculate correct width
+	myEd.Command(SCI_SETMARGINWIDTHN, 1, 20);//Calculate correct width
+	myEd.Command(SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS);//Calculate correct width
 
 	for (int i = 0 ; i < NB_FOLDER_STATE ; i++)
 	{
-		SendEditor(SCI_MARKERDEFINE, markersArray[FOLDER_TYPE][i], markersArray[4][i]);
-		SendEditor(SCI_MARKERSETBACK, markersArray[FOLDER_TYPE][i], 0xFF6A6A6A);
-		SendEditor(SCI_MARKERSETFORE, markersArray[FOLDER_TYPE][i], 0xFF333333);
+		myEd.Command(SCI_MARKERDEFINE, markersArray[FOLDER_TYPE][i], markersArray[4][i]);
+		myEd.Command(SCI_MARKERSETBACK, markersArray[FOLDER_TYPE][i], 0xFF6A6A6A);
+		myEd.Command(SCI_MARKERSETFORE, markersArray[FOLDER_TYPE][i], 0xFF333333);
 	}
 
-	SendEditor(SCI_SETUSETABS, 1);
-	SendEditor(SCI_SETTABWIDTH, 4);
-	SendEditor(SCI_SETINDENTATIONGUIDES, SC_IV_REAL);
+	myEd.Command(SCI_SETUSETABS, 1);
+	myEd.Command(SCI_SETTABWIDTH, 4);
+	myEd.Command(SCI_SETINDENTATIONGUIDES, SC_IV_REAL);
 
 	SetAStyle(myEd, SCE_C_DEFAULT,      0xFFFFFFFF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
 	SetAStyle(myEd, SCE_C_WORD,         0xFF0066FF, 0xD0000000);
@@ -201,39 +201,39 @@ void DMApp::InitialiseEditor() {
 }
 
 void DMApp::InitialiseEditor2() {
-	SendEditor(SCI_SETSTYLEBITS, 7);
+	myEd2.Command(SCI_SETSTYLEBITS, 7);
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
 	SetAStyle(myEd2, STYLE_DEFAULT,     0xFFFFFFFF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
-	app.myEd2.Command(SCI_STYLECLEARALL);	// Copies global style to all others
-	app.myEd2.Command(SCI_SETMARGINWIDTHN, 1, 0);//Calculate correct width
+	myEd2.Command(SCI_STYLECLEARALL);	// Copies global style to all others
+	myEd2.Command(SCI_SETMARGINWIDTHN, 1, 0);//Calculate correct width
 
-	app.myEd2.Command(SCI_SETUSETABS, 1);
-	app.myEd2.Command(SCI_SETTABWIDTH, 4);
+	myEd2.Command(SCI_SETUSETABS, 1);
+	myEd2.Command(SCI_SETTABWIDTH, 4);
 	
-	app.myEd2.Command(SCI_SETSELBACK,            1, 0xD0CC9966);
-	app.myEd2.Command(SCI_SETCARETFORE,          0xFFFFFFFF, 0);
-	app.myEd2.Command(SCI_SETCARETLINEVISIBLE,   1);
-	app.myEd2.Command(SCI_SETCARETLINEBACK,      0xFFFFFFFF);
-	app.myEd2.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
+	myEd2.Command(SCI_SETSELBACK,            1, 0xD0CC9966);
+	myEd2.Command(SCI_SETCARETFORE,          0xFFFFFFFF, 0);
+	myEd2.Command(SCI_SETCARETLINEVISIBLE,   1);
+	myEd2.Command(SCI_SETCARETLINEBACK,      0xFFFFFFFF);
+	myEd2.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
 }
 
 void DMApp::InitialiseEditor3() {
-	SendEditor(SCI_SETSTYLEBITS, 7);
+	shaderList.Command(SCI_SETSTYLEBITS, 7);
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
 	SetAStyle(shaderList, STYLE_DEFAULT,     0xFFFFFFFF, 0xD0000000, 16, "c:/windows/fonts/cour.ttf");
-	app.shaderList.Command(SCI_STYLECLEARALL);	// Copies global style to all others
-	app.shaderList.Command(SCI_SETMARGINWIDTHN, 1, 0);//Calculate correct width
+	shaderList.Command(SCI_STYLECLEARALL);	// Copies global style to all others
+	shaderList.Command(SCI_SETMARGINWIDTHN, 1, 0);//Calculate correct width
 
-	app.shaderList.Command(SCI_SETUSETABS, 1);
-	app.shaderList.Command(SCI_SETTABWIDTH, 4);
+	shaderList.Command(SCI_SETUSETABS, 1);
+	shaderList.Command(SCI_SETTABWIDTH, 4);
 	
-	app.shaderList.Command(SCI_SETSELBACK,            1, 0xD0CC9966);
-	app.shaderList.Command(SCI_SETCARETFORE,          0x00FFFFFF, 0);
-	app.shaderList.Command(SCI_SETCARETLINEVISIBLE,   1);
-	app.shaderList.Command(SCI_SETCARETLINEBACK,      0xFFFFFFFF);
-	app.shaderList.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
+	shaderList.Command(SCI_SETSELBACK,            1, 0xD0CC9966);
+	shaderList.Command(SCI_SETCARETFORE,          0x00FFFFFF, 0);
+	shaderList.Command(SCI_SETCARETLINEVISIBLE,   1);
+	shaderList.Command(SCI_SETCARETLINEBACK,      0xFFFFFFFF);
+	shaderList.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
 }
 
 #include <SDL.h>
@@ -363,9 +363,6 @@ int main(int /*argc*/, char** /*argv*/)
 	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
 	SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, TRUE );							// colors and doublebuffering
-	//SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
-	//SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 0 );
-	//SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
 
 	mScreen = SDL_SetVideoMode(800, 600, 32, flags);
 	if (!mScreen)
@@ -383,7 +380,6 @@ int main(int /*argc*/, char** /*argv*/)
 	app.myEd.drawSurface = s;
 	app.myEd2.drawSurface = s;
 	app.shaderList.drawSurface = s;
-	//PRectangle rcPaint(0, 0, 800, 600);
 
 	float w=500, h=410;
 
@@ -399,26 +395,24 @@ int main(int /*argc*/, char** /*argv*/)
 
 	app.myEd.Command(SCI_CANCEL);
 	app.myEd.Command(SCI_SETUNDOCOLLECTION, 0);
-	//app.myEd.Command(SCI_ADDTEXT, strlen(fragmentSource), reinterpret_cast<LPARAM>((char*)fragmentSource));
 	app.myEd.Command(SCI_SETUNDOCOLLECTION, 1);
 	app.myEd.Command(EM_EMPTYUNDOBUFFER);
 	app.myEd.Command(SCI_SETSAVEPOINT);
 	app.myEd.Command(SCI_GOTOPOS, 0);
-	app.myEd.SetFocusState(false);
+	app.myEd.Command(SCI_SETFOCUS, false);
 
 	program = CompileProgram(strlen(fragmentSource), fragmentSource, sizeof(errbuf), errbuf);
 
 	app.myEd2.Command(SCI_CANCEL);
 	app.myEd2.Command(SCI_SETUNDOCOLLECTION, 0);
-	//app.myEd2.Command(SCI_ADDTEXT, strlen(errbuf), reinterpret_cast<LPARAM>((char*)errbuf));
 	app.myEd2.Command(SCI_SETUNDOCOLLECTION, 1);
 	app.myEd2.Command(EM_EMPTYUNDOBUFFER);
 	app.myEd2.Command(SCI_SETSAVEPOINT);
 	app.myEd2.Command(SCI_GOTOPOS, 0);
-	app.myEd2.SetFocusState(false);
+	app.myEd2.Command(SCI_SETFOCUS, false);
 
 	app.shaderList.Command(SCI_GOTOPOS, 0);
-	app.shaderList.SetFocusState(true);
+	app.shaderList.Command(SCI_SETFOCUS, true);
 
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
@@ -523,33 +517,18 @@ int main(int /*argc*/, char** /*argv*/)
 				}
 				if ('1'<=sciKey && sciKey<='3' && isModEnabled(KMOD_ALT, E.key.keysym.mod))
 				{
-					curEd->SetFocusState(false);
-					//curEd = (curEd==&app.myEd)?&app.myEd2:((curEd==&app.myEd2)?&app.shaderList:&app.myEd);
+					curEd->Command(SCI_SETFOCUS, false);
 					switch(sciKey)
 					{
 						case '1': curEd=&app.shaderList; break;
 						case '2': curEd=&app.myEd; break;
 						case '3': curEd=&app.myEd2; break;
 					}
-					curEd->SetFocusState(true);
+					curEd->Command(SCI_SETFOCUS, true);
 				}
 				if (E.key.keysym.sym==SDLK_F7 && isModEnabled(0, E.key.keysym.mod)&&curSh&&curPrg)
 				{
 					compileProgram();
-					//grab source from scintilla
-					//GLint lengthDoc = app.myEd.Command(SCI_GETLENGTH);
-					//TextRange tr;
-					//tr.chrg.cpMin = 0;
-					//tr.chrg.cpMax = lengthDoc;
-					//tr.lpstrText = fragmentSource;
-					//app.myEd.Command(SCI_GETTEXTRANGE, 0, reinterpret_cast<LPARAM>(&tr));
-					////compile source
-					//GLuint prg = CompileProgram(strlen(fragmentSource), fragmentSource, sizeof(errbuf), errbuf);
-					//if (prg)
-					//{
-					//	glDeleteProgram(program);
-					//	program = prg;
-					//}
 					//update result window
 					app.myEd2.Command(SCI_CANCEL);
 					app.myEd2.Command(SCI_SETUNDOCOLLECTION, 0);
@@ -661,7 +640,7 @@ int main(int /*argc*/, char** /*argv*/)
 						altPressed,
 						&consumed
 					);
-					if (!consumed && E.key.keysym.unicode && E.key.keysym.unicode>32 && !ctrlPressed && !altPressed && curEd==&app.myEd)
+					if (!consumed && E.key.keysym.unicode>=32 && !ctrlPressed && !altPressed && curEd==&app.myEd)
 						curEd->AddCharUTF(E.key.keysym.unicode);
 				}
 			}

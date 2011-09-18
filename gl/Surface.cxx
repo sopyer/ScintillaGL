@@ -3,34 +3,21 @@
 // Copyright 2011 by Mykhailo Parfeniuk
 // The License.txt file describes the conditions under which this software may be distributed.
 
-//#include <string.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <stddef.h>
-//#include <math.h>
 #include <assert.h>
 
 #include "Platform.h"
-
-//#include "Scintilla.h"
-//#include "UniConversion.h"
-#include "XPM.h"
 
 #include <gl/glee.h>
 
 enum encodingType { singleByte, UTF8, dbcs};
 
-// Required on OS X
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
 #endif
 class SurfaceImpl : public Surface {
-	//encodingType et;
 	Colour penColour;
 	int x;
 	int y;
-	bool inited;
-	bool createdGC;
 public:
 	SurfaceImpl();
 	virtual ~SurfaceImpl();
@@ -41,28 +28,29 @@ public:
 
 	void Release();
 	bool Initialised();
-	void PenColour(Colour/*Allocated*/ fore);
+	void PenColour(Colour fore);
 	int LogPixelsY();
 	float DeviceHeightFont(int points);
 	void MoveTo(float x_, float y_);
 	void LineTo(float x_, float y_);
-	void Polygon(Point *pts, int npts, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
-	void RectangleDraw(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
-	void FillRectangle(PRectangle rc, Colour/*Allocated*/ back);
+	void Polygon(Point *pts, int npts, Colour fore, Colour back);
+	void RectangleDraw(PRectangle rc, Colour fore, Colour back);
+	void FillRectangle(PRectangle rc, Colour back);
 	void FillRectangle(PRectangle rc, Surface &surfacePattern);
-	void RoundedRectangle(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
-	void AlphaRectangle(PRectangle rc, int cornerSize, Colour/*Allocated*/ fill, int alphaFill,
-		Colour/*Allocated*/ outline, int alphaOutline, int flags);
-	void Ellipse(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
+	void RoundedRectangle(PRectangle rc, Colour fore, Colour back);
+	void AlphaRectangle(PRectangle rc, int cornerSize, Colour fill, int alphaFill,
+		Colour outline, int alphaOutline, int flags);
+	void Ellipse(PRectangle rc, Colour fore, Colour back);
 
 	//TODO: Remove
 	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
+
 	virtual void DrawPixmap(PRectangle rc, Point from, Pixmap pixmap);
 
-	void DrawTextBase(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore);
-	void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
-	void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back);
-	void DrawTextTransparent(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore);
+	void DrawTextBase(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore);
+	void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore, Colour back);
+	void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore, Colour back);
+	void DrawTextTransparent(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore);
 	void MeasureWidths(Font &font_, const char *s, int len, float *positions);
 	float WidthText(Font &font_, const char *s, int len);
 	float WidthChar(Font &font_, char ch);
@@ -73,7 +61,6 @@ public:
 	float Height(Font &font_);
 	float AverageCharWidth(Font &font_);
 
-	//int SetPalette(Palette *pal, bool inBackGround);
 	void SetClip(PRectangle rc);
 	void FlushCachedState();
 };
@@ -81,42 +68,32 @@ public:
 }
 #endif
 
-SurfaceImpl::SurfaceImpl() : //et(singleByte),
-x(0), y(0), inited(false), createdGC(false) {
-	//assert(0);
+SurfaceImpl::SurfaceImpl() : x(0), y(0) {
 }
 
 SurfaceImpl::~SurfaceImpl() {
-	//assert(0);
 }
 
 void SurfaceImpl::Release() {
-	//assert(0);
 }
 
 bool SurfaceImpl::Initialised() {
-	//assert(0);
-	return true;//return inited;
+	return true;
 }
 
 void SurfaceImpl::Init(WindowID /*wid*/) {
 	assert(0);
-	inited = true;
 }
 
 void SurfaceImpl::Init(SurfaceID /*sid*/, WindowID /*wid*/) {
 	assert(0);
-	inited = true;
 }
 
 void SurfaceImpl::InitPixMap(int /*width*/, int /*height*/, Surface* /*surface_*/, WindowID /*wid*/) {
 	assert(0);
-	createdGC = true;
-	inited = true;
 }
 
-void SurfaceImpl::PenColour(Colour/*Allocated*/ fore) {
-	//assert(0);
+void SurfaceImpl::PenColour(Colour fore) {
 	penColour = fore;
 }
 
@@ -125,19 +102,16 @@ int SurfaceImpl::LogPixelsY() {
 }
 
 float SurfaceImpl::DeviceHeightFont(int points) {
-	//assert(0);
 	int logPix = LogPixelsY();
 	return (points * logPix + logPix / 2) / 72;
 }
 
 void SurfaceImpl::MoveTo(float x_, float y_) {
-	//assert(0);
 	x = x_;
 	y = y_;
 }
 
 void SurfaceImpl::LineTo(float x_, float y_) {
-	//assert(0);
 	glColor4ubv((GLubyte*)&penColour);
 	glBegin(GL_LINES);
 	glVertex2f(x+0.5,  y+0.5);
@@ -147,12 +121,12 @@ void SurfaceImpl::LineTo(float x_, float y_) {
 	y = y_;
 }
 
-void SurfaceImpl::Polygon(Point* /*pts*/, int /*npts*/, Colour/*Allocated*/ /*fore*/,
-                          Colour/*Allocated*/ /*back*/) {
+void SurfaceImpl::Polygon(Point* /*pts*/, int /*npts*/, Colour /*fore*/,
+                          Colour /*back*/) {
 	assert(0);
 }
 
-void SurfaceImpl::RectangleDraw(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+void SurfaceImpl::RectangleDraw(PRectangle rc, Colour fore, Colour back) {
 	FillRectangle(rc, back);
 	glColor4ubv((GLubyte*)&fore);
 	glBegin(GL_LINE_STRIP);
@@ -237,7 +211,7 @@ void SurfaceImpl::DrawPixmap(PRectangle rc, Point offset, Pixmap pixmap)
 	glDisable(GL_TEXTURE_2D);
 }
 
-void SurfaceImpl::FillRectangle(PRectangle rc, Colour/*Allocated*/ back) {
+void SurfaceImpl::FillRectangle(PRectangle rc, Colour back) {
 	glColor4ubv((GLubyte*)&back);
 	glBegin(GL_QUADS);
 	glVertex2f(rc.left,  rc.top);
@@ -245,34 +219,18 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Colour/*Allocated*/ back) {
 	glVertex2f(rc.right, rc.bottom);
 	glVertex2f(rc.left,  rc.bottom);
 	glEnd();
-	//assert(0);
 }
 
 void SurfaceImpl::FillRectangle(PRectangle /*rc*/, Surface &/*surfacePattern*/) {
 	assert(0);
 }
 
-void SurfaceImpl::RoundedRectangle(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
+void SurfaceImpl::RoundedRectangle(PRectangle /*rc*/, Colour /*fore*/, Colour /*back*/) {
 	assert(0);
 }
 
-//static unsigned int GetRValue(unsigned int co) {
-//	return (co >> 16) & 0xff;
-//}
-//
-//static unsigned int GetGValue(unsigned int co) {
-//	return (co >> 8) & 0xff;
-//}
-//
-//static unsigned int GetBValue(unsigned int co) {
-//	return co & 0xff;
-//}
-
-void SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, Colour/*Allocated*/ fill, int alphaFill,
-		Colour/*Allocated*/ /*outline*/, int /*alphaOutline*/, int /*flags*/) {
-	//assert(0);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+void SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, Colour fill, int alphaFill,
+		Colour /*outline*/, int /*alphaOutline*/, int /*flags*/) {
 	unsigned int back = fill&0xFFFFFF | ((alphaFill&0xFF)<<24);
 	glColor4ubv((GLubyte*)&back);
 	glBegin(GL_QUADS);
@@ -281,10 +239,9 @@ void SurfaceImpl::AlphaRectangle(PRectangle rc, int /*cornerSize*/, Colour/*Allo
 	glVertex2f(rc.right, rc.bottom);
 	glVertex2f(rc.left,  rc.bottom);
 	glEnd();
-	//glDisable(GL_BLEND);
 }
 
-void SurfaceImpl::Ellipse(PRectangle /*rc*/, Colour/*Allocated*/ /*fore*/, Colour/*Allocated*/ /*back*/) {
+void SurfaceImpl::Ellipse(PRectangle /*rc*/, Colour /*fore*/, Colour /*back*/) {
 	assert(0);
 }
 
@@ -325,17 +282,11 @@ static size_t UTF8CharLength(const char *s) {
 
 const int maxLengthTextRun = 10000;
 
-//#include <string.h>
 #include <stdio.h>
-//#include <stdlib.h>
-//#include <stddef.h>
-//#include <math.h>
 #include <assert.h>
 
 #include "Platform.h"
 
-//#include "Scintilla.h"
-//#include "UniConversion.h"
 #include "XPM.h"
 
 #include <gl/glee.h>
@@ -354,12 +305,10 @@ struct stbtt_Font
 
 Font::Font() : fid(0)
 {
-	//assert(0);
 }
 
 Font::~Font()
 {
-	//assert(0);
 }
 
 stbtt_Font defaultFont;
@@ -433,8 +382,7 @@ void Font::Release()
 }
 
 void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, float ybase, const char *s, int len,
-                                 Colour/*Allocated*/ fore) {
-	//assert(0);
+                                 Colour fore) {
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	glEnable(GL_TEXTURE_2D);
 	//glEnable(GL_BLEND);
@@ -462,26 +410,21 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, float ybase, const ch
 }
 
 void SurfaceImpl::DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len,
-                                 Colour/*Allocated*/ fore, Colour/*Allocated*/ /*back*/) {
-	//assert(0);
+                                 Colour fore, Colour /*back*/) {
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
-// On GTK+, exactly same as DrawTextNoClip
 void SurfaceImpl::DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len,
-                                  Colour/*Allocated*/ fore, Colour/*Allocated*/ /*back*/) {
-	//assert(0);
+                                  Colour fore, Colour /*back*/) {
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
 void SurfaceImpl::DrawTextTransparent(PRectangle rc, Font &font_, float ybase, const char *s, int len,
-                                  Colour/*Allocated*/ fore) {
-	//assert(0);
+                                  Colour fore) {
 	DrawTextBase(rc, font_, ybase, s, len, fore);
 }
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, float *positions) {
-	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	//TODO: implement proper UTF-8 handling
 	float position = 0;
@@ -496,7 +439,6 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, float *posi
 }
 
 float SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
-	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	//TODO: implement proper UTF-8 handling
 	int position = 0;
@@ -516,7 +458,6 @@ float SurfaceImpl::WidthChar(Font &font_, char ch) {
 }
 
 float SurfaceImpl::Ascent(Font &font_) {
-	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int ascent, descent, lineGap;
 	stbtt_GetFontVMetrics(&realFont->fontinfo, &ascent, &descent, &lineGap);
@@ -524,7 +465,6 @@ float SurfaceImpl::Ascent(Font &font_) {
 }
 
 float SurfaceImpl::Descent(Font &font_) {
-	//assert(0);
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	int ascent, descent, lineGap;
 	stbtt_GetFontVMetrics(&realFont->fontinfo, &ascent, &descent, &lineGap);
@@ -551,11 +491,6 @@ float SurfaceImpl::Height(Font &font_) {
 float SurfaceImpl::AverageCharWidth(Font &font_) {
 	return WidthChar(font_, 'n');
 }
-
-//int SurfaceImpl::SetPalette(Palette *, bool) {
-//	// Handled in palette allocation for GTK so this does nothing
-//	return 0;
-//}
 
 void SurfaceImpl::SetClip(PRectangle rc) {
 	double plane[][4] = {
