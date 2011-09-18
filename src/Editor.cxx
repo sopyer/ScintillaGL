@@ -3888,7 +3888,53 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, int len) {
 }
 
 bool Editor::CanPaste() {
-	return !pdoc->IsReadOnly() && !SelectionContainsProtected();
+	return !pdoc->IsReadOnly() && !SelectionContainsProtected() && IsClipboardTextAvailable(TEXT_FORMAT_UTF8)!=0;
+}
+
+void Editor::Paste() {
+	UndoGroup ug(pdoc);
+	bool isLine = SelectionEmpty() && IsClipboardTextAvailable(TEXT_FORMAT_UTF8_LINE)!=0;
+	ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
+	SelectionPosition selStart = sel.IsRectangular() ?
+		sel.Rectangular().Start() :
+		sel.Range(sel.Main()).Start();
+	bool isRectangular = IsClipboardTextAvailable(TEXT_FORMAT_UTF8_RECT)!=0;
+
+	int len = GetClipboardTextUTF8(0, 0);
+	if (len)
+	{
+		char* text = new char[len + 1];
+		GetClipboardTextUTF8(text, len+1);
+
+		if (isRectangular) {
+			PasteRectangular(selStart, text, len);
+		} else {
+			char *convertedText = 0;
+			if (convertPastes) {
+				// Convert line endings of the paste into our local line-endings mode
+				convertedText = Document::TransformLineEnds(&len, text, len, pdoc->eolMode);
+			}
+			char* textToInsert = convertedText?convertedText:text;
+			if (isLine) {
+				int insertPos = pdoc->LineStart(pdoc->LineFromPosition(sel.MainCaret()));
+				pdoc->InsertString(insertPos, textToInsert, len);
+				// add the newline if necessary
+				if ((len > 0) && (textToInsert[len-1] != '\n' && textToInsert[len-1] != '\r')) {
+					const char *endline = StringFromEOLMode(pdoc->eolMode);
+					pdoc->InsertString(insertPos + len, endline, strlen(endline));
+					len += strlen(endline);
+				}
+				if (sel.MainCaret() == insertPos) {
+					SetEmptySelection(sel.MainCaret() + len);
+				}
+			} else {
+				InsertPaste(selStart, textToInsert, len);
+			}
+			delete []convertedText;
+		}
+
+		delete []text;
+	}
 }
 
 void Editor::Clear() {
@@ -5443,6 +5489,13 @@ static bool Close(Point pt1, Point pt2) {
 	if (abs(pt1.y - pt2.y) > 3)
 		return false;
 	return true;
+}
+
+void Editor::CopyToClipboard(const SelectionText& selectedText) {
+	int format;
+	format = selectedText.lineCopy?TEXT_FORMAT_UTF8_LINE:TEXT_FORMAT_UTF8;
+	format = selectedText.rectangular?TEXT_FORMAT_UTF8_RECT:TEXT_FORMAT_UTF8;
+	SetClipboardTextUTF8(selectedText.s, selectedText.len, format);
 }
 
 char *Editor::CopyRange(int start, int end) {

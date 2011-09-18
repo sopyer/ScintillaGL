@@ -241,7 +241,7 @@ void DMApp::InitialiseEditor3() {
 #include <gl/glee.h>
 #include "gldebug.h"
 
-void Platform_Initialise();
+void Platform_Initialise(HWND hWnd);
 void Platform_Finalise();
 
 char fragmentSource[65536] = "void main()\n{\n\tgl_FragColor=vec4(0, 1, 0, 1);\n}\n";
@@ -374,7 +374,10 @@ int main(int /*argc*/, char** /*argv*/)
 	SDL_EnableUNICODE(TRUE);
 	SDL_EnableKeyRepeat(500, 100);
 
-	Platform_Initialise();
+	SDL_SysWMinfo info = {{0, 0}, 0, 0};
+	SDL_GetWMInfo(&info);
+
+	Platform_Initialise(info.window);
 
 	Surface* s = Surface::Allocate();
 	app.myEd.drawSurface = s;
@@ -417,11 +420,6 @@ int main(int /*argc*/, char** /*argv*/)
 #ifdef SCI_LEXER
 	Scintilla_LinkLexers();
 #endif
-
-	SDL_SysWMinfo info = {{0, 0}, 0, 0};
-	SDL_GetWMInfo(&info);
-	app.myEd.hWnd = info.window;
-	app.myEd2.hWnd = info.window;
 
 	Uint8	prevKState[SDLK_LAST] = {0};
 	bool run = true;
@@ -632,10 +630,10 @@ int main(int /*argc*/, char** /*argv*/)
 				else if (sciKey)
 				{
 					bool consumed;
-					bool ctrlPressed = !!(E.key.keysym.mod&KMOD_LCTRL | E.key.keysym.mod&KMOD_RCTRL);
-					bool altPressed = !!(E.key.keysym.mod&KMOD_LALT | E.key.keysym.mod&KMOD_RALT);
+					bool ctrlPressed = E.key.keysym.mod&KMOD_LCTRL || E.key.keysym.mod&KMOD_RCTRL;
+					bool altPressed = E.key.keysym.mod&KMOD_LALT || E.key.keysym.mod&KMOD_RALT;
 					curEd->KeyDown((SDLK_a<=sciKey && sciKey<=SDLK_z)?sciKey-'a'+'A':sciKey,
-						!!(E.key.keysym.mod&KMOD_LSHIFT | E.key.keysym.mod&KMOD_RSHIFT),
+						E.key.keysym.mod&KMOD_LSHIFT || E.key.keysym.mod&KMOD_RSHIFT,
 						ctrlPressed,
 						altPressed,
 						&consumed

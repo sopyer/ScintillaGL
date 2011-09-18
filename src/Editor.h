@@ -382,8 +382,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void PasteRectangular(SelectionPosition pos, const char *ptr, int len);
 	virtual void Copy();
 	virtual void CopyAllowLine();
-	virtual bool CanPaste();
-	virtual void Paste() = 0;
+	bool CanPaste();
+	void Paste();
 	void Clear();
 	void SelectAll();
 	void Undo();
@@ -397,7 +397,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	virtual void NotifyChange() = 0;
 	virtual void NotifyFocus(bool focus);
 	virtual void NotifyParent(SCNotification scn) = 0;
-	virtual void NotifySetCursor(Cursor newCursor) {}
+	virtual void NotifySetCursor(Cursor /*newCursor*/) {}
 	virtual void NotifyStyleToNeeded(int endStyleNeeded);
 	void NotifyChar(int ch);
 	void NotifySavePoint(bool isSavePoint);
@@ -450,7 +450,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	long SearchInTarget(const char *text, int length);
 	void GoToLine(int lineNo);
 
-	virtual void CopyToClipboard(const SelectionText &selectedText) = 0;
+	void CopyToClipboard(const SelectionText &selectedText);
 	char *CopyRange(int start, int end);
 	void CopySelectionRange(SelectionText *ss, bool allowLineCopy=false);
 	void CopyRangeToClipboard(int start, int end);

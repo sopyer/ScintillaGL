@@ -38,27 +38,31 @@ void UTF8FromUTF16(const wchar_t *uptr, unsigned int tlen, char *putf, unsigned 
 	for (unsigned int i = 0; i < tlen && uptr[i];) {
 		unsigned int uch = uptr[i];
 		if (uch < 0x80) {
+			if (k>=len) break;
 			putf[k++] = static_cast<char>(uch);
 		} else if (uch < 0x800) {
+			if (k+2>=len) break;
 			putf[k++] = static_cast<char>(0xC0 | (uch >> 6));
 			putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
 		} else if ((uch >= SURROGATE_LEAD_FIRST) &&
 			(uch <= SURROGATE_TRAIL_LAST)) {
 			// Half a surrogate pair
 			i++;
+			if (k+4>=len) break;
 			unsigned int xch = 0x10000 + ((uch & 0x3ff) << 10) + (uptr[i] & 0x3ff);
 			putf[k++] = static_cast<char>(0xF0 | (xch >> 18));
 			putf[k++] = static_cast<char>(0x80 | ((xch >> 12) & 0x3f));
 			putf[k++] = static_cast<char>(0x80 | ((xch >> 6) & 0x3f));
 			putf[k++] = static_cast<char>(0x80 | (xch & 0x3f));
 		} else {
+			if (k+3>=len) break;
 			putf[k++] = static_cast<char>(0xE0 | (uch >> 12));
 			putf[k++] = static_cast<char>(0x80 | ((uch >> 6) & 0x3f));
 			putf[k++] = static_cast<char>(0x80 | (uch & 0x3f));
 		}
 		i++;
 	}
-	putf[len] = '\0';
+	putf[k] = '\0';
 }
 
 unsigned int UTF8CharLength(unsigned char ch) {

@@ -135,10 +135,7 @@ class MyEditor: public Editor
 {
 	size_t nextTime;
 	static const size_t tickInterval = 100;
-	CLIPFORMAT cfColumnSelect;
-	CLIPFORMAT cfLineSelect;
 public:
-	HWND hWnd;
 	LexState2 ls;
 	
 	MyEditor();
@@ -148,12 +145,6 @@ public:
 	virtual void SetVerticalScrollPos() {}
 	virtual void SetHorizontalScrollPos() {}
 	virtual bool ModifyScrollBars(int /*nMax*/, int /*nPage*/) {return true;}
-
-	void InsertPasteText(const char *text, int len, SelectionPosition selStart, bool isRectangular, bool isLine);
-	bool CanPaste();
-
-	virtual void Paste();
-	virtual void CopyToClipboard(const SelectionText &selectedText);
 
 	virtual void ClaimSelection() {}
 	virtual void NotifyChange() {}

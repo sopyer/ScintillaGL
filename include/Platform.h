@@ -494,6 +494,17 @@ public:
 	static int Clamp(int val, int minVal, int maxVal);
 };
 
+enum AdditionalTextFormat
+{
+	TEXT_FORMAT_UTF8,
+	TEXT_FORMAT_UTF8_LINE,
+	TEXT_FORMAT_UTF8_RECT
+};
+
+int IsClipboardTextAvailable(AdditionalTextFormat fmt=TEXT_FORMAT_UTF8);
+void SetClipboardTextUTF8(const char* text, size_t  len, int additionalFormat);
+int GetClipboardTextUTF8(char* text, size_t len);
+
 #ifdef  NDEBUG
 #define PLATFORM_ASSERT(c) ((void)0)
 #else
