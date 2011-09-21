@@ -53,7 +53,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>SCI_LEXER;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SCI_LEXER;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,9 +83,16 @@
     <ClCompile Include="DMApp.cxx" />
     <ClCompile Include="external\GLee.c" />
     <ClCompile Include="gldebug.cpp" />
+    <ClCompile Include="gl\DefaultFontData.cpp" />
+    <ClCompile Include="gl\PlatGL.cxx" />
+    <ClCompile Include="gl\ScintillaGL.cxx" />
+    <ClCompile Include="gl\Surface.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gldebug.h" />
+    <ClInclude Include="gl\DefaultFontData.h" />
+    <ClInclude Include="gl\ScintillaGL.h" />
+    <ClInclude Include="gl\stb_truetype.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

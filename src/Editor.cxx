@@ -112,7 +112,6 @@ Editor::Editor() {
 	errorStatus = 0;
 	mouseDownCaptures = true;
 
-	//bufferedDraw = true;
 	twoPhaseDraw = true;
 
 	lastClickTime = 0;
@@ -241,7 +240,7 @@ void Editor::InvalidateStyleRedraw() {
 void Editor::RefreshStyleData() {
 	if (!stylesValid) {
 		stylesValid = true;
-		//AutoSurface surface(this);
+
 		if (drawSurface) {
 			vs.Refresh(*drawSurface);
 		}
@@ -361,7 +360,7 @@ Point Editor::LocationFromPosition(SelectionPosition pos) {
 	int line = pdoc->LineFromPosition(pos.Position());
 	int lineVisible = cs.DisplayFromDoc(line);
 	//Platform::DebugPrintf("line=%d\n", line);
-	//AutoSurface surface(this);
+
 	AutoLineLayout ll(llc, RetrieveLineLayout(line));
 	if (drawSurface && ll) {
 		// -1 because of adding in for visible lines in following loop.
@@ -446,7 +445,7 @@ SelectionPosition Editor::SPositionFromLocation(Point pt, bool canReturnInvalid,
 		return SelectionPosition(canReturnInvalid ? INVALID_POSITION : pdoc->Length());
 	unsigned int posLineStart = pdoc->LineStart(lineDoc);
 	SelectionPosition retVal(canReturnInvalid ? INVALID_POSITION : static_cast<int>(posLineStart));
-	//AutoSurface surface(this);
+
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (drawSurface && ll) {
 		LayoutLine(lineDoc, drawSurface, vs, ll, wrapWidth);
@@ -506,7 +505,7 @@ int Editor::PositionFromLineX(int lineDoc, int x) {
 	if (lineDoc >= pdoc->LinesTotal())
 		return pdoc->Length();
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
-	//AutoSurface surface(this);
+
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	int retVal = 0;
 	if (drawSurface && ll) {
@@ -543,7 +542,7 @@ SelectionPosition Editor::SPositionFromLineX(int lineDoc, int x) {
 	if (lineDoc >= pdoc->LinesTotal())
 		return SelectionPosition(pdoc->Length());
 	//Platform::DebugPrintf("Position of (%d,%d) line = %d top=%d\n", pt.x, pt.y, line, topLine);
-	//AutoSurface surface(this);
+
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	int retVal = 0;
 	if (drawSurface && ll) {
@@ -665,7 +664,6 @@ void Editor::InvalidateSelection(SelectionRange newMain, bool invalidateWholeSel
 		}
 	}
 	ContainerNeedsUpdate(SC_UPDATE_SELECTION);
-	//InvalidateRange(firstAffected, lastAffected);
 }
 
 void Editor::SetSelection(SelectionPosition currentPos_, SelectionPosition anchor_) {
@@ -688,7 +686,6 @@ void Editor::SetSelection(SelectionPosition currentPos_, SelectionPosition ancho
 	}
 	sel.RangeMain() = rangeNew;
 	SetRectangularRange();
-	ClaimSelection();
 }
 
 void Editor::SetSelection(int currentPos_, int anchor_) {
@@ -709,7 +706,6 @@ void Editor::SetSelection(SelectionPosition currentPos_) {
 		sel.RangeMain() =
 			SelectionRange(SelectionPosition(currentPos_), sel.RangeMain().anchor);
 	}
-	ClaimSelection();
 }
 
 void Editor::SetSelection(int currentPos_) {
@@ -724,8 +720,6 @@ void Editor::SetEmptySelection(SelectionPosition currentPos_) {
 	sel.Clear();
 	sel.RangeMain() = rangeNew;
 	SetRectangularRange();
-	ClaimSelection();
-
 }
 
 void Editor::SetEmptySelection(int currentPos_) {
@@ -882,8 +876,6 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 		// Perform redraw rather than scroll if many lines would be redrawn anyway.
 		if ((abs(linesToMove) <= 10) && (paintState == notPainting)) {
 			ScrollText(linesToMove);
-		} else {
-			//Redraw();
 		}
 #else
 		Redraw();
@@ -895,9 +887,7 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 }
 
 void Editor::ScrollText(int /* linesToMove */) {
-	//assert(!"WTF");
 	//Platform::DebugPrintf("Editor::ScrollText %d\n", linesToMove);
-	//Redraw();
 }
 
 void Editor::HorizontalScrollTo(int xPos) {
@@ -938,7 +928,7 @@ void Editor::MoveCaretInsideView(bool ensureVisible) {
 int Editor::DisplayFromPosition(int pos) {
 	int lineDoc = pdoc->LineFromPosition(pos);
 	int lineDisplay = cs.DisplayFromDoc(lineDoc);
-	//AutoSurface surface(this);
+
 	AutoLineLayout ll(llc, RetrieveLineLayout(lineDoc));
 	if (drawSurface && ll) {
 		LayoutLine(lineDoc, drawSurface, vs, ll, wrapWidth);
@@ -1225,7 +1215,6 @@ void Editor::SetXYScroll(XYScrollPosition newXY) {
 			}
 			SetHorizontalScrollPos();
 		}
-		//Redraw();
 		UpdateSystemCaret();
 	}
 }
@@ -1238,7 +1227,6 @@ void Editor::ShowCaretAtCurrentPosition() {
 	if (hasFocus) {
 		caret.active = true;
 		caret.on = true;
-		SetTicking(true);
 	} else {
 		caret.active = false;
 		caret.on = false;
@@ -1252,15 +1240,6 @@ void Editor::DropCaret() {
 }
 
 void Editor::InvalidateCaret() {
-	//assert(0);
-	//TODO: seem is not required for opengl
-	if (posDrag.IsValid()) {
-		//InvalidateRange(posDrag.Position(), posDrag.Position() + 1);
-	} else {
-		for (size_t r=0; r<sel.Count(); r++) {
-			//InvalidateRange(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1);
-		}
-	}
 	UpdateSystemCaret();
 }
 
@@ -2172,10 +2151,8 @@ Colour Editor::TextBackground(ViewStyle &vsDraw, bool overrideBackground,
 }
 
 void Editor::DrawIndentGuide(Surface *surface, int lineVisible, float lineHeight, int start, PRectangle rcSegment, bool highlight) {
-	//Point from(0, ((lineVisible & 1) && (lineHeight & 1)) ? 1 : 0);
 	PRectangle rcCopyArea(start + 1, rcSegment.top, start + 2, rcSegment.bottom);
-	//surface->Copy(rcCopyArea, from,
-	//        highlight ? *pixmapIndentGuideHighlight : *pixmapIndentGuide);
+
 	surface->DrawPixmap(rcCopyArea, Point(0, lineHeight*lineVisible),
 	        highlight ? pixmapIndentGuideHighlight : pixmapIndentGuide);
 }
@@ -3367,7 +3344,6 @@ void Editor::Paint(/*Surface *surfaceWindow, PRectangle rcArea*/) {
 		//Platform::DebugPrintf(
 		//"Layout:%9.6g    Paint:%9.6g    Ratio:%9.6g   Copy:%9.6g   Total:%9.6g\n",
 		//durLayout, durPaint, durLayout / durPaint, durCopy, etWhole.Duration());
-		//NotifyPainted();
 	}
 }
 
@@ -3395,11 +3371,6 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	if (!pfr)
 		return 0;
 
-	//AutoSurface surface(pfr->hdc, this);
-	//if (!surface)
-	//	return 0;
-	//AutoSurface surfaceMeasure(pfr->hdcTarget, this);
-	//if (!surfaceMeasure) {
 	if (!drawSurface) {
 		return 0;
 	}
@@ -3435,21 +3406,21 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 	// Set colours for printing according to users settings
 	for (size_t sty = 0; sty < vsPrint.stylesSize; sty++) {
 		if (printColourMode == SC_PRINT_INVERTLIGHT) {
-			vsPrint.styles[sty].fore/*.desired*/ = InvertedLight(vsPrint.styles[sty].fore/*.desired*/);
-			vsPrint.styles[sty].back/*.desired*/ = InvertedLight(vsPrint.styles[sty].back/*.desired*/);
+			vsPrint.styles[sty].fore = InvertedLight(vsPrint.styles[sty].fore);
+			vsPrint.styles[sty].back = InvertedLight(vsPrint.styles[sty].back);
 		} else if (printColourMode == SC_PRINT_BLACKONWHITE) {
-			vsPrint.styles[sty].fore/*.desired*/ = MakeRGBA/*Desired*/(0, 0, 0);
-			vsPrint.styles[sty].back/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
+			vsPrint.styles[sty].fore = MakeRGBA(0, 0, 0);
+			vsPrint.styles[sty].back = MakeRGBA(0xff, 0xff, 0xff);
 		} else if (printColourMode == SC_PRINT_COLOURONWHITE) {
-			vsPrint.styles[sty].back/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
+			vsPrint.styles[sty].back = MakeRGBA(0xff, 0xff, 0xff);
 		} else if (printColourMode == SC_PRINT_COLOURONWHITEDEFAULTBG) {
 			if (sty <= STYLE_DEFAULT) {
-				vsPrint.styles[sty].back/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
+				vsPrint.styles[sty].back = MakeRGBA(0xff, 0xff, 0xff);
 			}
 		}
 	}
 	// White background for the line numbers
-	vsPrint.styles[STYLE_LINENUMBER].back/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
+	vsPrint.styles[STYLE_LINENUMBER].back = MakeRGBA(0xff, 0xff, 0xff);
 
 	vsPrint.Refresh(*drawSurface);
 	// Determining width must hapen after fonts have been realised in Refresh
@@ -3578,7 +3549,7 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 
 int Editor::TextWidth(int style, const char *text) {
 	RefreshStyleData();
-	//AutoSurface surface(this);
+
 	if (drawSurface) {
 		return drawSurface->WidthText(vs.styles[style].font, text, istrlen(text));
 	} else {
@@ -3787,7 +3758,6 @@ void Editor::ClearSelection(bool retainMultipleSelections) {
 	}
 	ThinRectangularRange();
 	sel.RemoveDuplicates();
-	ClaimSelection();
 }
 
 void Editor::ClearAll() {
@@ -5590,7 +5560,6 @@ void Editor::SetDragPosition(SelectionPosition newPos) {
 	}
 	if (!(posDrag == newPos)) {
 		caret.on = true;
-		SetTicking(true);
 		InvalidateCaret();
 		posDrag = newPos;
 		InvalidateCaret();
@@ -5958,28 +5927,16 @@ void Editor::SetHotSpotRange(Point *pt) {
 		// range can encompass more than the run range and then
 		// the underline will not be drawn properly.
 		int hsStart_ = pdoc->ExtendStyleRange(pos, -1, vs.hotspotSingleLine);
-		int hsEnd_ = pdoc->ExtendStyleRange(pos, 1, vs.hotspotSingleLine);
+		int hsEnd_   = pdoc->ExtendStyleRange(pos, 1, vs.hotspotSingleLine);
 
 		// Only invalidate the range if the hotspot range has changed...
 		if (hsStart_ != hsStart || hsEnd_ != hsEnd) {
-			if (hsStart != -1) {
-				//InvalidateRange(hsStart, hsEnd);
-			}
 			hsStart = hsStart_;
-			hsEnd = hsEnd_;
-			//InvalidateRange(hsStart, hsEnd);
+			hsEnd   = hsEnd_;
 		}
 	} else {
-		if (hsStart != -1) {
-			int hsStart_ = hsStart;
-			int hsEnd_ = hsEnd;
-			hsStart = -1;
-			hsEnd = -1;
-			//InvalidateRange(hsStart_, hsEnd_);
-		} else {
-			hsStart = -1;
-			hsEnd = -1;
-		}
+		hsStart = -1;
+		hsEnd = -1;
 	}
 }
 
@@ -6334,7 +6291,6 @@ void Editor::SetDocPointer(Document *document) {
 
 	pdoc->AddWatcher(this, 0);
 	SetScrollBars();
-	//Redraw();
 }
 
 void Editor::SetAnnotationVisible(int visible) {
@@ -6350,7 +6306,6 @@ void Editor::SetAnnotationVisible(int visible) {
 				}
 			}
 		}
-		//Redraw();
 	}
 }
 
@@ -6397,7 +6352,6 @@ void Editor::ToggleContraction(int line) {
 				}
 
 				SetScrollBars();
-				//Redraw();
 			}
 
 		} else {
@@ -6408,7 +6362,6 @@ void Editor::ToggleContraction(int line) {
 			cs.SetExpanded(line, 1);
 			Expand(line, true);
 			SetScrollBars();
-			//Redraw();
 		}
 	}
 }
@@ -6445,7 +6398,6 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 			}
 		}
 		SetScrollBars();
-		//Redraw();
 	}
 	if (enforcePolicy) {
 		int lineDisplay = cs.DisplayFromDoc(lineDoc);
@@ -6453,18 +6405,15 @@ void Editor::EnsureLineVisible(int lineDoc, bool enforcePolicy) {
 			if ((topLine > lineDisplay) || ((visiblePolicy & VISIBLE_STRICT) && (topLine + visibleSlop > lineDisplay))) {
 				SetTopLine(Platform::Clamp(lineDisplay - visibleSlop, 0, MaxScrollPos()));
 				SetVerticalScrollPos();
-				//Redraw();
 			} else if ((lineDisplay > topLine + LinesOnScreen() - 1) ||
 			        ((visiblePolicy & VISIBLE_STRICT) && (lineDisplay > topLine + LinesOnScreen() - 1 - visibleSlop))) {
 				SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() + 1 + visibleSlop, 0, MaxScrollPos()));
 				SetVerticalScrollPos();
-				//Redraw();
 			}
 		} else {
 			if ((topLine > lineDisplay) || (lineDisplay > topLine + LinesOnScreen() - 1) || (visiblePolicy & VISIBLE_STRICT)) {
 				SetTopLine(Platform::Clamp(lineDisplay - LinesOnScreen() / 2 + 1, 0, MaxScrollPos()));
 				SetVerticalScrollPos();
-				//Redraw();
 			}
 		}
 	}
@@ -6507,7 +6456,6 @@ int Editor::ReplaceTarget(bool replacePatterns, const char *text, int length) {
 }
 
 int Editor::WrapCount(int line) {
-	//AutoSurface surface(this);
 	AutoLineLayout ll(llc, RetrieveLineLayout(line));
 
 	if (drawSurface && ll) {
@@ -6548,10 +6496,10 @@ void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 	vs.EnsureStyle(wParam);
 	switch (iMessage) {
 	case SCI_STYLESETFORE:
-		vs.styles[wParam].fore/*.desired*/ = Colour/*Desired*/(lParam);
+		vs.styles[wParam].fore = Colour(lParam);
 		break;
 	case SCI_STYLESETBACK:
-		vs.styles[wParam].back/*.desired*/ = Colour/*Desired*/(lParam);
+		vs.styles[wParam].back = Colour(lParam);
 		break;
 	case SCI_STYLESETBOLD:
 		vs.styles[wParam].bold = lParam != 0;
@@ -6596,9 +6544,9 @@ sptr_t Editor::StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	vs.EnsureStyle(wParam);
 	switch (iMessage) {
 	case SCI_STYLEGETFORE:
-		return vs.styles[wParam].fore/*.desired.AsLong()*/;
+		return vs.styles[wParam].fore;
 	case SCI_STYLEGETBACK:
-		return vs.styles[wParam].back/*.desired.AsLong()*/;
+		return vs.styles[wParam].back;
 	case SCI_STYLEGETBOLD:
 		return vs.styles[wParam].bold ? 1 : 0;
 	case SCI_STYLEGETITALIC:
@@ -7518,15 +7466,13 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_MARKERSETFORE:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].fore/*.desired*/ = Colour/*Desired*/(lParam);
+			vs.markers[wParam].fore = Colour(lParam);
 		InvalidateStyleData();
-		//RedrawSelMargin();
 		break;
 	case SCI_MARKERSETBACK:
 		if (wParam <= MARKER_MAX)
-			vs.markers[wParam].back/*.desired*/ = Colour/*Desired*/(lParam);
+			vs.markers[wParam].back = Colour(lParam);
 		InvalidateStyleData();
-		//RedrawSelMargin();
 		break;
 	case SCI_MARKERSETALPHA:
 		if (wParam <= MARKER_MAX)
@@ -7575,7 +7521,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 			vs.markers[wParam].SetXPM(CharPtrFromSPtr(lParam));
 		};
 		InvalidateStyleData();
-		//RedrawSelMargin();
 		break;
 
 	case SCI_SETMARGINTYPEN:
@@ -7708,9 +7653,9 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		InvalidateStyleRedraw();
 		break;
 	case SCI_GETCARETLINEBACK:
-		return vs.caretLineBackground/*.desired.AsLong()*/;
+		return vs.caretLineBackground;
 	case SCI_SETCARETLINEBACK:
-		vs.caretLineBackground/*.desired*/ = wParam;
+		vs.caretLineBackground = wParam;
 		InvalidateStyleRedraw();
 		break;
 	case SCI_GETCARETLINEBACKALPHA:
@@ -7733,8 +7678,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETFOLDLEVEL: {
 			int prev = pdoc->SetLevel(wParam, lParam);
-			//if (prev != lParam)
-			//	RedrawSelMargin();
 			return prev;
 		}
 
@@ -7750,14 +7693,12 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_SHOWLINES:
 		cs.SetVisible(wParam, lParam, true);
 		SetScrollBars();
-		//Redraw();
 		break;
 
 	case SCI_HIDELINES:
 		if (wParam > 0)
 			cs.SetVisible(wParam, lParam, false);
 		SetScrollBars();
-		//Redraw();
 		break;
 
 	case SCI_GETLINEVISIBLE:
@@ -7765,7 +7706,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETFOLDEXPANDED:
 		if (cs.SetExpanded(wParam, lParam != 0)) {
-			//RedrawSelMargin();
 		}
 		break;
 
@@ -7774,7 +7714,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETFOLDFLAGS:
 		foldFlags = wParam;
-		//Redraw();
 		break;
 
 	case SCI_TOGGLEFOLD:
@@ -7820,15 +7759,15 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELFORE:
 		vs.selforeset = wParam != 0;
-		vs.selforeground/*.desired*/ = Colour/*Desired*/(lParam);
-		vs.selAdditionalForeground/*.desired*/ = Colour/*Desired*/(lParam);
+		vs.selforeground = Colour(lParam);
+		vs.selAdditionalForeground = Colour(lParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETSELBACK:
 		vs.selbackset = wParam != 0;
-		vs.selbackground/*.desired*/ = Colour/*Desired*/(lParam);
-		vs.selAdditionalBackground/*.desired*/ = Colour/*Desired*/(lParam);
+		vs.selbackground = Colour(lParam);
+		vs.selAdditionalBackground = Colour(lParam);
 		InvalidateStyleRedraw();
 		break;
 
@@ -7851,23 +7790,23 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETWHITESPACEFORE:
 		vs.whitespaceForegroundSet = wParam != 0;
-		vs.whitespaceForeground/*.desired*/ = /*ColourDesired*/(lParam);
+		vs.whitespaceForeground = lParam;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETWHITESPACEBACK:
 		vs.whitespaceBackgroundSet = wParam != 0;
-		vs.whitespaceBackground/*.desired*/ = /*ColourDesired*/(lParam);
+		vs.whitespaceBackground = lParam;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETCARETFORE:
-		vs.caretcolour/*.desired*/ = /*ColourDesired*/(wParam);
+		vs.caretcolour = wParam;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETCARETFORE:
-		return vs.caretcolour/*.desired.AsLong()*/;
+		return vs.caretcolour;
 
 	case SCI_SETCARETSTYLE:
 		if (wParam >= CARETSTYLE_INVISIBLE && wParam <= CARETSTYLE_BLOCK)
@@ -7920,13 +7859,13 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_INDICSETFORE:
 		if (wParam <= INDIC_MAX) {
-			vs.indicators[wParam].fore/*.desired*/ = Colour/*Desired*/(lParam);
+			vs.indicators[wParam].fore = Colour(lParam);
 			InvalidateStyleRedraw();
 		}
 		break;
 
 	case SCI_INDICGETFORE:
-		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].fore/*.desired.AsLong()*/ : 0;
+		return (wParam <= INDIC_MAX) ? vs.indicators[wParam].fore : 0;
 
 	case SCI_INDICSETUNDER:
 		if (wParam <= INDIC_MAX) {
@@ -8116,10 +8055,10 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		break;
 
 	case SCI_GETEDGECOLOUR:
-		return vs.edgecolour/*.desired.AsLong()*/;
+		return vs.edgecolour;
 
 	case SCI_SETEDGECOLOUR:
-		vs.edgecolour/*.desired*/ = /*ColourDesired*/(wParam);
+		vs.edgecolour = wParam;
 		InvalidateStyleRedraw();
 		break;
 
@@ -8273,33 +8212,33 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETFOLDMARGINCOLOUR:
 		vs.foldmarginColourSet = wParam != 0;
-		vs.foldmarginColour/*.desired*/ = /*ColourDesired*/(lParam);
+		vs.foldmarginColour = lParam;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETFOLDMARGINHICOLOUR:
 		vs.foldmarginHighlightColourSet = wParam != 0;
-		vs.foldmarginHighlightColour/*.desired*/ = /*ColourDesired*/(lParam);
+		vs.foldmarginHighlightColour = lParam;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETHOTSPOTACTIVEFORE:
 		vs.hotspotForegroundSet = wParam != 0;
-		vs.hotspotForeground/*.desired*/ = /*ColourDesired*/(lParam);
+		vs.hotspotForeground = lParam;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETHOTSPOTACTIVEFORE:
-		return vs.hotspotForeground/*.desired.AsLong()*/;
+		return vs.hotspotForeground;
 
 	case SCI_SETHOTSPOTACTIVEBACK:
 		vs.hotspotBackgroundSet = wParam != 0;
-		vs.hotspotBackground/*.desired*/ = /*ColourDesired*/(lParam);
+		vs.hotspotBackground = lParam;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETHOTSPOTACTIVEBACK:
-		return vs.hotspotBackground/*.desired.AsLong()*/;
+		return vs.hotspotBackground;
 
 	case SCI_SETHOTSPOTACTIVEUNDERLINE:
 		vs.hotspotUnderline = wParam != 0;
@@ -8503,22 +8442,18 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_CLEARSELECTIONS:
 		sel.Clear();
-		//Redraw();
 		break;
 
 	case SCI_SETSELECTION:
 		sel.SetSelection(SelectionRange(wParam, lParam));
-		//Redraw();
 		break;
 
 	case SCI_ADDSELECTION:
 		sel.AddSelection(SelectionRange(wParam, lParam));
-		//Redraw();
 		break;
 
 	case SCI_SETMAINSELECTION:
 		sel.SetMain(wParam);
-		//Redraw();
 		break;
 
 	case SCI_GETMAINSELECTION:
@@ -8526,7 +8461,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNCARET:
 		sel.Range(wParam).caret.SetPosition(lParam);
-		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNCARET:
@@ -8534,14 +8468,12 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNANCHOR:
 		sel.Range(wParam).anchor.SetPosition(lParam);
-		//Redraw();
 		break;
 	case SCI_GETSELECTIONNANCHOR:
 		return sel.Range(wParam).anchor.Position();
 
 	case SCI_SETSELECTIONNCARETVIRTUALSPACE:
 		sel.Range(wParam).caret.SetVirtualSpace(lParam);
-		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNCARETVIRTUALSPACE:
@@ -8549,7 +8481,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNANCHORVIRTUALSPACE:
 		sel.Range(wParam).anchor.SetVirtualSpace(lParam);
-		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNANCHORVIRTUALSPACE:
@@ -8557,7 +8488,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNSTART:
 		sel.Range(wParam).anchor.SetPosition(lParam);
-		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNSTART:
@@ -8565,7 +8495,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_SETSELECTIONNEND:
 		sel.Range(wParam).caret.SetPosition(lParam);
-		//Redraw();
 		break;
 
 	case SCI_GETSELECTIONNEND:
@@ -8577,7 +8506,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().caret.SetPosition(wParam);
 		SetRectangularRange();
-		//Redraw();
 		break;
 
 	case SCI_GETRECTANGULARSELECTIONCARET:
@@ -8589,7 +8517,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().anchor.SetPosition(wParam);
 		SetRectangularRange();
-		//Redraw();
 		break;
 
 	case SCI_GETRECTANGULARSELECTIONANCHOR:
@@ -8601,7 +8528,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().caret.SetVirtualSpace(wParam);
 		SetRectangularRange();
-		//Redraw();
 		break;
 
 	case SCI_GETRECTANGULARSELECTIONCARETVIRTUALSPACE:
@@ -8613,7 +8539,6 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		sel.selType = Selection::selRectangle;
 		sel.Rectangular().anchor.SetVirtualSpace(wParam);
 		SetRectangularRange();
-		//Redraw();
 		break;
 
 	case SCI_GETRECTANGULARSELECTIONANCHORVIRTUALSPACE:
@@ -8627,12 +8552,12 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return virtualSpaceOptions;
 
 	case SCI_SETADDITIONALSELFORE:
-		vs.selAdditionalForeground/*.desired*/ = Colour/*Desired*/(wParam);
+		vs.selAdditionalForeground = Colour(wParam);
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_SETADDITIONALSELBACK:
-		vs.selAdditionalBackground/*.desired*/ = Colour/*Desired*/(wParam);
+		vs.selAdditionalBackground = Colour(wParam);
 		InvalidateStyleRedraw();
 		break;
 
@@ -8645,12 +8570,12 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return vs.selAdditionalAlpha;
 
 	case SCI_SETADDITIONALCARETFORE:
-		vs.additionalCaretColour/*.desired*/ = /*ColourDesired*/(wParam);
+		vs.additionalCaretColour = wParam;
 		InvalidateStyleRedraw();
 		break;
 
 	case SCI_GETADDITIONALCARETFORE:
-		return vs.additionalCaretColour/*.desired.AsLong()*/;
+		return vs.additionalCaretColour;
 
 	case SCI_ROTATESELECTION:
 		sel.RotateMain();

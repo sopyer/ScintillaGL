@@ -253,7 +253,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	Editor();
 	virtual ~Editor();
-	virtual void Initialise() = 0;
+
+	//TODO: check whether 2 following functions are required
+	virtual void Initialise() {}
 	virtual void Finalise();
 
 	void InvalidateStyleData();
@@ -363,9 +365,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr);
 	int TextWidth(int style, const char *text);
 
-	virtual void SetVerticalScrollPos() = 0;
-	virtual void SetHorizontalScrollPos() = 0;
-	virtual bool ModifyScrollBars(int nMax, int nPage) = 0;
+	virtual void SetVerticalScrollPos() {}
+	virtual void SetHorizontalScrollPos() {}
+	virtual bool ModifyScrollBars(int /*nMax*/, int /*nPage*/) {return true;}
 	virtual void ReconfigureScrollBars();
 	void SetScrollBars();
 	void ChangeSize();
@@ -390,13 +392,12 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void Redo();
 	void DelChar();
 	void DelCharBack(bool allowLineStartDeletion);
-	virtual void ClaimSelection() = 0;
 
 	enum Cursor { cursorInvalid, cursorText, cursorArrow, cursorUp, cursorWait, cursorHoriz, cursorVert, cursorReverseArrow, cursorHand };
 
-	virtual void NotifyChange() = 0;
+	virtual void NotifyChange() {}
 	virtual void NotifyFocus(bool focus);
-	virtual void NotifyParent(SCNotification scn) = 0;
+	virtual void NotifyParent(SCNotification /*scn*/) {}
 	virtual void NotifySetCursor(Cursor /*newCursor*/) {}
 	virtual void NotifyStyleToNeeded(int endStyleNeeded);
 	void NotifyChar(int ch);
@@ -474,10 +475,9 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void Tick();
 	bool Idle();
-	virtual void SetTicking(bool on) = 0;
 	virtual bool SetIdle(bool) { return false; }
-	virtual void SetMouseCapture(bool on) = 0;
-	virtual bool HaveMouseCapture() = 0;
+	virtual void SetMouseCapture(bool /*on*/) {}
+	virtual bool HaveMouseCapture() { return false; }
 
 	int PositionAfterArea(PRectangle rcArea);
 	void StyleToPositionInView(Position pos);

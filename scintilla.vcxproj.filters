@@ -10,9 +10,6 @@
     <Filter Include="include">
       <UniqueIdentifier>{1bdd9649-5002-4b18-a3ac-0f41ebf1b559}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gl">
-      <UniqueIdentifier>{7ae8cad5-109e-4bea-9b4d-0da1ba6767c8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{70d496a6-77c0-41dc-82b3-04c66fb6ca6b}</UniqueIdentifier>
     </Filter>
@@ -348,18 +345,6 @@
     <ClCompile Include="src\XPM.cxx">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="gl\PlatGL.cxx">
-      <Filter>gl</Filter>
-    </ClCompile>
-    <ClCompile Include="gl\Surface.cxx">
-      <Filter>gl</Filter>
-    </ClCompile>
-    <ClCompile Include="gl\DefaultFontData.cpp">
-      <Filter>gl</Filter>
-    </ClCompile>
-    <ClCompile Include="gl\ScintillaGL.cxx">
-      <Filter>gl</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lexlib\Accessor.h">
@@ -481,15 +466,6 @@
     </ClInclude>
     <ClInclude Include="src\XPM.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="gl\stb_truetype.h">
-      <Filter>gl</Filter>
-    </ClInclude>
-    <ClInclude Include="gl\ScintillaGL.h">
-      <Filter>gl</Filter>
-    </ClInclude>
-    <ClInclude Include="gl\DefaultFontData.h">
-      <Filter>gl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -140,19 +140,6 @@ public:
 	
 	MyEditor();
 
-	virtual void Initialise() {}
-
-	virtual void SetVerticalScrollPos() {}
-	virtual void SetHorizontalScrollPos() {}
-	virtual bool ModifyScrollBars(int /*nMax*/, int /*nPage*/) {return true;}
-
-	virtual void ClaimSelection() {}
-	virtual void NotifyChange() {}
-	virtual void NotifyParent(SCNotification /*scn*/) {}
-	virtual void SetTicking(bool /*on*/) {}
-	virtual void SetMouseCapture(bool /*on*/) {}
-	virtual bool HaveMouseCapture() {return false;}
-
 	void FindMatchingBracePos(int & braceAtCaret, int & braceOpposite);
 
 	bool BraceMatch();
