@@ -2,7 +2,6 @@
 #include <gl/glee.h>
 
 #include "ScintillaGL.h"
-#include "Platform.h"
 
 MyEditor::MyEditor():ls(pdoc)
 {
@@ -10,12 +9,73 @@ MyEditor::MyEditor():ls(pdoc)
 	pdoc->pli = &ls;
 }
 
-
-void MyEditor::FindMatchingBracePos(int & braceAtCaret, int & braceOpposite)
+void MyEditor::OnKeyDown(SDL_KeyboardEvent& event)
 {
+	int sciKey;
+	switch(event.keysym.sym)
+	{
+		case SDLK_DOWN:				sciKey = SCK_DOWN;          break;
+		case SDLK_UP:				sciKey = SCK_UP;            break;
+		case SDLK_LEFT:				sciKey = SCK_LEFT;          break;
+		case SDLK_RIGHT:			sciKey = SCK_RIGHT;         break;
+		case SDLK_HOME:				sciKey = SCK_HOME;          break;
+		case SDLK_END:				sciKey = SCK_END;           break;
+		case SDLK_PAGEUP:			sciKey = SCK_PRIOR;         break;
+		case SDLK_PAGEDOWN:			sciKey = SCK_NEXT;	        break;
+		case SDLK_DELETE:			sciKey = SCK_DELETE;        break;
+		case SDLK_INSERT:			sciKey = SCK_INSERT;        break;
+		case SDLK_ESCAPE:			sciKey = SCK_ESCAPE;        break;
+		case SDLK_BACKSPACE:		sciKey = SCK_BACK;	        break;
+		case SDLK_TAB:				sciKey = SCK_TAB;	        break;
+		case SDLK_RETURN:			sciKey = SCK_RETURN;        break;
+		case SDLK_KP_PLUS:			sciKey = SCK_ADD;	        break;
+		case SDLK_KP_MINUS:			sciKey = SCK_SUBTRACT;      break;
+		case SDLK_KP_DIVIDE:		sciKey = SCK_DIVIDE;        break;
+		case SDLK_LSUPER:			sciKey = SCK_WIN;	        break;
+		case SDLK_RSUPER:			sciKey = SCK_RWIN;	        break;
+		case SDLK_MENU:				sciKey = SCK_MENU;	        break;
+		case SDLK_SLASH:			sciKey = '/';		        break;
+		case SDLK_ASTERISK:			sciKey = '`';		        break;
+		case SDLK_LEFTBRACKET:		sciKey = '[';		        break;
+		case SDLK_BACKSLASH:		sciKey = '\\';		        break;
+		case SDLK_RIGHTBRACKET:		sciKey = ']';		        break;
+		case SDLK_LSHIFT:
+		case SDLK_RSHIFT:
+		case SDLK_LALT:
+		case SDLK_RALT:
+		case SDLK_LCTRL:
+		case SDLK_RCTRL:
+			sciKey = 0;
+			break;
+		default:
+			sciKey = event.keysym.sym;
+	}
+
+	if (sciKey)
+	{
+		bool consumed;
+		bool ctrlPressed  = event.keysym.mod&KMOD_LCTRL  || event.keysym.mod&KMOD_RCTRL;
+		bool altPressed   = event.keysym.mod&KMOD_LALT   || event.keysym.mod&KMOD_RALT;
+		bool shiftPressed = event.keysym.mod&KMOD_LSHIFT || event.keysym.mod&KMOD_RSHIFT;
+		KeyDown((SDLK_a<=sciKey && sciKey<=SDLK_z)?sciKey-'a'+'A':sciKey,
+			shiftPressed, ctrlPressed, altPressed,
+			&consumed
+		);
+		if (!consumed && event.keysym.unicode>=32 && !ctrlPressed && !altPressed)
+		{
+			char    utf8[5];
+			wchar_t utf16[2] = {event.keysym.unicode, 0};
+			UTF8FromUTF16(utf16, 1, utf8, sizeof(utf8));
+			AddCharUTF(utf8, strlen(utf8));
+		}
+	}
+}
+
+bool MyEditor::BraceMatch() 
+{
+	int braceAtCaret = -1;
+	int braceOpposite = -1;
 	int caretPos = int(Command(SCI_GETCURRENTPOS));
-	braceAtCaret = -1;
-	braceOpposite = -1;
 	char charBefore = '\0';
 
 	int lengthDoc = int(Command(SCI_GETLENGTH));
@@ -41,14 +101,6 @@ void MyEditor::FindMatchingBracePos(int & braceAtCaret, int & braceOpposite)
 	}
 	if (braceAtCaret >= 0) 
 		braceOpposite = int(Command(SCI_BRACEMATCH, braceAtCaret, 0));
-}
-
-// return true if 1 or 2 (matched) brace(s) is found
-bool MyEditor::BraceMatch() 
-{
-	int braceAtCaret = -1;
-	int braceOpposite = -1;
-	FindMatchingBracePos(braceAtCaret, braceOpposite);
 
 	if ((braceAtCaret != -1) && (braceOpposite == -1))
 	{

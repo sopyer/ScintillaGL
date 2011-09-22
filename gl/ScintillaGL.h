@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include <SDL.h>
+
 #include "Platform.h"
 
 #include "ILexer.h"
@@ -35,14 +37,12 @@
 #include "Editor.h"
 #include "UniConversion.h"
 
-#ifdef SCI_LEXER
-#	include "SciLexer.h"
-#	include "LexerModule.h"
-#	include "ExternalLexer.h"
-#	include "SciLexer.h"
-#	include "LexerModule.h"
-#	include "Catalogue.h"
-#endif
+#include "SciLexer.h"
+#include "LexerModule.h"
+#include "ExternalLexer.h"
+#include "SciLexer.h"
+#include "LexerModule.h"
+#include "Catalogue.h"
 
 class LexState2 : public LexInterface {
 	const LexerModule *lexCurrent;
@@ -113,23 +113,7 @@ public:
 			}
 		}
 	}
-	//const char *DescribeWordListSets();
-	//void SetWordList(int n, const char *wl);
-	//int GetStyleBitsNeeded() const;
-	//const char *GetName() const;
-	//void *PrivateCall(int operation, void *pointer);
-	//const char *PropertyNames();
-	//int PropertyType(const char *name);
-	//const char *DescribeProperty(const char *name);
-	//void PropSet(const char *key, const char *val);
-	//const char *PropGet(const char *key) const;
-	//int PropGetInt(const char *key, int defaultValue=0) const;
-	//int PropGetExpanded(const char *key, char *result) const;
 };
-
-#ifdef SCI_NAMESPACE
-}
-#endif
 
 class MyEditor: public Editor
 {
@@ -140,11 +124,7 @@ public:
 	
 	MyEditor();
 
-	void FindMatchingBracePos(int & braceAtCaret, int & braceOpposite);
-
 	bool BraceMatch();
-
+	void OnKeyDown(SDL_KeyboardEvent& event);
 	void Paint();
-
-	void AddCharUTF(char c) {Editor::AddCharUTF(&c, 1);}
 };

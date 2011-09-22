@@ -5,9 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="gl">
-      <UniqueIdentifier>{90e02bde-ab21-4555-a854-44ea60d14608}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DMApp.cxx">
@@ -20,16 +17,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gl\DefaultFontData.cpp">
-      <Filter>gl</Filter>
-    </ClCompile>
-    <ClCompile Include="gl\PlatGL.cxx">
-      <Filter>gl</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gl\ScintillaGL.cxx">
-      <Filter>gl</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gl\Surface.cxx">
-      <Filter>gl</Filter>
+    <ClCompile Include="gl\PlatGL.cxx">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -40,13 +34,13 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="gl\DefaultFontData.h">
-      <Filter>gl</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="gl\ScintillaGL.h">
-      <Filter>gl</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="gl\stb_truetype.h">
-      <Filter>gl</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
