@@ -190,144 +190,6 @@ inline Colour ColourFromText(const char *val) {
  */
 
 /**
- * Holds a desired RGB colour.
- */
-//class Colour/*Desired*/ {
-//	long co;
-//public:
-//	Colour/*Desired*/(long lcol=0) {
-//		co = lcol;
-//	}
-//
-//	Colour/*Desired*/(unsigned int red, unsigned int green, unsigned int blue) {
-//		Set(red, green, blue);
-//	}
-//
-//	bool operator==(const Colour/*Desired*/ &other) const {
-//		return co == other.co;
-//	}
-//
-//	void Set(long lcol) {
-//		co = lcol;
-//	}
-//
-//	void Set(unsigned int red, unsigned int green, unsigned int blue) {
-//		co = red | (green << 8) | (blue << 16);
-//	}
-//
-//	static inline unsigned int ValueOfHex(const char ch) {
-//		if (ch >= '0' && ch <= '9')
-//			return ch - '0';
-//		else if (ch >= 'A' && ch <= 'F')
-//			return ch - 'A' + 10;
-//		else if (ch >= 'a' && ch <= 'f')
-//			return ch - 'a' + 10;
-//		else
-//			return 0;
-//	}
-//
-//	void Set(const char *val) {
-//		if (*val == '#') {
-//			val++;
-//		}
-//		unsigned int r = ValueOfHex(val[0]) * 16 + ValueOfHex(val[1]);
-//		unsigned int g = ValueOfHex(val[2]) * 16 + ValueOfHex(val[3]);
-//		unsigned int b = ValueOfHex(val[4]) * 16 + ValueOfHex(val[5]);
-//		Set(r, g, b);
-//	}
-//
-//	long AsLong() const {
-//		return co;
-//	}
-//
-//	unsigned int GetRed() {
-//		return co & 0xff;
-//	}
-//
-//	unsigned int GetGreen() {
-//		return (co >> 8) & 0xff;
-//	}
-//
-//	unsigned int GetBlue() {
-//		return (co >> 16) & 0xff;
-//	}
-//};
-//
-///**
-// * Holds an allocated RGB colour which may be an approximation to the desired colour.
-// */
-//class Colour/*Allocated*/ {
-//	long coAllocated;
-//
-//public:
-//
-//	Colour/*Allocated*/(long lcol=0) {
-//		coAllocated = lcol;
-//	}
-//
-//	void Set(long lcol) {
-//		coAllocated = lcol;
-//	}
-//
-//	long AsLong() const {
-//		return coAllocated;
-//	}
-//};
-//
-///**
-// * Colour pairs hold a desired colour and an allocated colour.
-// */
-//struct Colour/*Pair*/ {
-//	Colour/*Desired*/ desired;
-//	Colour/*Allocated*/ allocated;
-//
-//	Colour/*Pair*/(Colour/*Desired*/ desired_=Colour/*Desired*/(0,0,0)) {
-//		desired = desired_;
-//		allocated.Set(desired.AsLong());
-//	}
-//	void Copy() {
-//		allocated.Set(desired.AsLong());
-//	}
-//};
-
-class Window;	// Forward declaration for Palette
-
-/**
- * Colour palette management.
- */
-//class Palette {
-//	int used;
-//	int size;
-//	Colour/*Pair*/ *entries;
-//#if PLAT_GTK
-//	void *allocatedPalette; // GdkColor *
-//	int allocatedLen;
-//#endif
-//	// Private so Palette objects can not be copied
-//	Palette(const Palette &);
-//	Palette &operator=(const Palette &);
-//public:
-//#if PLAT_WIN
-//	void *hpal;
-//#endif
-//	bool allowRealization;
-//
-//	Palette();
-//	~Palette();
-//
-//	void Release();
-//
-//	/**
-//	 * This method either adds a colour to the list of wanted colours (want==true)
-//	 * or retrieves the allocated colour back to the Colour/*Pair*/.
-//	 * This is one method to make it easier to keep the code for wanting and retrieving in sync.
-//	 */
-//	void WantFind(Colour/*Pair*/ &cp, bool want);
-//
-//	void Allocate(Window &w);
-//};
-
-/**
  * Font management.
  */
 class Font {
@@ -380,27 +242,27 @@ public:
 
 	virtual void Release()=0;
 	virtual bool Initialised()=0;
-	virtual void PenColour(Colour/*Allocated*/ fore)=0;
+	virtual void PenColour(Colour fore)=0;
 	virtual int LogPixelsY()=0;
 	virtual float DeviceHeightFont(int points)=0;
 	virtual void MoveTo(float x_, float y_)=0;
 	virtual void LineTo(float x_, float y_)=0;
-	virtual void Polygon(Point *pts, int npts, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
-	virtual void RectangleDraw(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
-	virtual void FillRectangle(PRectangle rc, Colour/*Allocated*/ back)=0;
+	virtual void Polygon(Point *pts, int npts, Colour fore, Colour back)=0;
+	virtual void RectangleDraw(PRectangle rc, Colour fore, Colour back)=0;
+	virtual void FillRectangle(PRectangle rc, Colour back)=0;
 	virtual void FillRectangle(PRectangle rc, Surface &surfacePattern)=0;
-	virtual void RoundedRectangle(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
-	virtual void AlphaRectangle(PRectangle rc, int cornerSize, Colour/*Allocated*/ fill, int alphaFill,
-		Colour/*Allocated*/ outline, int alphaOutline, int flags)=0;
-	virtual void Ellipse(PRectangle rc, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
+	virtual void RoundedRectangle(PRectangle rc, Colour fore, Colour back)=0;
+	virtual void AlphaRectangle(PRectangle rc, int cornerSize, Colour fill, int alphaFill,
+		Colour outline, int alphaOutline, int flags)=0;
+	virtual void Ellipse(PRectangle rc, Colour fore, Colour back)=0;
 	
 	//TODO: Remove
 	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 	virtual void DrawPixmap(PRectangle rc, Point from, Pixmap pixmap) = 0;
 
-	virtual void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
-	virtual void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore, Colour/*Allocated*/ back)=0;
-	virtual void DrawTextTransparent(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour/*Allocated*/ fore)=0;
+	virtual void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore, Colour back)=0;
+	virtual void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore, Colour back)=0;
+	virtual void DrawTextTransparent(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore)=0;
 	virtual void MeasureWidths(Font &font_, const char *s, int len, float *positions)=0;
 	virtual float WidthText(Font &font_, const char *s, int len)=0;
 	virtual float WidthChar(Font &font_, char ch)=0;
@@ -411,15 +273,9 @@ public:
 	virtual float Height(Font &font_)=0;
 	virtual float AverageCharWidth(Font &font_)=0;
 
-	//virtual int SetPalette(Palette *pal, bool inBackGround)=0;
 	virtual void SetClip(PRectangle rc)=0;
 	virtual void FlushCachedState()=0;
 };
-
-/**
- * A simple callback action passing one piece of untyped user data.
- */
-typedef void (*CallBackAction)(void*);
 
 class ElapsedTime {
 	long bigBit;
@@ -450,48 +306,32 @@ public:
  * Platform class used to retrieve system wide parameters such as double click speed
  * and chrome colour. Not a creatable object, more of a module with several functions.
  */
-class Platform {
-	// Private so Platform objects can not be copied
-	Platform(const Platform &) {}
-	Platform &operator=(const Platform &) { return *this; }
-public:
-	// Should be private because no new Platforms are ever created
-	// but gcc warns about this
-	Platform() {}
-	~Platform() {}
-	static Colour/*Desired*/ Chrome();
-	static Colour/*Desired*/ ChromeHighlight();
-	static const char *DefaultFont();
-	static int DefaultFontSize();
-	static unsigned int DoubleClickTime();
-	static bool MouseButtonBounce();
-	static void DebugDisplay(const char *s);
-	static bool IsKeyDown(int key);
-	static long SendScintilla(
+namespace Platform {
+	Colour       Chrome();
+	Colour       ChromeHighlight();
+	const char*  DefaultFont();
+	int          DefaultFontSize();
+	unsigned int DoubleClickTime();
+	bool         MouseButtonBounce();
+
+	long SendScintilla(
 		WindowID w, unsigned int msg, unsigned long wParam=0, long lParam=0);
-	static long SendScintillaPointer(
+	long SendScintillaPointer(
 		WindowID w, unsigned int msg, unsigned long wParam=0, void *lParam=0);
-	static bool IsDBCSLeadByte(int codePage, char ch);
-	static int DBCSCharLength(int codePage, const char *s);
-	static int DBCSCharMaxLength();
 
 	// These are utility functions not really tied to a platform
-	static int Minimum(int a, int b);
-	static int Maximum(int a, int b);
-	// Next three assume 16 bit shorts and 32 bit longs
-	static long LongFromTwoShorts(short a,short b) {
-		return (a) | ((b) << 16);
-	}
-	static short HighShortFromLong(long x) {
-		return static_cast<short>(x >> 16);
-	}
-	static short LowShortFromLong(long x) {
-		return static_cast<short>(x & 0xffff);
-	}
-	static void DebugPrintf(const char *format, ...);
-	static bool ShowAssertionPopUps(bool assertionPopUps_);
-	static void Assert(const char *c, const char *file, int line);
-	static int Clamp(int val, int minVal, int maxVal);
+	inline int Minimum(int a, int b) { return a<b ? a : b; }
+	inline int Maximum(int a, int b) { return a>b ? a : b; }
+
+	inline short HighShortFromLong(long x) { return static_cast<short>(x >> 16);    }
+	inline short LowShortFromLong(long x)  { return static_cast<short>(x & 0xffff);	}
+
+	inline int Clamp(int val, int minVal, int maxVal) { return Minimum( maxVal, Maximum( val, minVal ) ); }
+
+	void DebugDisplay(const char *s);
+	void DebugPrintf(const char *format, ...);
+	bool ShowAssertionPopUps(bool assertionPopUps_);
+	void Assert(const char *c, const char *file, int line);
 };
 
 enum AdditionalTextFormat

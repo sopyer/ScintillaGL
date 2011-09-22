@@ -28,7 +28,8 @@ using namespace Scintilla;
 #endif
 
 ElapsedTime::ElapsedTime() {
-assert(0);	}
+	assert(0);
+}
 
 class DynamicLibraryImpl : public DynamicLibrary {
 public:
@@ -60,12 +61,12 @@ double ElapsedTime::Duration(bool reset) {
 assert(0);		return 0;
 }
 
-Colour/*Desired*/ Platform::Chrome() {
-	return MakeRGBA/*Desired*/(0xe0, 0xe0, 0xe0);
+Colour Platform::Chrome() {
+	return MakeRGBA(0xe0, 0xe0, 0xe0);
 }
 
-Colour/*Desired*/ Platform::ChromeHighlight() {
-	return MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
+Colour Platform::ChromeHighlight() {
+	return MakeRGBA(0xff, 0xff, 0xff);
 }
 
 const char *Platform::DefaultFont() {
@@ -88,71 +89,16 @@ void Platform::DebugDisplay(const char *s) {
 	fprintf(stderr, "%s", s);
 }
 
-bool Platform::IsKeyDown(int) {
-	// TODO: discover state of keys in GTK+/X
-	return false;
-}
-
 long Platform::SendScintilla(
     WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
-assert(0);		return 0;
+	assert(0);
+	return 0;
 }
 
 long Platform::SendScintillaPointer(
     WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
-assert(0);		return 0;
-}
-
-bool Platform::IsDBCSLeadByte(int codePage, char ch) {
-	// Byte ranges found in Wikipedia articles with relevant search strings in each case
-	unsigned char uch = static_cast<unsigned char>(ch);
-	switch (codePage) {
-		case 932:
-			// Shift_jis
-			return ((uch >= 0x81) && (uch <= 0x9F)) ||
-				((uch >= 0xE0) && (uch <= 0xEF));
-		case 936:
-			// GBK
-			return (uch >= 0x81) && (uch <= 0xFE);
-		case 950:
-			// Big5
-			return (uch >= 0x81) && (uch <= 0xFE);
-		// Korean EUC-KR may be code page 949.
-	}
-	return false;
-}
-
-int Platform::DBCSCharLength(int codePage, const char *s) {
-	if (codePage == 932 || codePage == 936 || codePage == 950) {
-		return IsDBCSLeadByte(codePage, s[0]) ? 2 : 1;
-	} else {
-		int bytes = mblen(s, MB_CUR_MAX);
-		if (bytes >= 1)
-			return bytes;
-		else
-			return 1;
-	}
-}
-
-int Platform::DBCSCharMaxLength() {
-	return MB_CUR_MAX;
-	//return 2;
-}
-
-// These are utility functions not really tied to a platform
-
-int Platform::Minimum(int a, int b) {
-	if (a < b)
-		return a;
-	else
-		return b;
-}
-
-int Platform::Maximum(int a, int b) {
-	if (a > b)
-		return a;
-	else
-		return b;
+	assert(0);
+	return 0;
 }
 
 //#define TRACE
@@ -186,14 +132,6 @@ void Platform::Assert(const char *c, const char *file, int line) {
 	strcat(buffer, "\r\n");
 	Platform::DebugDisplay(buffer);
 	abort();
-}
-
-int Platform::Clamp(int val, int minVal, int maxVal) {
-	if (val > maxVal)
-		val = maxVal;
-	if (val < minVal)
-		val = minVal;
-	return val;
 }
 
 namespace platform
@@ -354,18 +292,9 @@ int GetClipboardTextUTF8(char* text, size_t len)
 	return clipLen;
 }
 
-// ScintillaGL source code edit control
-// Surface.cxx - implementation of surface on OpenGL
-// Copyright 2011 by Mykhailo Parfeniuk
-// The License.txt file describes the conditions under which this software may be distributed.
-
 #include <assert.h>
-
 #include "Platform.h"
-
 #include <gl/glee.h>
-
-enum encodingType { singleByte, UTF8, dbcs};
 
 #ifdef SCI_NAMESPACE
 namespace Scintilla {

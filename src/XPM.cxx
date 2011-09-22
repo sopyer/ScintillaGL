@@ -38,7 +38,7 @@ static size_t MeasureLength(const char *s) {
 	return i;
 }
 
-Colour/*Allocated*/ XPM::ColourFromCode(int ch) const {
+Colour XPM::ColourFromCode(int ch) const {
 	return colourCodeTable[ch]/*->allocated*/;
 #ifdef SLOW
 	for (int i=0; i<nColours; i++) {
@@ -142,7 +142,7 @@ void XPM::Init(const char *const *linesForm) {
 		if (*colourDef == '#') {
 			colours[c]/*.desired.Set(colourDef)*/ = ColourFromText(colourDef);
 		} else {
-			colours[c]/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
+			colours[c] = MakeRGBA(0xff, 0xff, 0xff);
 			codeTransparent = codes[c];
 		}
 		colourCodeTable[static_cast<unsigned char>(codes[c])] = (colours[c]);

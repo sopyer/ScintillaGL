@@ -91,40 +91,40 @@ ViewStyle::ViewStyle(const ViewStyle &source) {
 	}
 
 	selforeset = source.selforeset;
-	selforeground/*.desired*/ = source.selforeground/*.desired*/;
-	selAdditionalForeground/*.desired*/ = source.selAdditionalForeground/*.desired*/;
+	selforeground = source.selforeground;
+	selAdditionalForeground = source.selAdditionalForeground;
 	selbackset = source.selbackset;
-	selbackground/*.desired*/ = source.selbackground/*.desired*/;
-	selAdditionalBackground/*.desired*/ = source.selAdditionalBackground/*.desired*/;
-	selbackground2/*.desired*/ = source.selbackground2/*.desired*/;
+	selbackground = source.selbackground;
+	selAdditionalBackground = source.selAdditionalBackground;
+	selbackground2 = source.selbackground2;
 	selAlpha = source.selAlpha;
 	selAdditionalAlpha = source.selAdditionalAlpha;
 	selEOLFilled = source.selEOLFilled;
 
 	foldmarginColourSet = source.foldmarginColourSet;
-	foldmarginColour/*.desired*/ = source.foldmarginColour/*.desired*/;
+	foldmarginColour = source.foldmarginColour;
 	foldmarginHighlightColourSet = source.foldmarginHighlightColourSet;
-	foldmarginHighlightColour/*.desired*/ = source.foldmarginHighlightColour/*.desired*/;
+	foldmarginHighlightColour = source.foldmarginHighlightColour;
 
 	hotspotForegroundSet = source.hotspotForegroundSet;
-	hotspotForeground/*.desired*/ = source.hotspotForeground/*.desired*/;
+	hotspotForeground = source.hotspotForeground;
 	hotspotBackgroundSet = source.hotspotBackgroundSet;
-	hotspotBackground/*.desired*/ = source.hotspotBackground/*.desired*/;
+	hotspotBackground = source.hotspotBackground;
 	hotspotUnderline = source.hotspotUnderline;
 	hotspotSingleLine = source.hotspotSingleLine;
 
 	whitespaceForegroundSet = source.whitespaceForegroundSet;
-	whitespaceForeground/*.desired*/ = source.whitespaceForeground/*.desired*/;
+	whitespaceForeground = source.whitespaceForeground;
 	whitespaceBackgroundSet = source.whitespaceBackgroundSet;
-	whitespaceBackground/*.desired*/ = source.whitespaceBackground/*.desired*/;
-	selbar/*.desired*/ = source.selbar/*.desired*/;
-	selbarlight/*.desired*/ = source.selbarlight/*.desired*/;
-	caretcolour/*.desired*/ = source.caretcolour/*.desired*/;
-	additionalCaretColour/*.desired*/ = source.additionalCaretColour/*.desired*/;
+	whitespaceBackground = source.whitespaceBackground;
+	selbar = source.selbar;
+	selbarlight = source.selbarlight;
+	caretcolour = source.caretcolour;
+	additionalCaretColour = source.additionalCaretColour;
 	showCaretLineBackground = source.showCaretLineBackground;
-	caretLineBackground/*.desired*/ = source.caretLineBackground/*.desired*/;
+	caretLineBackground = source.caretLineBackground;
 	caretLineAlpha = source.caretLineAlpha;
-	edgecolour/*.desired*/ = source.edgecolour/*.desired*/;
+	edgecolour = source.edgecolour;
 	edgeState = source.edgeState;
 	caretStyle = source.caretStyle;
 	caretWidth = source.caretWidth;
@@ -166,13 +166,13 @@ void ViewStyle::Init(size_t stylesSize_) {
 
 	indicators[0].style = INDIC_SQUIGGLE;
 	indicators[0].under = false;
-	indicators[0].fore = MakeRGBA/*Desired*/(0, 0x7f, 0);
+	indicators[0].fore = MakeRGBA(0, 0x7f, 0);
 	indicators[1].style = INDIC_TT;
 	indicators[1].under = false;
-	indicators[1].fore = MakeRGBA/*Desired*/(0, 0, 0xff);
+	indicators[1].fore = MakeRGBA(0, 0, 0xff);
 	indicators[2].style = INDIC_PLAIN;
 	indicators[2].under = false;
-	indicators[2].fore = MakeRGBA/*Desired*/(0xff, 0, 0);
+	indicators[2].fore = MakeRGBA(0xff, 0, 0);
 
 	lineHeight = 1;
 	maxAscent = 1;
@@ -181,35 +181,35 @@ void ViewStyle::Init(size_t stylesSize_) {
 	spaceWidth = 8;
 
 	selforeset = false;
-	selforeground/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0, 0);
-	selAdditionalForeground/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0, 0);
+	selforeground = MakeRGBA(0xff, 0, 0);
+	selAdditionalForeground = MakeRGBA(0xff, 0, 0);
 	selbackset = true;
-	selbackground/*.desired*/ = MakeRGBA/*Desired*/(0xc0, 0xc0, 0xc0);
-	selAdditionalBackground/*.desired*/ = MakeRGBA/*Desired*/(0xd7, 0xd7, 0xd7);
-	selbackground2/*.desired*/ = MakeRGBA/*Desired*/(0xb0, 0xb0, 0xb0);
+	selbackground = MakeRGBA(0xc0, 0xc0, 0xc0);
+	selAdditionalBackground = MakeRGBA(0xd7, 0xd7, 0xd7);
+	selbackground2 = MakeRGBA(0xb0, 0xb0, 0xb0);
 	selAlpha = SC_ALPHA_NOALPHA;
 	selAdditionalAlpha = SC_ALPHA_NOALPHA;
 	selEOLFilled = false;
 
 	foldmarginColourSet = false;
-	foldmarginColour/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0, 0);
+	foldmarginColour = MakeRGBA(0xff, 0, 0);
 	foldmarginHighlightColourSet = false;
-	foldmarginHighlightColour/*.desired*/ = MakeRGBA/*Desired*/(0xc0, 0xc0, 0xc0);
+	foldmarginHighlightColour = MakeRGBA(0xc0, 0xc0, 0xc0);
 
 	whitespaceForegroundSet = false;
-	whitespaceForeground/*.desired*/ = MakeRGBA/*Desired*/(0, 0, 0);
+	whitespaceForeground = MakeRGBA(0, 0, 0);
 	whitespaceBackgroundSet = false;
-	whitespaceBackground/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
-	selbar/*.desired*/ = Platform::Chrome();
-	selbarlight/*.desired*/ = Platform::ChromeHighlight();
-	styles[STYLE_LINENUMBER].fore/*.desired*/ = MakeRGBA/*Desired*/(0, 0, 0);
-	styles[STYLE_LINENUMBER].back/*.desired*/ = Platform::Chrome();
-	caretcolour/*.desired*/ = MakeRGBA/*Desired*/(0, 0, 0);
-	additionalCaretColour/*.desired*/ = MakeRGBA/*Desired*/(0x7f, 0x7f, 0x7f);
+	whitespaceBackground = MakeRGBA(0xff, 0xff, 0xff);
+	selbar = Platform::Chrome();
+	selbarlight = Platform::ChromeHighlight();
+	styles[STYLE_LINENUMBER].fore = MakeRGBA(0, 0, 0);
+	styles[STYLE_LINENUMBER].back = Platform::Chrome();
+	caretcolour = MakeRGBA(0, 0, 0);
+	additionalCaretColour = MakeRGBA(0x7f, 0x7f, 0x7f);
 	showCaretLineBackground = false;
-	caretLineBackground/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0);
+	caretLineBackground = MakeRGBA(0xff, 0xff, 0);
 	caretLineAlpha = SC_ALPHA_NOALPHA;
-	edgecolour/*.desired*/ = MakeRGBA/*Desired*/(0xc0, 0xc0, 0xc0);
+	edgecolour = MakeRGBA(0xc0, 0xc0, 0xc0);
 	edgeState = EDGE_NONE;
 	caretStyle = CARETSTYLE_LINE;
 	caretWidth = 1;
@@ -217,9 +217,9 @@ void ViewStyle::Init(size_t stylesSize_) {
 	someStylesForceCase = false;
 
 	hotspotForegroundSet = false;
-	hotspotForeground/*.desired*/ = MakeRGBA/*Desired*/(0, 0, 0xff);
+	hotspotForeground = MakeRGBA(0, 0, 0xff);
 	hotspotBackgroundSet = false;
-	hotspotBackground/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
+	hotspotBackground = MakeRGBA(0xff, 0xff, 0xff);
 	hotspotUnderline = true;
 	hotspotSingleLine = true;
 
@@ -291,8 +291,8 @@ void ViewStyle::Init(size_t stylesSize_) {
 //}
 
 void ViewStyle::Refresh(Surface &surface) {
-	selbar/*.desired*/ = Platform::Chrome();
-	selbarlight/*.desired*/ = Platform::ChromeHighlight();
+	selbar = Platform::Chrome();
+	selbarlight = Platform::ChromeHighlight();
 	styles[STYLE_DEFAULT].Realise(surface, zoomLevel, NULL, extraFontFlag);
 	maxAscent = styles[STYLE_DEFAULT].ascent;
 	maxDescent = styles[STYLE_DEFAULT].descent;
@@ -360,8 +360,8 @@ void ViewStyle::EnsureStyle(size_t index) {
 }
 
 void ViewStyle::ResetDefaultStyle() {
-	styles[STYLE_DEFAULT].Clear(MakeRGBA/*Desired*/(0,0,0),
-		MakeRGBA/*Desired*/(0xff,0xff,0xff),
+	styles[STYLE_DEFAULT].Clear(MakeRGBA(0,0,0),
+		MakeRGBA(0xff,0xff,0xff),
 		Platform::DefaultFontSize(), fontNames.Save(Platform::DefaultFont()),
 		SC_CHARSET_DEFAULT,
 		false, false, false, false, Style::caseMixed, true, true, false);
@@ -374,11 +374,11 @@ void ViewStyle::ClearStyles() {
 			styles[i].ClearTo(styles[STYLE_DEFAULT]);
 		}
 	}
-	styles[STYLE_LINENUMBER].back/*.desired*/ = Platform::Chrome();
+	styles[STYLE_LINENUMBER].back = Platform::Chrome();
 
 	// Set call tip fore/back to match the values previously set for call tips
-	styles[STYLE_CALLTIP].back/*.desired*/ = MakeRGBA/*Desired*/(0xff, 0xff, 0xff);
-	styles[STYLE_CALLTIP].fore/*.desired*/ = MakeRGBA/*Desired*/(0x80, 0x80, 0x80);
+	styles[STYLE_CALLTIP].back = MakeRGBA(0xff, 0xff, 0xff);
+	styles[STYLE_CALLTIP].fore = MakeRGBA(0x80, 0x80, 0x80);
 }
 
 void ViewStyle::SetStyleFontName(int styleIndex, const char *name) {

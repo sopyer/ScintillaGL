@@ -45,7 +45,7 @@ public:
 	Style(const Style &source);
 	~Style();
 	Style &operator=(const Style &source);
-	void Clear(Colour/*Desired*/ fore_, Colour/*Desired*/ back_,
+	void Clear(Colour fore_, Colour back_,
 	           int size_,
 	           const char *fontName_, int characterSet_,
 	           bool bold_, bool italic_, bool eolFilled_,

@@ -24,7 +24,7 @@ class XPM {
 	char codeTransparent;
 	char *codes;
 	Colour/*Pair*/ *colours;
-	Colour/*Allocated*/ ColourFromCode(int ch) const;
+	Colour ColourFromCode(int ch) const;
 	void FillRun(Surface *surface, int code, int startX, int y, int x);
 	char **lines;
 	Colour/*Pair*/ /***/colourCodeTable[256];

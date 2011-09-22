@@ -31,8 +31,8 @@ public:
 	LineMarker(const LineMarker &) {
 		// Defined to avoid pxpm being blindly copied, not as real copy constructor
 		markType = SC_MARK_CIRCLE;
-		fore = MakeRGBA/*Desired*/(0,0,0);
-		back = MakeRGBA/*Desired*/(0xff,0xff,0xff);
+		fore = MakeRGBA(0,0,0);
+		back = MakeRGBA(0xff,0xff,0xff);
 		alpha = SC_ALPHA_NOALPHA;
 		pxpm = NULL;
 	}
@@ -42,8 +42,8 @@ public:
 	LineMarker &operator=(const LineMarker &) {
 		// Defined to avoid pxpm being blindly copied, not as real assignment operator
 		markType = SC_MARK_CIRCLE;
-		fore = MakeRGBA/*Desired*/(0,0,0);
-		back = MakeRGBA/*Desired*/(0xff,0xff,0xff);
+		fore = MakeRGBA(0,0,0);
+		back = MakeRGBA(0xff,0xff,0xff);
 		alpha = SC_ALPHA_NOALPHA;
 		delete pxpm;
 		pxpm = NULL;

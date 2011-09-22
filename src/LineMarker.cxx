@@ -37,7 +37,7 @@ void LineMarker::SetXPM(const char *const *linesForm) {
 	markType = SC_MARK_PIXMAP;
 }
 
-static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, Colour fore, Colour back) {
 	PRectangle rc;
 	rc.left = centreX - armSize;
 	rc.top = centreY - armSize;
@@ -46,7 +46,7 @@ static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, Col
 	surface->RectangleDraw(rc, back, fore);
 }
 
-static void DrawCircle(Surface *surface, int centreX, int centreY, int armSize, Colour/*Allocated*/ fore, Colour/*Allocated*/ back) {
+static void DrawCircle(Surface *surface, int centreX, int centreY, int armSize, Colour fore, Colour back) {
 	PRectangle rcCircle;
 	rcCircle.left = centreX - armSize;
 	rcCircle.top = centreY - armSize;
@@ -55,14 +55,14 @@ static void DrawCircle(Surface *surface, int centreX, int centreY, int armSize, 
 	surface->Ellipse(rcCircle, back, fore);
 }
 
-static void DrawPlus(Surface *surface, int centreX, int centreY, int armSize, Colour/*Allocated*/ fore) {
+static void DrawPlus(Surface *surface, int centreX, int centreY, int armSize, Colour fore) {
 	PRectangle rcV(centreX, centreY - armSize + 2, centreX + 1, centreY + armSize - 2 + 1);
 	surface->FillRectangle(rcV, fore);
 	PRectangle rcH(centreX - armSize + 2, centreY, centreX + armSize - 2 + 1, centreY+1);
 	surface->FillRectangle(rcH, fore);
 }
 
-static void DrawMinus(Surface *surface, int centreX, int centreY, int armSize, Colour/*Allocated*/ fore) {
+static void DrawMinus(Surface *surface, int centreX, int centreY, int armSize, Colour fore) {
 	PRectangle rcH(centreX - armSize + 2, centreY, centreX + armSize - 2 + 1, centreY+1);
 	surface->FillRectangle(rcH, fore);
 }
