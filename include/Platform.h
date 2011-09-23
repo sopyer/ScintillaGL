@@ -9,48 +9,6 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-#include <assert.h>
-
-// PLAT_GTK = GTK+ on Linux or Win32
-// PLAT_GTK_WIN32 is defined additionally when running PLAT_GTK under Win32
-// PLAT_WIN = Win32 API on Win32 OS
-// PLAT_WX is wxWindows on any supported platform
-
-#define PLAT_GTK 0
-#define PLAT_GTK_WIN32 0
-#define PLAT_MACOSX 0
-#define PLAT_WIN 0
-#define PLAT_WX  0
-#define PLAT_FOX 0
-
-#if defined(FOX)
-#undef PLAT_FOX
-#define PLAT_FOX 1
-
-#elif defined(__WX__)
-#undef PLAT_WX
-#define PLAT_WX  1
-
-#elif defined(GTK)
-#undef PLAT_GTK
-#define PLAT_GTK 1
-
-#if defined(__WIN32__) || defined(_MSC_VER)
-#undef PLAT_GTK_WIN32
-#define PLAT_GTK_WIN32 1
-#endif
-
-#elif defined(__APPLE__)
-
-#undef PLAT_MACOSX
-#define PLAT_MACOSX 1
-
-#else
-#undef PLAT_WIN
-#define PLAT_WIN 1
-
-#endif
-
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
 #endif
@@ -77,10 +35,6 @@ public:
 
 	explicit Point(float x_=0, float y_=0) : x(x_), y(y_) {
 	}
-
-	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
-
-	static Point FromLong(long lpoint);
 };
 
 /**
@@ -131,30 +85,16 @@ public:
 };
 
 typedef unsigned int Colour;
+
 inline Colour MakeRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a=0xFF)
 {
 	return a<<24|b<<16|g<<8|r;
 }
 
-inline int GetRed(Colour c)
-{
-	return c&0xFF;
-}
-
-inline int GetGreen(Colour c)
-{
-	return (c>>8)&0xFF;
-}
-
-inline int GetBlue(Colour c)
-{
-	return (c>>16)&0xFF;
-}
-
-inline int GetAlpha(Colour c)
-{
-	return (c>>24)&0xFF;
-}
+inline int GetRed(Colour c)   { return c&0xFF;       }
+inline int GetGreen(Colour c) {	return (c>>8)&0xFF;  }
+inline int GetBlue(Colour c)  { return (c>>16)&0xFF; }
+inline int GetAlpha(Colour c) {	return (c>>24)&0xFF; }
 
 inline unsigned char ValueOfHex(const char ch) {
 	if (ch >= '0' && ch <= '9')
@@ -178,26 +118,11 @@ inline Colour ColourFromText(const char *val) {
 }
 
 /**
- * In some circumstances, including Win32 in paletted mode and GTK+, each colour
- * must be allocated before use. The desired colours are held in the ColourDesired class,
- * and after allocation the allocation entry is stored in the ColourAllocated class. In other
- * circumstances, such as Win32 in true colour mode, the allocation process just copies
- * the RGB values from the desired to the allocated class.
- * As each desired colour requires allocation before it can be used, the ColourPair class
- * holds both a ColourDesired and a ColourAllocated
- * The Palette class is responsible for managing the palette of colours which contains a
- * list of ColourPair objects and performs the allocation.
- */
-
-/**
  * Font management.
  */
 class Font {
 protected:
 	FontID fid;
-#if PLAT_WX
-	int ascent;
-#endif
 	// Private so Font objects can not be copied
 	Font(const Font &);
 	Font &operator=(const Font &);
@@ -216,13 +141,14 @@ public:
         friend class SurfaceImpl;
 };
 
-struct PixmapInternal;
-typedef PixmapInternal* Pixmap;
+struct pixmap_t;
+typedef pixmap_t* Pixmap;
 
 Pixmap	CreatePixmap();
 void	DestroyPixmap(Pixmap pixmap);
 void	UpdatePixmap(Pixmap pixmap, int w, int h, int* data);
 bool	IsPixmapInitialised(Pixmap pixmap);
+
 /**
  * A surface abstracts a place to draw.
  */
@@ -234,14 +160,10 @@ private:
 public:
 	Surface() {}
 	virtual ~Surface() {}
+
 	static Surface *Allocate();
-
-	virtual void Init(WindowID wid)=0;
-	virtual void Init(SurfaceID sid, WindowID wid)=0;
-	virtual void InitPixMap(int width, int height, Surface *surface_, WindowID wid)=0;
-
 	virtual void Release()=0;
-	virtual bool Initialised()=0;
+
 	virtual void PenColour(Colour fore)=0;
 	virtual int LogPixelsY()=0;
 	virtual float DeviceHeightFont(int points)=0;
@@ -256,8 +178,6 @@ public:
 		Colour outline, int alphaOutline, int flags)=0;
 	virtual void Ellipse(PRectangle rc, Colour fore, Colour back)=0;
 	
-	//TODO: Remove
-	virtual void Copy(PRectangle rc, Point from, Surface &surfaceSource)=0;
 	virtual void DrawPixmap(PRectangle rc, Point from, Pixmap pixmap) = 0;
 
 	virtual void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore, Colour back)=0;
@@ -286,23 +206,6 @@ public:
 };
 
 /**
- * Dynamic Library (DLL/SO/...) loading
- */
-class DynamicLibrary {
-public:
-	virtual ~DynamicLibrary() {}
-
-	/// @return Pointer to function "name", or NULL on failure.
-	virtual Function FindFunction(const char *name) = 0;
-
-	/// @return true if the library was loaded successfully.
-	virtual bool IsValid() = 0;
-
-	/// @return An instance of a DynamicLibrary subclass with "modulePath" loaded.
-	static DynamicLibrary *Load(const char *modulePath);
-};
-
-/**
  * Platform class used to retrieve system wide parameters such as double click speed
  * and chrome colour. Not a creatable object, more of a module with several functions.
  */
@@ -323,9 +226,7 @@ namespace Platform {
 
 	inline int Clamp(int val, int minVal, int maxVal) { return Minimum( maxVal, Maximum( val, minVal ) ); }
 
-	void DebugDisplay(const char *s);
 	void DebugPrintf(const char *format, ...);
-	bool ShowAssertionPopUps(bool assertionPopUps_);
 	void Assert(const char *c, const char *file, int line);
 };
 
@@ -336,27 +237,22 @@ enum AdditionalTextFormat
 	TEXT_FORMAT_UTF8_RECT
 };
 
-int IsClipboardTextAvailable(AdditionalTextFormat fmt=TEXT_FORMAT_UTF8);
+int  IsClipboardTextAvailable(AdditionalTextFormat fmt=TEXT_FORMAT_UTF8);
+int  GetClipboardTextUTF8(char* text, size_t len);
 void SetClipboardTextUTF8(const char* text, size_t  len, int additionalFormat);
-int GetClipboardTextUTF8(char* text, size_t len);
-
-#ifdef  NDEBUG
-#define PLATFORM_ASSERT(c) ((void)0)
-#else
-#ifdef SCI_NAMESPACE
-#define PLATFORM_ASSERT(c) ((c) ? (void)(0) : Scintilla::Platform::Assert(#c, __FILE__, __LINE__))
-#else
-#define PLATFORM_ASSERT(c) ((c) ? (void)(0) : Platform::Assert(#c, __FILE__, __LINE__))
-#endif
-#endif
 
 #ifdef SCI_NAMESPACE
 }
 #endif
 
-// Shut up annoying Visual C++ warnings:
-#ifdef _MSC_VER
-#pragma warning(disable: 4244 4309 4514 4710)
+#ifdef  NDEBUG
+#	define PLATFORM_ASSERT(c) ((void)0)
+#else
+#	ifdef SCI_NAMESPACE
+#		define PLATFORM_ASSERT(c) ((c) ? (void)(0) : Scintilla::Platform::Assert(#c, __FILE__, __LINE__))
+#	else
+#		define PLATFORM_ASSERT(c) ((c) ? (void)(0) : Platform::Assert(#c, __FILE__, __LINE__))
+#	endif
 #endif
 
 #endif

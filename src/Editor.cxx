@@ -3190,7 +3190,6 @@ void Editor::Paint(/*Surface *surfaceWindow, PRectangle rcArea*/) {
 		//TODO: meaningless????
 		RefreshPixMaps(drawSurface);	// In case pixmaps invalidated by scrollbar change
 	}
-	//PLATFORM_ASSERT(pixmapSelPattern->Initialised());
 	PLATFORM_ASSERT(IsPixmapInitialised(pixmapSelPattern));
 
 	if (paintState != paintAbandoned) {
@@ -3431,9 +3430,6 @@ long Editor::FormatRange(bool draw, Sci_RangeToFormat *pfr) {
 		vsPrint.ms[lineNumberIndex].width = lineNumberWidth;
 		vsPrint.Refresh(*drawSurface);	// Recalculate fixedColumnWidth
 	}
-	// Ensure colours are set up
-	//vsPrint.RefreshColourPalette(palette, true);
-	//vsPrint.RefreshColourPalette(palette, false);
 
 	int linePrintStart = pdoc->LineFromPosition(pfr->chrg.cpMin);
 	int linePrintLast = linePrintStart + (pfr->rc.bottom - pfr->rc.top) / vsPrint.lineHeight - 1;

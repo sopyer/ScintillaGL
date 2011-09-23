@@ -18,48 +18,9 @@
 
 #include <gl/glee.h>
 
-#ifdef _MSC_VER
-// Ignore unreferenced local functions in GTK+ headers
-#pragma warning(disable: 4505)
-#endif
-
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
 #endif
-
-ElapsedTime::ElapsedTime() {
-	assert(0);
-}
-
-class DynamicLibraryImpl : public DynamicLibrary {
-public:
-	DynamicLibraryImpl(const char *modulePath) {
-		assert(0);
-	}
-
-	virtual ~DynamicLibraryImpl() {
-		assert(0);
-	}
-
-	// Use g_module_symbol to get a pointer to the relevant function.
-	virtual Function FindFunction(const char *name) {
-		assert(0);
-		return 0;
-	}
-
-	virtual bool IsValid() {
-		assert(0);
-		return true;
-	}
-};
-
-DynamicLibrary *DynamicLibrary::Load(const char *modulePath) {
-	return static_cast<DynamicLibrary *>( new DynamicLibraryImpl(modulePath) );
-}
-
-double ElapsedTime::Duration(bool reset) {
-assert(0);		return 0;
-}
 
 Colour Platform::Chrome() {
 	return MakeRGBA(0xe0, 0xe0, 0xe0);
@@ -85,41 +46,11 @@ bool Platform::MouseButtonBounce() {
 	return true;
 }
 
-void Platform::DebugDisplay(const char *s) {
-	fprintf(stderr, "%s", s);
-}
-
-//#define TRACE
-
-#ifdef TRACE
-void Platform::DebugPrintf(const char *format, ...) {
-	char buffer[2000];
-	va_list pArguments;
-	va_start(pArguments, format);
-	vsprintf(buffer, format, pArguments);
-	va_end(pArguments);
-	Platform::DebugDisplay(buffer);
-}
-#else
-void Platform::DebugPrintf(const char *, ...) {}
-
-#endif
-
-// Not supported for GTK+
-static bool assertionPopUps = true;
-
-bool Platform::ShowAssertionPopUps(bool assertionPopUps_) {
-	bool ret = assertionPopUps;
-	assertionPopUps = assertionPopUps_;
-	return ret;
-}
-
 void Platform::Assert(const char *c, const char *file, int line) {
 	char buffer[2000];
 	sprintf(buffer, "Assertion [%s] failed at %s %d", c, file, line);
 	strcat(buffer, "\r\n");
-	Platform::DebugDisplay(buffer);
-	abort();
+	assert(false);
 }
 
 namespace platform
@@ -289,18 +220,13 @@ namespace Scintilla {
 #endif
 class SurfaceImpl : public Surface {
 	Colour penColour;
-	int x;
-	int y;
+	float x;
+	float y;
 public:
 	SurfaceImpl();
 	virtual ~SurfaceImpl();
 
-	void Init(WindowID wid);
-	void Init(SurfaceID sid, WindowID wid);
-	void InitPixMap(int width, int height, Surface *surface_, WindowID wid);
-
 	void Release();
-	bool Initialised();
 	void PenColour(Colour fore);
 	int LogPixelsY();
 	float DeviceHeightFont(int points);
@@ -314,9 +240,6 @@ public:
 	void AlphaRectangle(PRectangle rc, int cornerSize, Colour fill, int alphaFill,
 		Colour outline, int alphaOutline, int flags);
 	void Ellipse(PRectangle rc, Colour fore, Colour back);
-
-	//TODO: Remove
-	void Copy(PRectangle rc, Point from, Surface &surfaceSource);
 
 	virtual void DrawPixmap(PRectangle rc, Point from, Pixmap pixmap);
 
@@ -350,22 +273,6 @@ SurfaceImpl::~SurfaceImpl() {
 void SurfaceImpl::Release() {
 }
 
-bool SurfaceImpl::Initialised() {
-	return true;
-}
-
-void SurfaceImpl::Init(WindowID /*wid*/) {
-	assert(0);
-}
-
-void SurfaceImpl::Init(SurfaceID /*sid*/, WindowID /*wid*/) {
-	assert(0);
-}
-
-void SurfaceImpl::InitPixMap(int /*width*/, int /*height*/, Surface* /*surface_*/, WindowID /*wid*/) {
-	assert(0);
-}
-
 void SurfaceImpl::PenColour(Colour fore) {
 	penColour = fore;
 }
@@ -376,7 +283,7 @@ int SurfaceImpl::LogPixelsY() {
 
 float SurfaceImpl::DeviceHeightFont(int points) {
 	int logPix = LogPixelsY();
-	return (points * logPix + logPix / 2) / 72;
+	return (points * logPix + logPix / 2) / 72.0f;
 }
 
 void SurfaceImpl::MoveTo(float x_, float y_) {
@@ -387,8 +294,8 @@ void SurfaceImpl::MoveTo(float x_, float y_) {
 void SurfaceImpl::LineTo(float x_, float y_) {
 	glColor4ubv((GLubyte*)&penColour);
 	glBegin(GL_LINES);
-	glVertex2f(x+0.5,  y+0.5);
-	glVertex2f(x_+0.5, y_+0.5);
+	glVertex2f(x+0.5f,  y+0.5f);
+	glVertex2f(x_+0.5f, y_+0.5f);
 	glEnd();
 	x = x_;
 	y = y_;
@@ -403,15 +310,15 @@ void SurfaceImpl::RectangleDraw(PRectangle rc, Colour fore, Colour back) {
 	FillRectangle(rc, back);
 	glColor4ubv((GLubyte*)&fore);
 	glBegin(GL_LINE_STRIP);
-	glVertex2f(rc.left+0.5,  rc.top+0.5);
-	glVertex2f(rc.right-0.5, rc.top+0.5);
-	glVertex2f(rc.right-0.5, rc.bottom-0.5);
-	glVertex2f(rc.left+0.5,  rc.bottom-0.5);
-	glVertex2f(rc.left+0.5,  rc.top+0.5);
+	glVertex2f(rc.left+0.5f,  rc.top+0.5f);
+	glVertex2f(rc.right-0.5f, rc.top+0.5f);
+	glVertex2f(rc.right-0.5f, rc.bottom-0.5f);
+	glVertex2f(rc.left+0.5f,  rc.bottom-0.5f);
+	glVertex2f(rc.left+0.5f,  rc.top+0.5f);
 	glEnd();
 }
 
-struct PixmapInternal
+struct pixmap_t
 {
 	GLuint tex;
 	float scalex, scaley;
@@ -420,7 +327,7 @@ struct PixmapInternal
 
 Pixmap	CreatePixmap()
 {
-	Pixmap pm = new PixmapInternal;
+	Pixmap pm = new pixmap_t;
 	pm->scalex = 0;
 	pm->scaley = 0;
 	pm->initialised = false;
@@ -518,39 +425,6 @@ void SurfaceImpl::Ellipse(PRectangle /*rc*/, Colour /*fore*/, Colour /*back*/) {
 	assert(0);
 }
 
-void SurfaceImpl::Copy(PRectangle /*rc*/, Point /*from*/, Surface &/*surfaceSource*/) {
-	assert(0);
-}
-
-char *UTF8FromLatin1(const char *s, int &len) {
-	char *utfForm = new char[len*2+1];
-	size_t lenU = 0;
-	for (int i=0;i<len;i++) {
-		unsigned int uch = static_cast<unsigned char>(s[i]);
-		if (uch < 0x80) {
-			utfForm[lenU++] = uch;
-		} else {
-			utfForm[lenU++] = static_cast<char>(0xC0 | (uch >> 6));
-			utfForm[lenU++] = static_cast<char>(0x80 | (uch & 0x3f));
-		}
-	}
-	utfForm[lenU] = '\0';
-	len = lenU;
-	return utfForm;
-}
-
-static size_t UTF8CharLength(const char *s) {
-	const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
-	unsigned char ch = *us;
-	if (ch < 0x80) {
-		return 1;
-	} else if (ch < 0x80 + 0x40 + 0x20) {
-		return 2;
-	} else {
-		return 3;
-	}
-}
-
 // On GTK+, wchar_t is 4 bytes
 
 const int maxLengthTextRun = 10000;
@@ -625,7 +499,7 @@ void Font::Create(const char *faceName, int /*characterSet*/, int size,	bool /*b
 	unsigned char* buf = (unsigned char*)malloc(len);
 	unsigned char* bmp = new unsigned char[512*512];
 	fread(buf, 1, len, f);
-	stbtt_BakeFontBitmap(buf, 0, size, bmp, 512, 512, 32, 96, newFont->cdata); // no guarantee this fits!
+	stbtt_BakeFontBitmap(buf, 0, (float)size, bmp, 512, 512, 32, 96, newFont->cdata); // no guarantee this fits!
 	// can free ttf_buffer at this point
 	glGenTextures(1, &newFont->ftex);
 	glBindTexture(GL_TEXTURE_2D, newFont->ftex);
@@ -636,7 +510,7 @@ void Font::Create(const char *faceName, int /*characterSet*/, int size,	bool /*b
 
 	stbtt_InitFont(&newFont->fontinfo, buf, 0);
 
-	newFont->scale = stbtt_ScaleForPixelHeight(&newFont->fontinfo, size);
+	newFont->scale = stbtt_ScaleForPixelHeight(&newFont->fontinfo, (float)size);
 
 
 	delete [] bmp;
@@ -714,7 +588,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, float *posi
 float SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 	stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 	//TODO: implement proper UTF-8 handling
-	int position = 0;
+	float position = 0;
 	while (len--) {
 		int advance, leftBearing;
 		stbtt_GetCodepointHMetrics(&realFont->fontinfo, *s++, &advance, &leftBearing);
