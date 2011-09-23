@@ -306,9 +306,6 @@
     <ClCompile Include="src\Editor.cxx">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\ExternalLexer.cxx">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Indicator.cxx">
       <Filter>src</Filter>
     </ClCompile>
@@ -414,9 +411,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ExternalLexer.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\FontQuality.h">

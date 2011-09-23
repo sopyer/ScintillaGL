@@ -40,15 +40,6 @@
 using namespace Scintilla;
 #endif
 
-#ifdef BUILD_AS_EXTERNAL_LEXER
-
-#include "ExternalLexer.h"
-#include "WindowAccessor.h"
-
-#define BUILD_EXTERNAL_LEXER 0
-
-#endif
-
 #define HA_MODE_DEFAULT     0
 #define HA_MODE_IMPORT1     1
 #define HA_MODE_IMPORT2     2

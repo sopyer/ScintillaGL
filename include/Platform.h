@@ -314,11 +314,6 @@ namespace Platform {
 	unsigned int DoubleClickTime();
 	bool         MouseButtonBounce();
 
-	long SendScintilla(
-		WindowID w, unsigned int msg, unsigned long wParam=0, long lParam=0);
-	long SendScintillaPointer(
-		WindowID w, unsigned int msg, unsigned long wParam=0, void *lParam=0);
-
 	// These are utility functions not really tied to a platform
 	inline int Minimum(int a, int b) { return a<b ? a : b; }
 	inline int Maximum(int a, int b) { return a>b ? a : b; }

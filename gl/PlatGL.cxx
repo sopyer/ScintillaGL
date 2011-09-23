@@ -89,18 +89,6 @@ void Platform::DebugDisplay(const char *s) {
 	fprintf(stderr, "%s", s);
 }
 
-long Platform::SendScintilla(
-    WindowID w, unsigned int msg, unsigned long wParam, long lParam) {
-	assert(0);
-	return 0;
-}
-
-long Platform::SendScintillaPointer(
-    WindowID w, unsigned int msg, unsigned long wParam, void *lParam) {
-	assert(0);
-	return 0;
-}
-
 //#define TRACE
 
 #ifdef TRACE
