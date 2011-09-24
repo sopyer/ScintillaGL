@@ -7,39 +7,36 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DMApp.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\GLee.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="gldebug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gl\DefaultFontData.cpp">
+    <ClCompile Include="Demo.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gl\ScintillaGL.cxx">
+    <ClCompile Include="DefaultFontData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gl\PlatGL.cxx">
+    <ClCompile Include="..\external\GLee.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlatGL.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScintillaGL.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="gldebug.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="gl\DefaultFontData.h">
+    <ClInclude Include="DefaultFontData.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="gl\ScintillaGL.h">
+    <ClInclude Include="ScintillaGL.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="gl\stb_truetype.h">
+    <ClInclude Include="stb_truetype.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

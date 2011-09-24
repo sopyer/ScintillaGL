@@ -6,7 +6,6 @@
 
 #include "Scintilla.h"
 #include "SciLexer.h"
-#include "resource.h"
 
 const char appName[] = "DMApp";
 const char className[] = "DMAppWindow";
@@ -18,7 +17,7 @@ const COLORREF white = RGB(0xff,0xff,0xff);
 int Scintilla_RegisterClasses(void *hInstance);
 int Scintilla_ReleaseResources();
 
-#include "gl/ScintillaGL.h"
+#include "ScintillaGL.h"
 
 struct DMApp {
 	MyEditor myEd, myEd2, shaderList;

@@ -321,7 +321,6 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETLINEENDPOSITION 2136
 #define SCI_GETCODEPAGE 2137
 #define SCI_GETCARETFORE 2138
-//#define SCI_GETUSEPALETTE 2139
 #define SCI_GETREADONLY 2140
 #define SCI_SETCURRENTPOS 2141
 #define SCI_SETSELECTIONSTART 2142

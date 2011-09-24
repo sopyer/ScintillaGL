@@ -1,12 +1,11 @@
 /Debug
 /Release
-/win32
-/cocoa
-/macosx
 /ipch
-/gtk
+/Additional
+/Temp
 
 *.user
 *.suo
 *.sdf
 *.opensdf
+version.txt

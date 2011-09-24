@@ -14,7 +14,7 @@
     <ProjectGuid>{79829619-D8D1-47D1-87E2-9273231D1747}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>scintilla</RootNamespace>
-    <ProjectName>scintillaGL</ProjectName>
+    <ProjectName>scintilla</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -40,12 +40,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)/external/include/gl;$(SolutionDir)/external/include;./lexlib;./src;./include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <IncludePath>./lexlib;./;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
     <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IntDir>$(SolutionDir)Temp/$(ProjectName)/$(Configuration)/</IntDir>
+    <OutDir>$(SolutionDir)$(Configuration)/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)/external/include/gl;$(SolutionDir)/external/include;./lexlib;./src;./include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <IncludePath>./lexlib;./;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <IntDir>$(SolutionDir)Temp/$(ProjectName)/$(Configuration)/</IntDir>
+    <OutDir>$(SolutionDir)$(Configuration)/</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -176,31 +180,31 @@
     <ClCompile Include="lexlib\PropSetSimple.cxx" />
     <ClCompile Include="lexlib\StyleContext.cxx" />
     <ClCompile Include="lexlib\WordList.cxx" />
-    <ClCompile Include="src\Catalogue.cxx" />
-    <ClCompile Include="src\CellBuffer.cxx" />
-    <ClCompile Include="src\CharClassify.cxx" />
-    <ClCompile Include="src\ContractionState.cxx" />
-    <ClCompile Include="src\Decoration.cxx" />
-    <ClCompile Include="src\Document.cxx" />
-    <ClCompile Include="src\Editor.cxx" />
-    <ClCompile Include="src\Indicator.cxx" />
-    <ClCompile Include="src\KeyMap.cxx" />
-    <ClCompile Include="src\LineMarker.cxx" />
-    <ClCompile Include="src\PerLine.cxx" />
-    <ClCompile Include="src\PositionCache.cxx" />
-    <ClCompile Include="src\RESearch.cxx" />
-    <ClCompile Include="src\RunStyles.cxx" />
-    <ClCompile Include="src\Selection.cxx" />
-    <ClCompile Include="src\Style.cxx" />
-    <ClCompile Include="src\UniConversion.cxx" />
-    <ClCompile Include="src\ViewStyle.cxx" />
-    <ClCompile Include="src\XPM.cxx" />
+    <ClCompile Include="Catalogue.cxx" />
+    <ClCompile Include="CellBuffer.cxx" />
+    <ClCompile Include="CharClassify.cxx" />
+    <ClCompile Include="ContractionState.cxx" />
+    <ClCompile Include="Decoration.cxx" />
+    <ClCompile Include="Document.cxx" />
+    <ClCompile Include="Editor.cxx" />
+    <ClCompile Include="Indicator.cxx" />
+    <ClCompile Include="KeyMap.cxx" />
+    <ClCompile Include="LineMarker.cxx" />
+    <ClCompile Include="PerLine.cxx" />
+    <ClCompile Include="PositionCache.cxx" />
+    <ClCompile Include="RESearch.cxx" />
+    <ClCompile Include="RunStyles.cxx" />
+    <ClCompile Include="Selection.cxx" />
+    <ClCompile Include="Style.cxx" />
+    <ClCompile Include="UniConversion.cxx" />
+    <ClCompile Include="ViewStyle.cxx" />
+    <ClCompile Include="XPM.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\ILexer.h" />
-    <ClInclude Include="include\Platform.h" />
-    <ClInclude Include="include\SciLexer.h" />
-    <ClInclude Include="include\Scintilla.h" />
+    <ClInclude Include="ILexer.h" />
+    <ClInclude Include="Platform.h" />
+    <ClInclude Include="SciLexer.h" />
+    <ClInclude Include="Scintilla.h" />
     <ClInclude Include="lexlib\Accessor.h" />
     <ClInclude Include="lexlib\CharacterSet.h" />
     <ClInclude Include="lexlib\LexAccessor.h" />
@@ -213,33 +217,33 @@
     <ClInclude Include="lexlib\SparseState.h" />
     <ClInclude Include="lexlib\StyleContext.h" />
     <ClInclude Include="lexlib\WordList.h" />
-    <ClInclude Include="src\Catalogue.h" />
-    <ClInclude Include="src\CellBuffer.h" />
-    <ClInclude Include="src\CharClassify.h" />
-    <ClInclude Include="src\ContractionState.h" />
-    <ClInclude Include="src\Decoration.h" />
-    <ClInclude Include="src\Document.h" />
-    <ClInclude Include="src\Editor.h" />
-    <ClInclude Include="src\FontQuality.h" />
-    <ClInclude Include="src\Indicator.h" />
-    <ClInclude Include="src\KeyMap.h" />
-    <ClInclude Include="src\LineMarker.h" />
-    <ClInclude Include="src\Partitioning.h" />
-    <ClInclude Include="src\PerLine.h" />
-    <ClInclude Include="src\PositionCache.h" />
-    <ClInclude Include="src\RESearch.h" />
-    <ClInclude Include="src\RunStyles.h" />
-    <ClInclude Include="src\Selection.h" />
-    <ClInclude Include="src\SplitVector.h" />
-    <ClInclude Include="src\Style.h" />
-    <ClInclude Include="src\SVector.h" />
-    <ClInclude Include="src\UniConversion.h" />
-    <ClInclude Include="src\ViewStyle.h" />
-    <ClInclude Include="src\XPM.h" />
+    <ClInclude Include="Catalogue.h" />
+    <ClInclude Include="CellBuffer.h" />
+    <ClInclude Include="CharClassify.h" />
+    <ClInclude Include="ContractionState.h" />
+    <ClInclude Include="Decoration.h" />
+    <ClInclude Include="Document.h" />
+    <ClInclude Include="Editor.h" />
+    <ClInclude Include="FontQuality.h" />
+    <ClInclude Include="Indicator.h" />
+    <ClInclude Include="KeyMap.h" />
+    <ClInclude Include="LineMarker.h" />
+    <ClInclude Include="Partitioning.h" />
+    <ClInclude Include="PerLine.h" />
+    <ClInclude Include="PositionCache.h" />
+    <ClInclude Include="RESearch.h" />
+    <ClInclude Include="RunStyles.h" />
+    <ClInclude Include="Selection.h" />
+    <ClInclude Include="SplitVector.h" />
+    <ClInclude Include="Style.h" />
+    <ClInclude Include="SVector.h" />
+    <ClInclude Include="UniConversion.h" />
+    <ClInclude Include="ViewStyle.h" />
+    <ClInclude Include="XPM.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\LexGen.py" />
-    <None Include="src\SciTE.properties" />
+    <None Include="LexGen.py" />
+    <None Include="SciTE.properties" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

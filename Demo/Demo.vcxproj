@@ -39,13 +39,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)/external/include/gl;$(SolutionDir)/external/include;./lexlib;./src;./include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <IncludePath>$(SolutionDir)/external/include/gl;$(SolutionDir)/external/include;$(SolutionDir)scintilla;$(SolutionDir)scintilla/lexlib;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration)\;$(SolutionDir)/external/lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IntDir>$(SolutionDir)Temp/$(ProjectName)/$(Configuration)/</IntDir>
+    <OutDir>$(SolutionDir)$(Configuration)/</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)/external/include/gl;$(SolutionDir)/external/include;./lexlib;./src;./include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <IncludePath>$(SolutionDir)/external/include/gl;$(SolutionDir)/external/include;$(SolutionDir)scintilla;$(SolutionDir)scintilla/lexlib;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration)\;$(SolutionDir)/external/lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IntDir>$(SolutionDir)Temp/$(ProjectName)/$(Configuration)/</IntDir>
+    <OutDir>$(SolutionDir)$(Configuration)/</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -80,19 +84,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DMApp.cxx" />
-    <ClCompile Include="external\GLee.c" />
+    <ClCompile Include="Demo.cxx" />
+    <ClCompile Include="..\external\GLee.c" />
     <ClCompile Include="gldebug.cpp" />
-    <ClCompile Include="gl\DefaultFontData.cpp" />
-    <ClCompile Include="gl\PlatGL.cxx" />
-    <ClCompile Include="gl\ScintillaGL.cxx" />
+    <ClCompile Include="DefaultFontData.cpp" />
+    <ClCompile Include="PlatGL.cxx" />
+    <ClCompile Include="ScintillaGL.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gldebug.h" />
-    <ClInclude Include="gl\DefaultFontData.h" />
-    <ClInclude Include="gl\ScintillaGL.h" />
-    <ClInclude Include="gl\stb_truetype.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="DefaultFontData.h" />
+    <ClInclude Include="ScintillaGL.h" />
+    <ClInclude Include="stb_truetype.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
