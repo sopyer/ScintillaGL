@@ -156,6 +156,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	int virtualSpaceOptions;
 
+	Surface*	drawSurface;
+
 	Pixmap	pixmapSelPattern;
 	Pixmap	pixmapIndentGuide;
 	Pixmap	pixmapIndentGuideHighlight;
@@ -250,9 +252,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool convertPastes;
 
 	Document *pdoc;
-
-	Editor();
-	virtual ~Editor();
 
 	//TODO: check whether 2 following functions are required
 	virtual void Initialise() {}
@@ -361,7 +360,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DrawCarets(Surface *surface, ViewStyle &vsDraw, int line, int xStart,
 		PRectangle rcLine, LineLayout *ll, int subLine);
 	void RefreshPixMaps(Surface *surfaceWindow);
-	void Paint();
 	long FormatRange(bool draw, Sci_RangeToFormat *pfr);
 	int TextWidth(int style, const char *text);
 
@@ -374,8 +372,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	void FilterSelections();
 	int InsertSpace(int position, unsigned int spaces);
-	void AddChar(char ch);
-	virtual void AddCharUTF(char *s, unsigned int len);
 	void InsertPaste(SelectionPosition selStart, const char *text, int len);
 	void ClearSelection(bool retainMultipleSelections=false);
 	void ClearAll();
@@ -473,7 +469,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void ButtonMove(Point pt);
 	void ButtonUp(Point pt, unsigned int curTime, bool ctrl);
 
-	void Tick();
 	bool Idle();
 	virtual bool SetIdle(bool) { return false; }
 	virtual void SetMouseCapture(bool /*on*/) {}
@@ -516,16 +511,23 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	static sptr_t StringResult(sptr_t lParam, const char *val);
 
 public:
-	void SetSize(float width, float height)
-	{
-		clientRect = PRectangle(0, 0, width, height);
-	}
-	Surface*	drawSurface;
-	// Public so the COM thunks can access it.
-	int KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);
+	Editor();
+	virtual ~Editor();
 
-	// Public so scintilla_send_message can use it.
-	virtual sptr_t Command(unsigned int iMessage, uptr_t wParam=0, sptr_t lParam=0);
+	void SetSize(float width, float height)	{clientRect = PRectangle(0, 0, width, height);}
+	
+	//temporary to work with lexers
+	Document* GetDocument() {return pdoc;}
+	void SetLexer(LexInterface* ls) {pdoc->pli = ls;}
+
+	void Tick();
+	void Paint();
+
+	int  KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);
+	void AddChar(char ch);
+	void AddCharUTF(char *s, unsigned int len);
+
+	sptr_t Command(unsigned int iMessage, uptr_t wParam=0, sptr_t lParam=0);
 
 	int errorStatus;
 };

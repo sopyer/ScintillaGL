@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <SDL.h>
+#include <gl/GLee.h>
 
 #include "Platform.h"
 
@@ -43,87 +44,57 @@
 #include "LexerModule.h"
 #include "Catalogue.h"
 
-class LexState2 : public LexInterface {
-	const LexerModule *lexCurrent;
-public:
-	int lexLanguage;
+class LexState;
 
-	LexState2(Document *pdoc_) : LexInterface(pdoc_) {
-		lexCurrent = 0;
-		performingStyle = false;
-		lexLanguage = SCLEX_CONTAINER;
-	}
-
-	~LexState2() {
-		if (instance) {
-			instance->Release();
-			instance = 0;
-		}
-	}
-
-	void SetLexerModule(const LexerModule *lex) {
-		if (lex != lexCurrent) {
-			if (instance) {
-				instance->Release();
-				instance = 0;
-			}
-			lexCurrent = lex;
-			if (lexCurrent)
-				instance = lexCurrent->Create();
-			pdoc->LexerChanged();
-		}
-	}
-
-	void SetLexer(uptr_t wParam) {
-		lexLanguage = wParam;
-		if (lexLanguage == SCLEX_CONTAINER) {
-			SetLexerModule(0);
-		} else {
-			const LexerModule *lex = Catalogue::Find(lexLanguage);
-			if (!lex)
-				lex = Catalogue::Find(SCLEX_NULL);
-			SetLexerModule(lex);
-		}
-	}
-
-	void SetLexerLanguage(const char *languageName) {
-		const LexerModule *lex = Catalogue::Find(languageName);
-		if (!lex)
-			lex = Catalogue::Find(SCLEX_NULL);
-		if (lex)
-			lexLanguage = lex->GetLanguage();
-		SetLexerModule(lex);
-	}
-
-	void SetWordList(int n, const char *wl) {
-		if (instance) {
-			int firstModification = instance->WordListSet(n, wl);
-			if (firstModification >= 0) {
-				pdoc->ModifiedAt(firstModification);
-			}
-		}
-	}
-
-	void PropSet(const char *key, const char *val) {
-		if (instance) {
-			int firstModification = instance->PropertySet(key, val);
-			if (firstModification >= 0) {
-				pdoc->ModifiedAt(firstModification);
-			}
-		}
-	}
-};
-
-class MyEditor: public Editor
+class ScintillaDemo
 {
-	size_t nextTime;
-	static const size_t tickInterval = 100;
 public:
-	LexState2 ls;
-	
-	MyEditor();
+	ScintillaDemo();
+	~ScintillaDemo();
 
-	bool BraceMatch();
-	void OnKeyDown(SDL_KeyboardEvent& event);
-	void Paint();
+	void initialise(int w, int h);
+	void reset();
+
+	void handleKeyDown(SDL_KeyboardEvent& event);
+	void renderFullscreen();
+
+private:
+	void initialiseShaderEditor();
+	void initialiseDebugOutputView();
+	void initialiseSelectionList();
+
+	void saveShaderSource();
+	void compileProgram();
+	void fillListWithShaders();
+	void fillListWithPrograms();
+	void loadShaderSource();
+
+private:
+	enum ModesEnum
+	{
+		SELMODE_PROGRAM_LIST,
+		SELMODE_SHADER_LIST
+	};
+
+private:
+	static const size_t TICK_INTERVAL = 100;
+
+	size_t mNextTick;
+
+	ModesEnum mSelectionMode;
+	GLuint    mSelectedProgram;
+	GLuint    mSelectedShader;
+
+	std::vector<GLuint> mPrograms;
+	std::vector<GLuint> mAttachedShaders;
+
+	LexState* mLexer;
+
+	Editor  mShaderEditor;
+	Editor  mDebugOutputView;
+	Editor  mSelectionList;
+	Editor* mActiveEditor;
+
+	float mWidth;
+	float mHeight;
 };

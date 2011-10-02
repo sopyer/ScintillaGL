@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Demo", "Demo\Demo.vcxproj", "{64121079-AEDF-41DB-8468-BF3C04379EA7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{79829619-D8D1-47D1-87E2-9273231D1747} = {79829619-D8D1-47D1-87E2-9273231D1747}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scintilla", "scintilla\scintilla.vcxproj", "{79829619-D8D1-47D1-87E2-9273231D1747}"
 EndProject

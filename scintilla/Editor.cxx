@@ -160,6 +160,7 @@ Editor::Editor() {
 	additionalCaretsVisible = true;
 	virtualSpaceOptions = SCVS_NONE;
 
+	drawSurface = Surface::Allocate();
 	pixmapSelPattern = CreatePixmap();
 	pixmapIndentGuide = CreatePixmap();
 	pixmapIndentGuideHighlight = CreatePixmap();
@@ -219,6 +220,7 @@ Editor::~Editor() {
 	DestroyPixmap(pixmapSelPattern);
 	DestroyPixmap(pixmapIndentGuide);
 	DestroyPixmap(pixmapIndentGuideHighlight);
+	drawSurface->Release();
 }
 
 void Editor::Finalise() {
