@@ -1,14 +1,13 @@
 // A simple demonstration application using Scintilla
 #include <stdio.h>
-#include "ScintillaGL.h"
+#include "ShaderEditOverlay.h"
 #include <SDL.h>
 #include <SDL_syswm.h>
 #include <gl/glee.h>
-#include "gldebug.h"
 
 char fragmentSource[65536] = "void main()\n{\n\tgl_FragColor=vec4(0, 1, 0, 1);\n}\n";
 
-static ScintillaDemo app;
+static ShaderEditOverlay app;
 
 void Platform_Initialise(HWND hWnd);
 void Platform_Finalise();
@@ -82,6 +81,7 @@ int main(int /*argc*/, char** /*argv*/)
 
 	program = CompileProgram(strlen(fragmentSource), fragmentSource, sizeof(errbuf), errbuf);
 
+	app.addPrograms(1, &program);
 	Scintilla_LinkLexers();
 
 	bool run = true;

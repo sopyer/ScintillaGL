@@ -46,17 +46,21 @@
 
 class LexState;
 
-class ScintillaDemo
+class ShaderEditOverlay
 {
 public:
-	ScintillaDemo();
-	~ScintillaDemo();
+	ShaderEditOverlay();
+	~ShaderEditOverlay();
 
 	void initialise(int w, int h);
 	void reset();
 
 	void handleKeyDown(SDL_KeyboardEvent& event);
 	void renderFullscreen();
+
+	bool requireReset() {bool prevValue=mRequireReset; mRequireReset = false; return prevValue;}
+
+	void addPrograms(size_t count, GLuint* programs);
 
 private:
 	void initialiseShaderEditor();
@@ -78,6 +82,8 @@ private:
 
 private:
 	static const size_t TICK_INTERVAL = 100;
+
+	bool   mRequireReset;
 
 	size_t mNextTick;
 

@@ -11,12 +11,14 @@
 #include <assert.h>
 
 #include "Platform.h"
-
 #include "Scintilla.h"
 #include "UniConversion.h"
 #include "XPM.h"
-
 #include <gl/glee.h>
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "stb_truetype.h"
+#include "DefaultFontData.h"
 
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
@@ -63,12 +65,13 @@ namespace platform
 #include <winuser.h>
 #include <wtypes.h>
 
-HWND hWnd; //Clipboard window
+HWND hClipWnd; //Clipboard window
 CLIPFORMAT cfColumnSelect;
 CLIPFORMAT cfLineSelect;
 
 void Platform_Initialise(HWND hWnd)
 {
+	hClipWnd = hWnd;
 	// There does not seem to be a real standard for indicating that the clipboard
 	// contains a rectangular selection, so copy Developer Studio.
 	cfColumnSelect = static_cast<CLIPFORMAT>(
@@ -135,7 +138,7 @@ int IsClipboardTextAvailable(AdditionalTextFormat fmt)
 
 void SetClipboardTextUTF8(const char* text, size_t len, int additionalFormat)
 {
-	if (!::OpenClipboard(hWnd))
+	if (!::OpenClipboard(hClipWnd))
 		return;
 	::EmptyClipboard();
 
@@ -162,7 +165,7 @@ void SetClipboardTextUTF8(const char* text, size_t len, int additionalFormat)
 
 int GetClipboardTextUTF8(char* text, size_t len)
 {
-	if (!::OpenClipboard(hWnd))
+	if (!::OpenClipboard(hClipWnd))
 		return 0;
 
 	unsigned int clipLen = 0;
@@ -210,10 +213,6 @@ int GetClipboardTextUTF8(char* text, size_t len)
 
 	return clipLen;
 }
-
-#include <assert.h>
-#include "Platform.h"
-#include <gl/glee.h>
 
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
@@ -425,22 +424,7 @@ void SurfaceImpl::Ellipse(PRectangle /*rc*/, Colour /*fore*/, Colour /*back*/) {
 	assert(0);
 }
 
-// On GTK+, wchar_t is 4 bytes
-
 const int maxLengthTextRun = 10000;
-
-#include <stdio.h>
-#include <assert.h>
-
-#include "Platform.h"
-
-#include "XPM.h"
-
-#include <gl/glee.h>
-
-#define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
-#include "DefaultFontData.h"
 
 struct stbtt_Font
 {

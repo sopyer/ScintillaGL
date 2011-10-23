@@ -3194,6 +3194,8 @@ void Editor::Paint(/*Surface *surfaceWindow, PRectangle rcArea*/) {
 	}
 	PLATFORM_ASSERT(IsPixmapInitialised(pixmapSelPattern));
 
+	drawSurface->SetClip(rcArea);
+
 	if (paintState != paintAbandoned) {
 		PaintSelMargin(drawSurface, rcArea);
 

@@ -86,15 +86,13 @@
   <ItemGroup>
     <ClCompile Include="Demo.cxx" />
     <ClCompile Include="..\external\GLee.c" />
-    <ClCompile Include="gldebug.cpp" />
     <ClCompile Include="DefaultFontData.cpp" />
-    <ClCompile Include="PlatGL.cxx" />
-    <ClCompile Include="ScintillaGL.cxx" />
+    <ClCompile Include="ScPlatform.cxx" />
+    <ClCompile Include="ShaderEditOverlay.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gldebug.h" />
     <ClInclude Include="DefaultFontData.h" />
-    <ClInclude Include="ScintillaGL.h" />
+    <ClInclude Include="ShaderEditOverlay.h" />
     <ClInclude Include="stb_truetype.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

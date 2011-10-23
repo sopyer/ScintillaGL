@@ -7,9 +7,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gldebug.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Demo.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -19,24 +16,21 @@
     <ClCompile Include="..\external\GLee.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PlatGL.cxx">
+    <ClCompile Include="ShaderEditOverlay.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScintillaGL.cxx">
+    <ClCompile Include="ScPlatform.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gldebug.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="DefaultFontData.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScintillaGL.h">
+    <ClInclude Include="stb_truetype.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="stb_truetype.h">
+    <ClInclude Include="ShaderEditOverlay.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

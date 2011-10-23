@@ -257,39 +257,6 @@ void ViewStyle::Init(size_t stylesSize_) {
 	annotationStyleOffset = 0;
 }
 
-//void ViewStyle::RefreshColourPalette(Palette &pal, bool want) {
-//	unsigned int i;
-//	for (i=0; i<stylesSize; i++) {
-//		pal.WantFind(styles[i].fore, want);
-//		pal.WantFind(styles[i].back, want);
-//	}
-//	for (i=0; i<(sizeof(indicators)/sizeof(indicators[0])); i++) {
-//		pal.WantFind(indicators[i].fore, want);
-//	}
-//	for (i=0; i<(sizeof(markers)/sizeof(markers[0])); i++) {
-//		markers[i].RefreshColourPalette(pal, want);
-//	}
-//	pal.WantFind(selforeground, want);
-//	pal.WantFind(selAdditionalForeground, want);
-//	pal.WantFind(selbackground, want);
-//	pal.WantFind(selAdditionalBackground, want);
-//	pal.WantFind(selbackground2, want);
-//
-//	pal.WantFind(foldmarginColour, want);
-//	pal.WantFind(foldmarginHighlightColour, want);
-//
-//	pal.WantFind(whitespaceForeground, want);
-//	pal.WantFind(whitespaceBackground, want);
-//	pal.WantFind(selbar, want);
-//	pal.WantFind(selbarlight, want);
-//	pal.WantFind(caretcolour, want);
-//	pal.WantFind(additionalCaretColour, want);
-//	pal.WantFind(caretLineBackground, want);
-//	pal.WantFind(edgecolour, want);
-//	pal.WantFind(hotspotForeground, want);
-//	pal.WantFind(hotspotBackground, want);
-//}
-
 void ViewStyle::Refresh(Surface &surface) {
 	selbar = Platform::Chrome();
 	selbarlight = Platform::ChromeHighlight();

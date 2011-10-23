@@ -1,8 +1,7 @@
 #include <windows.h>
 #include <gl/glee.h>
 
-#include "ScintillaGL.h"
-#include "gldebug.h"
+#include "ShaderEditOverlay.h"
 
 class LexState : public LexInterface {
 	const LexerModule *lexCurrent;
@@ -75,16 +74,21 @@ public:
 	}
 };
 
-ScintillaDemo::ScintillaDemo()
+ShaderEditOverlay::ShaderEditOverlay():mRequireReset(false)
 {
 	mNextTick = 0;
 	mLexer = new LexState(mShaderEditor.GetDocument());
 	mShaderEditor.SetLexer(mLexer);
 }
 
-ScintillaDemo::~ScintillaDemo()
+ShaderEditOverlay::~ShaderEditOverlay()
 {
 	delete mLexer;
+}
+
+void ShaderEditOverlay::addPrograms(size_t count, GLuint* programs)
+{
+	mPrograms.insert(mPrograms.end(), programs, programs+count);
 }
 
 void SetAStyle(Editor& ed, int style, Colour fore, Colour back=0xFFFFFFFF, int size=-1, const char *face=0)
@@ -194,7 +198,7 @@ const int markersArray[][NB_FOLDER_STATE] = {
   {SC_MARK_BOXMINUS,      SC_MARK_BOXPLUS,   SC_MARK_VLINE,        SC_MARK_LCORNER,       SC_MARK_BOXPLUSCONNECTED,    SC_MARK_BOXMINUSCONNECTED,    SC_MARK_TCORNER}
 };
 
-void ScintillaDemo::initialiseShaderEditor() {
+void ShaderEditOverlay::initialiseShaderEditor() {
 
 	mShaderEditor.Command(SCI_SETSTYLEBITS, 7);
 
@@ -245,7 +249,7 @@ void ScintillaDemo::initialiseShaderEditor() {
 	SetAStyle(mShaderEditor, SCE_C_COMMENTLINE,  0xFF00FF00, 0xD0000000);
 }
 
-void ScintillaDemo::initialiseDebugOutputView() {
+void ShaderEditOverlay::initialiseDebugOutputView() {
 	mDebugOutputView.Command(SCI_SETSTYLEBITS, 7);
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
@@ -263,7 +267,7 @@ void ScintillaDemo::initialiseDebugOutputView() {
 	mDebugOutputView.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
 }
 
-void ScintillaDemo::initialiseSelectionList() {
+void ShaderEditOverlay::initialiseSelectionList() {
 	mSelectionList.Command(SCI_SETSTYLEBITS, 7);
 
 	// Set up the global default style. These attributes are used wherever no explicit choices are made.
@@ -281,7 +285,7 @@ void ScintillaDemo::initialiseSelectionList() {
 	mSelectionList.Command(SCI_SETCARETLINEBACKALPHA, 0x20);
 }
 
-void ScintillaDemo::initialise(int w, int h)
+void ShaderEditOverlay::initialise(int w, int h)
 {
 	mNextTick = 0;
 	
@@ -304,7 +308,7 @@ void ScintillaDemo::initialise(int w, int h)
 	mActiveEditor = &mSelectionList;
 }
 
-void ScintillaDemo::reset()
+void ShaderEditOverlay::reset()
 {
 	mSelectionMode=SELMODE_PROGRAM_LIST;
 	fillListWithPrograms();
@@ -325,7 +329,7 @@ void ScintillaDemo::reset()
 	mSelectionList.Command(SCI_SETFOCUS, true);
 }
 
-void ScintillaDemo::saveShaderSource()
+void ShaderEditOverlay::saveShaderSource()
 {
 	if (mSelectedProgram&&mSelectedShader)
 	{
@@ -342,7 +346,7 @@ void ScintillaDemo::saveShaderSource()
 	}
 }
 
-void ScintillaDemo::compileProgram()
+void ShaderEditOverlay::compileProgram()
 {
 	GLint lengthDoc;
 	TextRange tr;
@@ -405,7 +409,7 @@ error:
 	mDebugOutputView.Command(SCI_GOTOPOS, 0);
 }
 
-void ScintillaDemo::fillListWithShaders()
+void ShaderEditOverlay::fillListWithShaders()
 {
 	int pos = (int)mSelectionList.Command(SCI_GETCURRENTPOS);
 	int line = mSelectionList.Command(SCI_LINEFROMPOSITION, pos);
@@ -431,14 +435,10 @@ void ScintillaDemo::fillListWithShaders()
 	mSelectionList.Command(SCI_GOTOLINE, 0);
 }
 
-void ScintillaDemo::fillListWithPrograms()
+void ShaderEditOverlay::fillListWithPrograms()
 {
-	GLsizei count = gldGetProgramCount();
-	mPrograms.resize(count);
-	gldGetPrograms(&mPrograms[0], count);
-
 	mSelectionList.Command(SCI_CLEARALL);
-	for (int i=0; i<count; ++i)
+	for (size_t i=0; i<mPrograms.size(); ++i)
 	{
 		char str[128];
 		_snprintf(str, 128, "%sProgram #%d", (i==0)?"":"\n", mPrograms[i]);
@@ -447,7 +447,7 @@ void ScintillaDemo::fillListWithPrograms()
 	mSelectionList.Command(SCI_GOTOLINE, 0);
 }
 
-void ScintillaDemo::loadShaderSource()
+void ShaderEditOverlay::loadShaderSource()
 {
 	int pos = (int)mSelectionList.Command(SCI_GETCURRENTPOS);
 	int line = mSelectionList.Command(SCI_LINEFROMPOSITION, pos);
@@ -519,7 +519,7 @@ void BraceMatch(Editor& ed)
 	}
 }
 
-void ScintillaDemo::renderFullscreen()
+void ShaderEditOverlay::renderFullscreen()
 {
 	//update logic
 	if (timeGetTime()>mNextTick)
@@ -531,20 +531,26 @@ void ScintillaDemo::renderFullscreen()
 
 	BraceMatch(mShaderEditor);
 
-	//render
 	glUseProgram(0);
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	glOrtho(0, 800, 0, 600, 0, 500);
-	glTranslatef(0, 600, 0);
+	glOrtho(0, mWidth, 0, mHeight, 0, 500);
+	glTranslatef(0, mHeight, 0);
 	glScalef(1, -1, 1);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	//Render
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_CLIP_PLANE0);
+	glEnable(GL_CLIP_PLANE1);
+	glEnable(GL_CLIP_PLANE2);
+	glEnable(GL_CLIP_PLANE3);
 
 	float w1=mWidth-80.0f, h1=mHeight-80.0f;
 
@@ -557,7 +563,7 @@ void ScintillaDemo::renderFullscreen()
 	glTranslatef(0, h1*0.7f+20, 0);
 	mDebugOutputView.Paint();
 
-	glDisable(GL_BLEND);
+	glPopAttrib();
 }
 
 bool isModEnabled(int mod, int modState)
@@ -566,7 +572,7 @@ bool isModEnabled(int mod, int modState)
 	return (modState&mask)==0 && ((modState&mod)!=0 || mod==0); 
 }
 
-void ScintillaDemo::handleKeyDown(SDL_KeyboardEvent& event)
+void ShaderEditOverlay::handleKeyDown(SDL_KeyboardEvent& event)
 {
 	if (event.keysym.sym=='s' && isModEnabled(KMOD_CTRL, event.keysym.mod))
 	{
@@ -586,6 +592,7 @@ void ScintillaDemo::handleKeyDown(SDL_KeyboardEvent& event)
 	if (event.keysym.sym==SDLK_F7 && isModEnabled(0, event.keysym.mod)&&mSelectedShader&&mSelectedProgram)
 	{
 		compileProgram();
+		mRequireReset = true;
 	}
 	else if (mActiveEditor==&mSelectionList)
 	{
