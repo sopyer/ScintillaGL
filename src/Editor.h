@@ -163,6 +163,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool verticalScrollBarVisible;
 	bool endAtLastLine;
 	int caretSticky;
+	int marginOptions;
 	bool multipleSelection;
 	bool additionalSelectionTyping;
 	int multiPasteMode;
@@ -194,7 +195,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int dwellDelay;
 	int ticksToDwell;
 	bool dwelling;
-	enum { selChar, selWord, selLine } selectionType;
+	enum { selChar, selWord, selSubLine, selWholeLine } selectionType;
 	Point ptMouseLast;
 	enum { ddNone, ddInitial, ddDragging } inDragDrop;
 	bool dropWentOutside;
@@ -202,7 +203,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	SelectionPosition posDrop;
 	int hotSpotClickPos;
 	int lastXChosen;
-	int lineAnchor;
+	int lineAnchorPos;
 	int originalAnchorPos;
 	int wordSelectAnchorStartPos;
 	int wordSelectAnchorEndPos;
@@ -421,6 +422,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 
 	virtual void NotifyChange() = 0;
 	virtual void NotifyFocus(bool focus);
+	virtual void SetCtrlID(int identifier);
 	virtual int GetCtrlID() { return ctrlID; }
 	virtual void NotifyParent(SCNotification scn) = 0;
 	virtual void NotifyStyleToNeeded(int endStyleNeeded);
@@ -463,6 +465,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int StartEndDisplayLine(int pos, bool start);
 	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
+	int KeyDownWithModifiers(int key, int modifiers, bool *consumed);
 	int KeyDown(int key, bool shift, bool ctrl, bool alt, bool *consumed=0);
 
 	int GetWhitespaceVisible();
@@ -492,7 +495,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool PointInSelection(Point pt);
 	bool PointInSelMargin(Point pt);
 	Window::Cursor GetMarginCursor(Point pt);
-	void LineSelection(int lineCurrent_, int lineAnchor_);
+	void LineSelection(int lineCurrentPos_, int lineAnchorPos_, bool wholeLine);
 	void WordSelection(int pos);
 	void DwellEnd(bool mouseMoved);
 	void MouseLeave();

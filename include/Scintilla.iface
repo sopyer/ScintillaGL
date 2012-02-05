@@ -551,6 +551,9 @@ val INDIC_HIDDEN=5
 val INDIC_BOX=6
 val INDIC_ROUNDBOX=7
 val INDIC_STRAIGHTBOX=8
+val INDIC_DASH=9
+val INDIC_DOTS=10
+val INDIC_SQUIGGLELOW=11
 val INDIC_MAX=31
 val INDIC_CONTAINER=8
 val INDIC0_MASK=0x20
@@ -797,6 +800,9 @@ set void SetSelectionEnd=2144(position pos,)
 
 # Returns the position at the end of the selection.
 get position GetSelectionEnd=2145(,)
+
+# Set caret to a position, while removing any existing selection.
+fun void SetEmptySelection=2556(position pos,)
 
 # Sets the print magnification added to the point size of each style for printing.
 set void SetPrintMagnification=2146(int magnification,)
@@ -1945,6 +1951,16 @@ set void MarginSetStyleOffset=2537(int style,)
 # Get the start of the range of style numbers used for margin text
 get int MarginGetStyleOffset=2538(,)
 
+enu MarginOption=SC_MARGINOPTION_
+val SC_MARGINOPTION_NONE=0
+val SC_MARGINOPTION_SUBLINESELECT=1
+
+# Set the margin options.
+set void SetMarginOptions=2539(int marginOptions,)
+
+# Get the margin options.
+get int GetMarginOptions=2557(,)
+
 # Set the annotation text for a line
 set void AnnotationSetText=2540(int line, string text)
 
@@ -2131,6 +2147,12 @@ fun void MoveSelectedLinesUp=2620(,)
 # Move the selected lines down one line, shifting the line below before the selection
 fun void MoveSelectedLinesDown=2621(,)
 
+# Set the identifier reported as idFrom in notification messages.
+set void SetIdentifier=2622(int identifier,)
+
+# Get the identifier.
+get int GetIdentifier=2623(,)
+
 # Start notifying the container of all key presses and commands.
 fun void StartRecord=3001(,)
 
@@ -2272,6 +2294,7 @@ val SCMOD_SHIFT=1
 val SCMOD_CTRL=2
 val SCMOD_ALT=4
 val SCMOD_SUPER=8
+val SCMOD_META=16
 
 ################################################
 # For SciLexer.h
