@@ -248,6 +248,9 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define INDIC_BOX 6
 #define INDIC_ROUNDBOX 7
 #define INDIC_STRAIGHTBOX 8
+#define INDIC_DASH 9
+#define INDIC_DOTS 10
+#define INDIC_SQUIGGLELOW 11
 #define INDIC_MAX 31
 #define INDIC_CONTAINER 8
 #define INDIC0_MASK 0x20
@@ -330,6 +333,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETSELECTIONSTART 2143
 #define SCI_SETSELECTIONEND 2144
 #define SCI_GETSELECTIONEND 2145
+#define SCI_SETEMPTYSELECTION 2556
 #define SCI_SETPRINTMAGNIFICATION 2146
 #define SCI_GETPRINTMAGNIFICATION 2147
 #define SC_PRINT_NORMAL 0
@@ -727,6 +731,10 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_MARGINTEXTCLEARALL 2536
 #define SCI_MARGINSETSTYLEOFFSET 2537
 #define SCI_MARGINGETSTYLEOFFSET 2538
+#define SC_MARGINOPTION_NONE 0
+#define SC_MARGINOPTION_SUBLINESELECT 1
+#define SCI_SETMARGINOPTIONS 2539
+#define SCI_GETMARGINOPTIONS 2557
 #define SCI_ANNOTATIONSETTEXT 2540
 #define SCI_ANNOTATIONGETTEXT 2541
 #define SCI_ANNOTATIONSETSTYLE 2542
@@ -800,6 +808,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_VERTICALCENTRECARET 2619
 #define SCI_MOVESELECTEDLINESUP 2620
 #define SCI_MOVESELECTEDLINESDOWN 2621
+#define SCI_SETIDENTIFIER 2622
+#define SCI_GETIDENTIFIER 2623
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001
@@ -876,6 +886,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCMOD_CTRL 2
 #define SCMOD_ALT 4
 #define SCMOD_SUPER 8
+#define SCMOD_META 16
 #define SCN_STYLENEEDED 2000
 #define SCN_CHARADDED 2001
 #define SCN_SAVEPOINTREACHED 2002

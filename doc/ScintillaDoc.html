@@ -79,7 +79,7 @@
 
     <h1>Scintilla Documentation</h1>
 
-    <p>Last edited 21/May/2011 NH</p>
+    <p>Last edited 18/June/2011 NH</p>
 
     <p>There is <a class="jump" href="Design.html">an overview of the internal design of
     Scintilla</a>.<br />
@@ -1077,6 +1077,7 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_GETSELECTIONSTART">SCI_GETSELECTIONSTART</a><br />
      <a class="message" href="#SCI_SETSELECTIONEND">SCI_SETSELECTIONEND(int position)</a><br />
      <a class="message" href="#SCI_GETSELECTIONEND">SCI_GETSELECTIONEND</a><br />
+     <a class="message" href="#SCI_SETEMPTYSELECTION">SCI_SETEMPTYSELECTION(int pos)</a><br />
      <a class="message" href="#SCI_SELECTALL">SCI_SELECTALL</a><br />
      <a class="message" href="#SCI_LINEFROMPOSITION">SCI_LINEFROMPOSITION(int position)</a><br />
      <a class="message" href="#SCI_POSITIONFROMLINE">SCI_POSITIONFROMLINE(int line)</a><br />
@@ -1228,6 +1229,9 @@ struct Sci_TextToFind {
     position and which is the anchor. <code>SCI_GETSELECTIONSTART</code> returns the smaller of the
     current position or the anchor position. <code>SCI_GETSELECTIONEND</code> returns the larger of
     the two values.</p>
+
+    <p><b id="SCI_SETEMPTYSELECTION">SCI_SETEMPTYSELECTION(int pos)</b><br />
+     This removes any selection and sets the caret at <code>pos</code>. The caret is not scrolled into view.</p>
 
     <p><b id="SCI_SELECTALL">SCI_SELECTALL</b><br />
      This selects all the text in the document. The current position is not scrolled into view.</p>
@@ -2753,6 +2757,8 @@ struct Sci_TextToFind {
      <a class="message" href="#SCI_MARGINTEXTCLEARALL">SCI_MARGINTEXTCLEARALL</a><br />
      <a class="message" href="#SCI_MARGINSETSTYLEOFFSET">SCI_MARGINSETSTYLEOFFSET(int style)</a><br />
      <a class="message" href="#SCI_MARGINGETSTYLEOFFSET">SCI_MARGINGETSTYLEOFFSET</a><br />
+     <a class="message" href="#SCI_SETMARGINOPTIONS">SCI_SETMARGINOPTIONS(int marginOptions)</a><br />
+     <a class="message" href="#SCI_GETMARGINOPTIONS">SCI_GETMARGINOPTIONS</a><br />
     </code>
 
     <p><b id="SCI_SETMARGINTYPEN">SCI_SETMARGINTYPEN(int margin, int iType)</b><br />
@@ -2859,6 +2865,15 @@ struct Sci_TextToFind {
     <code>SCI_MARGINSETSTYLEOFFSET(256)</code> would allow the margin styles to be numbered from
     256 upto 511 so they do not overlap styles set by lexers. Each style number set with <code>SCI_MARGINSETSTYLE</code>
     or <code>SCI_MARGINSETSTYLES</code> has the offset added before looking up the style.
+    </p>
+    <p>
+     <b id="SCI_SETMARGINOPTIONS">SCI_SETMARGINOPTIONS(int marginOptions)</b><br />
+     <b id="SCI_GETMARGINOPTIONS">SCI_GETMARGINOPTIONS</b><br />
+    Define margin options by enabling appropriate bit flags. At the moment, only one flag is available 
+    <code>SC_MARGINOPTION_SUBLINESELECT</code>=1, which controls how wrapped lines are selected when clicking 
+    on margin in front of them. If <code>SC_MARGINOPTION_SUBLINESELECT</code> is set only sub line of wrapped 
+    line is selected, otherwise whole wrapped line is selected. Margin options are set to 
+    <code>SC_MARGINOPTION_NONE</code>=0 by default.
     </p>
 
     <h2 id="Annotations">Annotations</h2>
@@ -3613,7 +3628,7 @@ struct Sci_TextToFind {
 
           <td align="center">1</td>
 
-          <td>A squiggly underline.</td>
+          <td>A squiggly underline. Requires 3 pixels of descender space.</td>
         </tr>
 
         <tr>
@@ -3679,6 +3694,32 @@ struct Sci_TextToFind {
 			  <a class="message" href="#SCI_INDICSETOUTLINEALPHA">SCI_INDICSETOUTLINEALPHA</a>
               to control the alpha transparency values. The default alpha values are 30 for fill colour and 50 for outline colour.</td>
         </tr>
+
+        <tr>
+          <td align="left"><code>INDIC_DASH</code></td>
+
+          <td align="center">9</td>
+
+          <td>A dashed underline.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>INDIC_DOTS</code></td>
+
+          <td align="center">10</td>
+
+          <td>A dotted underline.</td>
+        </tr>
+
+        <tr>
+          <td align="left"><code>INDIC_SQUIGGLELOW</code></td>
+
+          <td align="center">11</td>
+
+          <td>Similar to <code>INDIC_SQUIGGLE</code> but only using 2 vertical pixels
+	  so will fit under small fonts.</td>
+        </tr>
+
       </tbody>
     </table>
 
@@ -4414,7 +4455,10 @@ struct Sci_TextToFind {
     <code>SCK_WIN</code>.</p>
 
     <p>The modifiers are a combination of zero or more of <code>SCMOD_ALT</code>,
-    <code>SCMOD_CTRL</code>, and <code>SCMOD_SHIFT</code>. If you are building a table, you might
+    <code>SCMOD_CTRL</code>, <code>SCMOD_SHIFT</code>, and <code>SCMOD_META</code>.
+    On OS X, the Command key is mapped to <code>SCMOD_CTRL</code> and the Control key to 
+    <code>SCMOD_META</code>.
+    If you are building a table, you might
     want to use <code>SCMOD_NORM</code>, which has the value 0, to mean no modifiers.</p>
 
     <p><b id="SCI_ASSIGNCMDKEY">SCI_ASSIGNCMDKEY(int <a class="jump"
@@ -5803,11 +5847,12 @@ struct SCNotification {
     </code>
 
     <p>The following <code>SCI_*</code> messages are associated with these notifications:</p>
-    <code><a class="message" href="#SCI_SETMODEVENTMASK">SCI_SETMODEVENTMASK(int
-    eventMask)</a><br />
+    <code><a class="message" href="#SCI_SETMODEVENTMASK">SCI_SETMODEVENTMASK(int eventMask)</a><br />
      <a class="message" href="#SCI_GETMODEVENTMASK">SCI_GETMODEVENTMASK</a><br />
-     <a class="message" href="#SCI_SETMOUSEDWELLTIME">SCI_SETMOUSEDWELLTIME</a><br />
+     <a class="message" href="#SCI_SETMOUSEDWELLTIME">SCI_SETMOUSEDWELLTIME(int milliseconds)</a><br />
      <a class="message" href="#SCI_GETMOUSEDWELLTIME">SCI_GETMOUSEDWELLTIME</a><br />
+     <a class="message" href="#SCI_SETIDENTIFIER">SCI_SETIDENTIFIER(int identifier)</a><br />
+     <a class="message" href="#SCI_GETIDENTIFIER">SCI_GETIDENTIFIER</a><br />
     </code>
 
     <p>The following additional notifications are sent using the <code>WM_COMMAND</code> message on
@@ -5817,6 +5862,17 @@ struct SCNotification {
      <a class="message" href="#SCEN_SETFOCUS">SCEN_SETFOCUS</a><br />
      <a class="message" href="#SCEN_KILLFOCUS">SCEN_KILLFOCUS</a><br />
     </code>
+
+    <p><b id="SCI_SETIDENTIFIER">SCI_SETIDENTIFIER(int identifier)</b><br />
+     <b id="SCI_GETIDENTIFIER">SCI_GETIDENTIFIER</b><br />
+     These two messages set and get the identifier of the Scintilla instance which is included in notifications as the 
+     <code>idFrom</code> field. 
+     When an application creates multiple Scintilla widgets, this allows the source of each notification to be found.
+     On Windows, this value is initialised in the <code>CreateWindow</code> call and stored as the 
+     <code>GWLP_ID</code> attribute of the window. 
+     The value should be small, preferrably less than 16 bits,
+     rather than a pointer as some of the functions will only transmit 16 or 32 bits.
+    </p>
 
     <p><b id="SCN_STYLENEEDED">SCN_STYLENEEDED</b><br />
      If you used <code><a class="message"
@@ -6461,7 +6517,7 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
     </table>
     <br />
 
-    <p><b id="SCI_SETMOUSEDWELLTIME">SCI_SETMOUSEDWELLTIME</b><br />
+    <p><b id="SCI_SETMOUSEDWELLTIME">SCI_SETMOUSEDWELLTIME(int milliseconds)</b><br />
      <b id="SCI_GETMOUSEDWELLTIME">SCI_GETMOUSEDWELLTIME</b><br />
      These two messages set and get the time the mouse must sit still, in milliseconds, to generate
     a <code><a class="message" href="#SCN_DWELLSTART">SCN_DWELLSTART</a></code> notification. If
@@ -6554,9 +6610,8 @@ for line = lineStart to lineEnd do SCI_ENSUREVISIBLE(line) next
 
     <p><b id="scintilla_set_id">void scintilla_set_id(ScintillaObject *sci, uptr_t id)</b><br />
     Set the control ID which will be used in the idFrom field of the NotifyHeader structure of all
-    notifications for this instance. When an application creates multiple Scintilla widgets, this allows
-    the source of each notification to be found. The value should be small, preferrably less than 16 bits,
-    rather than a pointer as some of the functions will only transmit 16 or 32 bits.</p>
+    notifications for this instance.
+    This is equivalent to <a class="message" href="#SCI_SETIDENTIFIER">SCI_SETIDENTIFIER</a>.</p>
 
     <p><b id="scintilla_send_message">sptr_t scintilla_send_message(ScintillaObject *sci,unsigned int iMessage, uptr_t wParam, sptr_t lParam)</b><br />
     The main entry point allows sending any of the messages described in this document.</p>
