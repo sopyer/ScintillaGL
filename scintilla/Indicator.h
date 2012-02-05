@@ -18,9 +18,10 @@ class Indicator {
 public:
 	int style;
 	bool under;
-	Colour/*Pair*/ fore;
+	Colour fore;
 	int fillAlpha;
-	Indicator() : style(INDIC_PLAIN), under(false), fore(MakeRGBA(0,0,0)), fillAlpha(30) {
+	int outlineAlpha;
+	Indicator() : style(INDIC_PLAIN), under(false), fore(MakeRGBA(0,0,0)), fillAlpha(30), outlineAlpha(50) {
 	}
 	void Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine);
 };

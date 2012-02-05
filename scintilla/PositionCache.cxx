@@ -151,15 +151,15 @@ void LineLayout::SetLineStart(int line, int start) {
 }
 
 void LineLayout::SetBracesHighlight(Range rangeLine, Position braces[],
-                                    char bracesMatchStyle, int xHighlight) {
-	if (rangeLine.ContainsCharacter(braces[0])) {
+                                    char bracesMatchStyle, int xHighlight, bool ignoreStyle) {
+	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[0])) {
 		int braceOffset = braces[0] - rangeLine.start;
 		if (braceOffset < numCharsInLine) {
 			bracePreviousStyles[0] = styles[braceOffset];
 			styles[braceOffset] = bracesMatchStyle;
 		}
 	}
-	if (rangeLine.ContainsCharacter(braces[1])) {
+	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[1])) {
 		int braceOffset = braces[1] - rangeLine.start;
 		if (braceOffset < numCharsInLine) {
 			bracePreviousStyles[1] = styles[braceOffset];
@@ -172,14 +172,14 @@ void LineLayout::SetBracesHighlight(Range rangeLine, Position braces[],
 	}
 }
 
-void LineLayout::RestoreBracesHighlight(Range rangeLine, Position braces[]) {
-	if (rangeLine.ContainsCharacter(braces[0])) {
+void LineLayout::RestoreBracesHighlight(Range rangeLine, Position braces[], bool ignoreStyle) {
+	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[0])) {
 		int braceOffset = braces[0] - rangeLine.start;
 		if (braceOffset < numCharsInLine) {
 			styles[braceOffset] = bracePreviousStyles[0];
 		}
 	}
-	if (rangeLine.ContainsCharacter(braces[1])) {
+	if (!ignoreStyle && rangeLine.ContainsCharacter(braces[1])) {
 		int braceOffset = braces[1] - rangeLine.start;
 		if (braceOffset < numCharsInLine) {
 			styles[braceOffset] = bracePreviousStyles[1];
@@ -391,7 +391,8 @@ static int NextBadU(const char *s, int p, int len, int &trailBytes) {
 	return -1;
 }
 
-BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_, int xStart, bool breakForSelection) :
+BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
+	int xStart, bool breakForSelection, Document *pdoc_) :
 	ll(ll_),
 	lineStart(lineStart_),
 	lineEnd(lineEnd_),
@@ -401,7 +402,8 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 	saeLen(0),
 	saeCurrentPos(0),
 	saeNext(0),
-	subBreak(-1) {
+	subBreak(-1),
+	pdoc(pdoc_) {
 	saeSize = 8;
 	selAndEdge = new int[saeSize];
 	for (unsigned int j=0; j < saeSize; j++) {
@@ -434,13 +436,15 @@ BreakFinder::BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posL
 	Insert(ll->edgeColumn - 1);
 	Insert(lineEnd - 1);
 
-	int trailBytes=0;
-	for (int pos = -1;;) {
-		pos = NextBadU(ll->chars, pos, lineEnd, trailBytes);
-		if (pos < 0)
-			break;
-		Insert(pos-1);
-		Insert(pos);
+	if (pdoc) {
+		int trailBytes=0;
+		for (int pos = -1;;) {
+			pos = NextBadU(ll->chars, pos, lineEnd, trailBytes);
+			if (pos < 0)
+				break;
+			Insert(pos-1);
+			Insert(pos);
+		}
 	}
 	saeNext = (saeLen > 0) ? selAndEdge[0] : -1;
 }
@@ -451,10 +455,6 @@ BreakFinder::~BreakFinder() {
 
 int BreakFinder::First() const {
 	return nextBreak;
-}
-
-static bool IsTrailByte(int ch) {
-	return (ch >= 0x80) && (ch < (0x80 + 0x40));
 }
 
 int BreakFinder::Next() {
@@ -487,34 +487,7 @@ int BreakFinder::Next() {
 		subBreak = -1;
 		return nextBreak;
 	} else {
-		int lastGoodBreak = -1;
-		int lastOKBreak = -1;
-		int lastUTF8Break = -1;
-		int j;
-		for (j = subBreak + 1; j <= nextBreak; j++) {
-			if (IsSpaceOrTab(ll->chars[j - 1]) && !IsSpaceOrTab(ll->chars[j])) {
-				lastGoodBreak = j;
-			}
-			if (static_cast<unsigned char>(ll->chars[j]) < 'A') {
-				lastOKBreak = j;
-			}
-			if (!IsTrailByte(static_cast<unsigned char>(ll->chars[j]))) {
-				lastUTF8Break = j;
-			}
-			if (((j - subBreak) >= lengthEachSubdivision) &&
-				((lastGoodBreak >= 0) || (lastOKBreak >= 0) || (lastUTF8Break >= 0))) {
-				break;
-			}
-		}
-		if (lastGoodBreak >= 0) {
-			subBreak = lastGoodBreak;
-		} else if (lastOKBreak >= 0) {
-			subBreak = lastOKBreak;
-		} else if (lastUTF8Break >= 0) {
-			subBreak = lastUTF8Break;
-		} else {
-			subBreak = nextBreak;
-		}
+		subBreak += pdoc->SafeSegment(ll->chars + subBreak, nextBreak-subBreak, lengthEachSubdivision);
 		if (subBreak >= nextBreak) {
 			subBreak = -1;
 			return nextBreak;
@@ -621,7 +594,8 @@ void PositionCache::SetSize(size_t size_) {
 }
 
 void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned int styleNumber,
-	const char *s, unsigned int len, float *positions) {
+	const char *s, unsigned int len, float *positions, Document *pdoc) {
+
 	allClear = false;
 	int probe = -1;
 	if ((size > 0) && (len < 30)) {
@@ -643,7 +617,22 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 			probe = probe2;
 		}
 	}
-	surface->MeasureWidths(vstyle.styles[styleNumber].font, s, len, positions);
+	if (len > BreakFinder::lengthStartSubdivision) {
+		// Break up into segments
+		unsigned int startSegment = 0;
+		int xStartSegment = 0;
+		while (startSegment < len) {
+			unsigned int lenSegment = pdoc->SafeSegment(s + startSegment, len - startSegment, BreakFinder::lengthEachSubdivision);
+			surface->MeasureWidths(vstyle.styles[styleNumber].font, s + startSegment, lenSegment, positions + startSegment);
+			for (unsigned int inSeg = 0; inSeg < lenSegment; inSeg++) {
+				positions[startSegment + inSeg] += xStartSegment;
+			}
+			xStartSegment = positions[startSegment + lenSegment - 1];
+			startSegment += lenSegment;
+		}
+	} else {
+		surface->MeasureWidths(vstyle.styles[styleNumber].font, s, len, positions);
+	}
 	if (probe >= 0) {
 		clock++;
 		if (clock > 60000) {

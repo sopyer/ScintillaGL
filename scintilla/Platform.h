@@ -166,7 +166,7 @@ public:
 
 	virtual void PenColour(Colour fore)=0;
 	virtual int LogPixelsY()=0;
-	virtual float DeviceHeightFont(int points)=0;
+	virtual float DeviceHeightFont(float points)=0;
 	virtual void MoveTo(float x_, float y_)=0;
 	virtual void LineTo(float x_, float y_)=0;
 	virtual void Polygon(Point *pts, int npts, Colour fore, Colour back)=0;

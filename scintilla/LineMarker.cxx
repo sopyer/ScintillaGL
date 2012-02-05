@@ -2,7 +2,7 @@
 /** @file LineMarker.cxx
  ** Defines the look of a line marker in the margin .
  **/
-// Copyright 1998-2003 by Neil Hodgson <neilh@scintilla.org>
+// Copyright 1998-2011 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
 #include <string.h>
@@ -17,13 +17,6 @@
 using namespace Scintilla;
 #endif
 
-//void LineMarker::RefreshColourPalette(Palette &pal, bool want) {
-//	pal.WantFind(fore, want);
-//	pal.WantFind(back, want);
-//	if (pxpm) {
-//		pxpm->RefreshColourPalette(pal, want);
-//	}
-//}
 
 void LineMarker::SetXPM(const char *textForm) {
 	delete pxpm;
@@ -67,7 +60,32 @@ static void DrawMinus(Surface *surface, int centreX, int centreY, int armSize, C
 	surface->FillRectangle(rcH, fore);
 }
 
-void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharacter) {
+void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharacter, typeOfFold tFold) {
+	Colour head = back;
+	Colour body = back;
+	Colour tail = back;
+
+	switch (tFold) {
+	case LineMarker::head :
+		head = backSelected;
+		tail = backSelected;
+		if (markType == SC_MARK_VLINE)
+			body = backSelected;
+		break;
+	case LineMarker::body :
+		head = backSelected;
+		body = backSelected;
+		break;
+	case LineMarker::tail :
+		body = backSelected;
+		tail = backSelected;
+		break;
+	default :
+		// LineMarker::undefined
+		break;
+	}
+
+
 	if ((markType == SC_MARK_PIXMAP) && (pxpm)) {
 		pxpm->Draw(surface, rcWhole);
 		return;
@@ -159,106 +177,138 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		// An invisible marker so don't draw anything
 
 	} else if (markType == SC_MARK_VLINE) {
-		surface->PenColour(back/*.allocated*/);
-		surface->MoveTo(centreX, rcWhole.top);
+		surface->PenColour(body);
+		surface->MoveTo(centreX, rcWhole.top + blobSize - (rcWhole.bottom - rcWhole.top)/2);
 		surface->LineTo(centreX, rcWhole.bottom);
 
 	} else if (markType == SC_MARK_LCORNER) {
-		surface->PenColour(back/*.allocated*/);
+		surface->PenColour(tail);
 		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, rc.top + dimOn2);
 		surface->LineTo(rc.right - 2, rc.top + dimOn2);
 
 	} else if (markType == SC_MARK_TCORNER) {
-		surface->PenColour(back/*.allocated*/);
-		surface->MoveTo(centreX, rcWhole.top);
-		surface->LineTo(centreX, rcWhole.bottom);
+		surface->PenColour(tail);
 		surface->MoveTo(centreX, rc.top + dimOn2);
 		surface->LineTo(rc.right - 2, rc.top + dimOn2);
 
+		surface->PenColour(body);
+		surface->MoveTo(centreX, rcWhole.top);
+		surface->LineTo(centreX, rc.top + dimOn2 + 1);
+
+		surface->PenColour(head);
+		surface->LineTo(centreX, rcWhole.bottom);
+
 	} else if (markType == SC_MARK_LCORNERCURVE) {
-		surface->PenColour(back/*.allocated*/);
+		surface->PenColour(tail);
 		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, rc.top + dimOn2-3);
 		surface->LineTo(centreX+3, rc.top + dimOn2);
 		surface->LineTo(rc.right - 1, rc.top + dimOn2);
 
 	} else if (markType == SC_MARK_TCORNERCURVE) {
-		surface->PenColour(back/*.allocated*/);
-		surface->MoveTo(centreX, rcWhole.top);
-		surface->LineTo(centreX, rcWhole.bottom);
-
+		surface->PenColour(tail);
 		surface->MoveTo(centreX, rc.top + dimOn2-3);
 		surface->LineTo(centreX+3, rc.top + dimOn2);
 		surface->LineTo(rc.right - 1, rc.top + dimOn2);
 
+		surface->PenColour(body);
+		surface->MoveTo(centreX, rcWhole.top);
+		surface->LineTo(centreX, rc.top + dimOn2-2);
+
+		surface->PenColour(head);
+		surface->LineTo(centreX, rcWhole.bottom);
+
 	} else if (markType == SC_MARK_BOXPLUS) {
-		surface->PenColour(back/*.allocated*/);
-		DrawBox(surface, centreX, centreY, blobSize, fore/*.allocated*/, back/*.allocated*/);
-		DrawPlus(surface, centreX, centreY, blobSize, back/*.allocated*/);
+		DrawBox(surface, centreX, centreY, blobSize, fore, head);
+		DrawPlus(surface, centreX, centreY, blobSize, tail);
 
 	} else if (markType == SC_MARK_BOXPLUSCONNECTED) {
-		surface->PenColour(back/*.allocated*/);
-		DrawBox(surface, centreX, centreY, blobSize, fore/*.allocated*/, back/*.allocated*/);
-		DrawPlus(surface, centreX, centreY, blobSize, back/*.allocated*/);
-
+		surface->PenColour(body);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
+		surface->PenColour(body);
 		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, centreY - blobSize);
 
-	} else if (markType == SC_MARK_BOXMINUS) {
-		surface->PenColour(back/*.allocated*/);
-		DrawBox(surface, centreX, centreY, blobSize, fore/*.allocated*/, back/*.allocated*/);
-		DrawMinus(surface, centreX, centreY, blobSize, back/*.allocated*/);
+		DrawBox(surface, centreX, centreY, blobSize, fore, head);
+		DrawPlus(surface, centreX, centreY, blobSize, tail);
 
+		if (tFold == LineMarker::body) {
+			surface->PenColour(tail);
+			surface->MoveTo(centreX + 1, centreY + blobSize);
+			surface->LineTo(centreX + blobSize + 1, centreY + blobSize);
+
+			surface->MoveTo(centreX + blobSize, centreY + blobSize);
+			surface->LineTo(centreX + blobSize, centreY - blobSize);
+
+			surface->MoveTo(centreX + 1, centreY - blobSize);
+			surface->LineTo(centreX + blobSize + 1, centreY - blobSize);
+		}
+	} else if (markType == SC_MARK_BOXMINUS) {
+		DrawBox(surface, centreX, centreY, blobSize, fore, head);
+		DrawMinus(surface, centreX, centreY, blobSize, tail);
+
+		surface->PenColour(head);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
 	} else if (markType == SC_MARK_BOXMINUSCONNECTED) {
-		surface->PenColour(back/*.allocated*/);
-		DrawBox(surface, centreX, centreY, blobSize, fore/*.allocated*/, back/*.allocated*/);
-		DrawMinus(surface, centreX, centreY, blobSize, back/*.allocated*/);
+		DrawBox(surface, centreX, centreY, blobSize, fore, head);
+		DrawMinus(surface, centreX, centreY, blobSize, tail);
 
+		surface->PenColour(head);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
+		surface->PenColour(body);
 		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, centreY - blobSize);
 
+		if (tFold == LineMarker::body) {
+			surface->PenColour(tail);
+			surface->MoveTo(centreX + 1, centreY + blobSize);
+			surface->LineTo(centreX + blobSize + 1, centreY + blobSize);
+
+			surface->MoveTo(centreX + blobSize, centreY + blobSize);
+			surface->LineTo(centreX + blobSize, centreY - blobSize);
+
+			surface->MoveTo(centreX + 1, centreY - blobSize);
+			surface->LineTo(centreX + blobSize + 1, centreY - blobSize);
+		}
 	} else if (markType == SC_MARK_CIRCLEPLUS) {
-		DrawCircle(surface, centreX, centreY, blobSize, fore/*.allocated*/, back/*.allocated*/);
-		surface->PenColour(back/*.allocated*/);
-		DrawPlus(surface, centreX, centreY, blobSize, back/*.allocated*/);
+		DrawCircle(surface, centreX, centreY, blobSize, fore, head);
+		DrawPlus(surface, centreX, centreY, blobSize, tail);
 
 	} else if (markType == SC_MARK_CIRCLEPLUSCONNECTED) {
-		DrawCircle(surface, centreX, centreY, blobSize, fore/*.allocated*/, back/*.allocated*/);
-		surface->PenColour(back/*.allocated*/);
-		DrawPlus(surface, centreX, centreY, blobSize, back/*.allocated*/);
-
+		surface->PenColour(body);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
 		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, centreY - blobSize);
 
-	} else if (markType == SC_MARK_CIRCLEMINUS) {
-		DrawCircle(surface, centreX, centreY, blobSize, fore/*.allocated*/, back/*.allocated*/);
-		surface->PenColour(back/*.allocated*/);
-		DrawMinus(surface, centreX, centreY, blobSize, back/*.allocated*/);
+		DrawCircle(surface, centreX, centreY, blobSize, fore, head);
+		DrawPlus(surface, centreX, centreY, blobSize, tail);
 
+	} else if (markType == SC_MARK_CIRCLEMINUS) {
+		DrawCircle(surface, centreX, centreY, blobSize, fore, head);
+		DrawMinus(surface, centreX, centreY, blobSize, tail);
+
+		surface->PenColour(head);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
 	} else if (markType == SC_MARK_CIRCLEMINUSCONNECTED) {
-		DrawCircle(surface, centreX, centreY, blobSize, fore/*.allocated*/, back/*.allocated*/);
-		surface->PenColour(back/*.allocated*/);
-		DrawMinus(surface, centreX, centreY, blobSize, back/*.allocated*/);
+		DrawCircle(surface, centreX, centreY, blobSize, fore, head);
+		DrawMinus(surface, centreX, centreY, blobSize, tail);
 
+		surface->PenColour(head);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
+		surface->PenColour(body);
 		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, centreY - blobSize);
 
@@ -269,17 +319,17 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		rc.left += (rc.Width() - width) / 2;
 		rc.right = rc.left + width;
 		surface->DrawTextClipped(rc, fontForCharacter, rc.bottom - 2,
-			character, 1, fore/*.allocated*/, back/*.allocated*/);
+			character, 1, fore, back);
 
 	} else if (markType == SC_MARK_DOTDOTDOT) {
 		int right = centreX - 6;
 		for (int b=0; b<3; b++) {
 			PRectangle rcBlob(right, rc.bottom - 4, right + 2, rc.bottom-2);
-			surface->FillRectangle(rcBlob, fore/*.allocated*/);
+			surface->FillRectangle(rcBlob, fore);
 			right += 5;
 		}
 	} else if (markType == SC_MARK_ARROWS) {
-		surface->PenColour(fore/*.allocated*/);
+		surface->PenColour(fore);
 		int right = centreX - 2;
 		for (int b=0; b<3; b++) {
 			surface->MoveTo(right - 4, centreY - 4);
@@ -299,12 +349,12 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 			Point(centreX, centreY + dimOn2),
 		};
 		surface->Polygon(pts, sizeof(pts) / sizeof(pts[0]),
-				fore/*.allocated*/, back/*.allocated*/);
+				fore, back);
 	} else if (markType == SC_MARK_LEFTRECT) {
 		PRectangle rcLeft = rcWhole;
 		rcLeft.right = rcLeft.left + 4;
-		surface->FillRectangle(rcLeft, back/*.allocated*/);
+		surface->FillRectangle(rcLeft, back);
 	} else { // SC_MARK_FULLRECT
-		surface->FillRectangle(rcWhole, back/*.allocated*/);
+		surface->FillRectangle(rcWhole, back);
 	}
 }

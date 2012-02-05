@@ -39,6 +39,20 @@ public:
 	const char *Save(const char *name);
 };
 
+class FontRealised : public FontSpecification, public FontMeasurements {
+	// Private so FontRealised objects can not be copied
+	FontRealised(const FontRealised &);
+	FontRealised &operator=(const FontRealised &);
+public:
+	Font font;
+	FontRealised *frNext;
+	FontRealised(const FontSpecification &fs);
+	virtual ~FontRealised();
+	void Realise(Surface &surface, float zoomLevel);
+	FontRealised *Find(const FontSpecification &fs);
+	void FindMaxAscentDescent(float &maxAscent, float &maxDescent);
+};
+
 enum IndentView {ivNone, ivReal, ivLookForward, ivLookBoth};
 
 enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterIndent=2};
@@ -48,6 +62,7 @@ enum WhiteSpaceVisibility {wsInvisible=0, wsVisibleAlways=1, wsVisibleAfterInden
 class ViewStyle {
 public:
 	FontNames fontNames;
+	FontRealised *frFirst;
 	size_t stylesSize;
 	Style *styles;
 	LineMarker markers[MARKER_MAX + 1];
@@ -114,13 +129,16 @@ public:
 	int marginStyleOffset;
 	int annotationVisible;
 	int annotationStyleOffset;
+	bool braceHighlightIndicatorSet;
+	int braceHighlightIndicator;
+	bool braceBadLightIndicatorSet;
+	int braceBadLightIndicator;
 
 	ViewStyle();
 	ViewStyle(const ViewStyle &source);
 	~ViewStyle();
 	void Init(size_t stylesSize_=64);
-	//void RefreshColourPalette(Palette &pal, bool want);
-	void Refresh(Surface &surface);
+	void CreateFont(const FontSpecification &fs);	void Refresh(Surface &surface);
 	void AllocStyles(size_t sizeNew);
 	void EnsureStyle(size_t index);
 	void ResetDefaultStyle();

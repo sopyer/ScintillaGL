@@ -228,7 +228,7 @@ public:
 	void Release();
 	void PenColour(Colour fore);
 	int LogPixelsY();
-	float DeviceHeightFont(int points);
+	float DeviceHeightFont(float points);
 	void MoveTo(float x_, float y_);
 	void LineTo(float x_, float y_);
 	void Polygon(Point *pts, int npts, Colour fore, Colour back);
@@ -280,7 +280,7 @@ int SurfaceImpl::LogPixelsY() {
 	return 72;
 }
 
-float SurfaceImpl::DeviceHeightFont(int points) {
+float SurfaceImpl::DeviceHeightFont(float points) {
 	int logPix = LogPixelsY();
 	return (points * logPix + logPix / 2) / 72.0f;
 }

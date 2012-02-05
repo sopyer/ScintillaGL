@@ -63,8 +63,8 @@ public:
 	bool InLine(int offset, int line) const;
 	void SetLineStart(int line, int start);
 	void SetBracesHighlight(Range rangeLine, Position braces[],
-		char bracesMatchStyle, int xHighlight);
-	void RestoreBracesHighlight(Range rangeLine, Position braces[]);
+		char bracesMatchStyle, int xHighlight, bool ignoreStyle);
+	void RestoreBracesHighlight(Range rangeLine, Position braces[], bool ignoreStyle);
 	int FindBefore(int x, int lower, int upper) const;
 	int EndLineStyle() const;
 };
@@ -117,11 +117,6 @@ public:
 
 // Class to break a line of text into shorter runs at sensible places.
 class BreakFinder {
-	// If a whole run is longer than lengthStartSubdivision then subdivide
-	// into smaller runs at spaces or punctuation.
-	enum { lengthStartSubdivision = 300 };
-	// Try to make each subdivided run lengthEachSubdivision or shorter.
-	enum { lengthEachSubdivision = 100 };
 	LineLayout *ll;
 	int lineStart;
 	int lineEnd;
@@ -133,9 +128,16 @@ class BreakFinder {
 	unsigned int saeCurrentPos;
 	int saeNext;
 	int subBreak;
+	Document *pdoc;
 	void Insert(int val);
 public:
-	BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_, int xStart, bool breakForSelection);
+	// If a whole run is longer than lengthStartSubdivision then subdivide
+	// into smaller runs at spaces or punctuation.
+	enum { lengthStartSubdivision = 300 };
+	// Try to make each subdivided run lengthEachSubdivision or shorter.
+	enum { lengthEachSubdivision = 100 };
+	BreakFinder(LineLayout *ll_, int lineStart_, int lineEnd_, int posLineStart_,
+		int xStart, bool breakForSelection, Document *pdoc_);
 	~BreakFinder();
 	int First() const;
 	int Next();
@@ -151,9 +153,9 @@ public:
 	~PositionCache();
 	void Clear();
 	void SetSize(size_t size_);
-	int GetSize() const { return size; }
+	size_t GetSize() const { return size; }
 	void MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned int styleNumber,
-		const char *s, unsigned int len, float *positions);
+		const char *s, unsigned int len, float *positions, Document *pdoc);
 };
 
 inline bool IsSpaceOrTab(int ch) {
