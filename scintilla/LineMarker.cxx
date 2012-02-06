@@ -7,6 +7,9 @@
 
 #include <string.h>
 
+#include <vector>
+#include <map>
+
 #include "Platform.h"
 
 #include "Scintilla.h"
@@ -28,6 +31,12 @@ void LineMarker::SetXPM(const char *const *linesForm) {
 	delete pxpm;
 	pxpm = new XPM(linesForm);
 	markType = SC_MARK_PIXMAP;
+}
+
+void LineMarker::SetRGBAImage(Point sizeRGBAImage, const unsigned char *pixelsRGBAImage) {
+	delete image;
+	image = new RGBAImage(sizeRGBAImage.x, sizeRGBAImage.y, pixelsRGBAImage);
+	markType = SC_MARK_RGBAIMAGE;
 }
 
 static void DrawBox(Surface *surface, int centreX, int centreY, int armSize, Colour fore, Colour back) {
@@ -67,10 +76,9 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 
 	switch (tFold) {
 	case LineMarker::head :
+	case LineMarker::headWithTail :
 		head = backSelected;
 		tail = backSelected;
-		if (markType == SC_MARK_VLINE)
-			body = backSelected;
 		break;
 	case LineMarker::body :
 		head = backSelected;
@@ -88,6 +96,10 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 
 	if ((markType == SC_MARK_PIXMAP) && (pxpm)) {
 		pxpm->Draw(surface, rcWhole);
+		return;
+	}
+	if ((markType == SC_MARK_RGBAIMAGE) && (image)) {
+		surface->DrawRGBAImage(rcWhole, image->GetWidth(), image->GetHeight(), image->Pixels());
 		return;
 	}
 	// Restrict most shapes a bit
@@ -178,7 +190,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 
 	} else if (markType == SC_MARK_VLINE) {
 		surface->PenColour(body);
-		surface->MoveTo(centreX, rcWhole.top + blobSize - (rcWhole.bottom - rcWhole.top)/2);
+		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, rcWhole.bottom);
 
 	} else if (markType == SC_MARK_LCORNER) {
@@ -224,7 +236,10 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		DrawPlus(surface, centreX, centreY, blobSize, tail);
 
 	} else if (markType == SC_MARK_BOXPLUSCONNECTED) {
-		surface->PenColour(body);
+		if (tFold == LineMarker::headWithTail)
+			surface->PenColour(tail);
+		else
+			surface->PenColour(body);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
@@ -282,10 +297,14 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		DrawPlus(surface, centreX, centreY, blobSize, tail);
 
 	} else if (markType == SC_MARK_CIRCLEPLUSCONNECTED) {
-		surface->PenColour(body);
+		if (tFold == LineMarker::headWithTail)
+			surface->PenColour(tail);
+		else
+			surface->PenColour(body);
 		surface->MoveTo(centreX, centreY + blobSize);
 		surface->LineTo(centreX, rcWhole.bottom);
 
+		surface->PenColour(body);
 		surface->MoveTo(centreX, rcWhole.top);
 		surface->LineTo(centreX, centreY - blobSize);
 

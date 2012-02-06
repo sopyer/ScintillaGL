@@ -10,6 +10,9 @@
 #include <math.h>
 #include <assert.h>
 
+#include <vector>
+#include <map>
+
 #include "Platform.h"
 #include "Scintilla.h"
 #include "UniConversion.h"
@@ -241,6 +244,7 @@ public:
 	void Ellipse(PRectangle rc, Colour fore, Colour back);
 
 	virtual void DrawPixmap(PRectangle rc, Point from, Pixmap pixmap);
+	virtual void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage);
 
 	void DrawTextBase(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore);
 	void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore, Colour back);
@@ -388,6 +392,11 @@ void SurfaceImpl::DrawPixmap(PRectangle rc, Point offset, Pixmap pixmap)
 	glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_TEXTURE_2D);
+}
+
+void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage)
+{
+    assert(!"Implemented");
 }
 
 void SurfaceImpl::FillRectangle(PRectangle rc, Colour back) {

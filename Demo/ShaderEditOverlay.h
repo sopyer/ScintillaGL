@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <SDL.h>
 #include <gl/GLee.h>

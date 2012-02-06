@@ -179,6 +179,7 @@ public:
 	virtual void Ellipse(PRectangle rc, Colour fore, Colour back)=0;
 	
 	virtual void DrawPixmap(PRectangle rc, Point from, Pixmap pixmap) = 0;
+	virtual void DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char *pixelsImage) = 0;
 
 	virtual void DrawTextNoClip(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore, Colour back)=0;
 	virtual void DrawTextClipped(PRectangle rc, Font &font_, float ybase, const char *s, int len, Colour fore, Colour back)=0;
