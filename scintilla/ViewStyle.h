@@ -66,6 +66,7 @@ public:
 	size_t stylesSize;
 	Style *styles;
 	LineMarker markers[MARKER_MAX + 1];
+	int largestMarkerHeight;
 	Indicator indicators[INDIC_MAX + 1];
 	float lineHeight;
 	float maxAscent;
@@ -102,7 +103,6 @@ public:
 	enum { margins=5 };
 	int leftMarginWidth;	///< Spacing margin on left of text
 	int rightMarginWidth;	///< Spacing margin on left of text
-	bool symbolMargin;
 	int maskInLine;	///< Mask for markers to be put into text because there is nowhere for them to go in margin
 	MarginStyle ms[margins];
 	int fixedColumnWidth;
@@ -111,7 +111,6 @@ public:
 	int whitespaceSize;
 	IndentView viewIndentationGuides;
 	bool viewEOL;
-	bool showMarkedLines;
 	Colour caretcolour;
 	Colour additionalCaretColour;
 	bool showCaretLineBackground;
@@ -147,6 +146,7 @@ public:
 	void SetStyleFontName(int styleIndex, const char *name);
 	bool ProtectionActive() const;
 	bool ValidStyle(size_t styleIndex) const;
+	void CalcLargestMarkerHeight();
 };
 
 #ifdef SCI_NAMESPACE

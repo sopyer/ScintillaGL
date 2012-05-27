@@ -43,10 +43,8 @@ public:
 };
 
 struct FontMeasurements {
-	float lineHeight;
 	float ascent;
 	float descent;
-	float externalLeading;
 	float aveCharWidth;
 	float spaceWidth;
 	float sizeZoomed;

@@ -8,10 +8,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4786)
-#endif
-
 #include <vector>
 #include <map>
 
@@ -47,14 +43,6 @@ static size_t MeasureLength(const char *s) {
 
 Colour XPM::ColourFromCode(int ch) const {
 	return colourCodeTable[ch];
-#ifdef SLOW
-	for (int i=0; i<nColours; i++) {
-		if (codes[i] == ch) {
-			return colours[i]/*.allocated*/;
-		}
-	}
-	return colours[0]/*.allocated*/;
-#endif
 }
 
 void XPM::FillRun(Surface *surface, int code, int startX, int y, int x) {

@@ -45,10 +45,8 @@ FontMeasurements::FontMeasurements() {
 }
 
 void FontMeasurements::Clear() {
-	lineHeight = 2.0f;
 	ascent = 1.0f;
 	descent = 1.0f;
-	externalLeading = 0.0f;
 	aveCharWidth = 1.0f;
 	spaceWidth = 1.0f;
 	sizeZoomed = 2.0f;

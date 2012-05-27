@@ -251,7 +251,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int wrapVisualFlags;
 	int wrapVisualFlagsLocation;
 	int wrapVisualStartIndent;
-	int wrapAddIndent; // This will be added to initial indent of line
 	int wrapIndentMode; // SC_WRAPINDENT_FIXED, _SAME, _INDENT
 
 	bool convertPastes;
@@ -354,7 +353,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	void DrawIndentGuide(Surface *surface, int lineVisible, float lineHeight, int start, PRectangle rcSegment, bool highlight);
 	void DrawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, Colour wrapColour);
 	void DrawEOL(Surface *surface, ViewStyle &vsDraw, PRectangle rcLine, LineLayout *ll,
-		int line, int lineEnd, int xStart, int subLine, int subLineStart,
+		int line, int lineEnd, int xStart, int subLine, double subLineStart,
 		bool overrideBackground, Colour background,
 		bool drawWrapMark, Colour wrapColour);
 	void DrawIndicator(int indicNum, int startPos, int endPos, Surface *surface, ViewStyle &vsDraw,
@@ -444,9 +443,6 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	int StartEndDisplayLine(int pos, bool start);
 	virtual int KeyCommand(unsigned int iMessage);
 	virtual int KeyDefault(int /* key */, int /*modifiers*/);
-
-	int GetWhitespaceVisible();
-	void SetWhitespaceVisible(int view);
 
 	void Indent(bool forwards);
 
