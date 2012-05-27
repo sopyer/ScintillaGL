@@ -100,6 +100,7 @@
     <ClCompile Include="lexers\LexASY.cxx" />
     <ClCompile Include="lexers\LexAU3.cxx" />
     <ClCompile Include="lexers\LexAVE.cxx" />
+    <ClCompile Include="lexers\LexAVS.cxx" />
     <ClCompile Include="lexers\LexBaan.cxx" />
     <ClCompile Include="lexers\LexBash.cxx" />
     <ClCompile Include="lexers\LexBasic.cxx" />
@@ -108,12 +109,14 @@
     <ClCompile Include="lexers\LexCLW.cxx" />
     <ClCompile Include="lexers\LexCmake.cxx" />
     <ClCompile Include="lexers\LexCOBOL.cxx" />
+    <ClCompile Include="lexers\LexCoffeeScript.cxx" />
     <ClCompile Include="lexers\LexConf.cxx" />
     <ClCompile Include="lexers\LexCPP.cxx" />
     <ClCompile Include="lexers\LexCrontab.cxx" />
     <ClCompile Include="lexers\LexCsound.cxx" />
     <ClCompile Include="lexers\LexCSS.cxx" />
     <ClCompile Include="lexers\LexD.cxx" />
+    <ClCompile Include="lexers\LexECL.cxx" />
     <ClCompile Include="lexers\LexEiffel.cxx" />
     <ClCompile Include="lexers\LexErlang.cxx" />
     <ClCompile Include="lexers\LexEScript.cxx" />
@@ -166,6 +169,7 @@
     <ClCompile Include="lexers\LexTADS3.cxx" />
     <ClCompile Include="lexers\LexTAL.cxx" />
     <ClCompile Include="lexers\LexTCL.cxx" />
+    <ClCompile Include="lexers\LexTCMD.cxx" />
     <ClCompile Include="lexers\LexTeX.cxx" />
     <ClCompile Include="lexers\LexTxt2tags.cxx" />
     <ClCompile Include="lexers\LexVB.cxx" />

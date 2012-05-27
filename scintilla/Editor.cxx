@@ -4878,7 +4878,7 @@ void Editor::CursorUpOrDown(int direction, Selection::selTypes selt) {
 		}
 	}
 
-	int newY = pt.y + (1 + skipLines) * direction * vs.lineHeight;
+	float newY = pt.y + (1 + skipLines) * direction * vs.lineHeight;
 	SelectionPosition posNew = SPositionFromLocation(
 	            Point(lastXChosen - xOffset, newY), false, false, UserVirtualSpace());
 
