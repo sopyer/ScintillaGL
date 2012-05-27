@@ -122,14 +122,14 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		PRectangle rcRounded = rc;
 		rcRounded.left = rc.left + 1;
 		rcRounded.right = rc.right - 1;
-		surface->RoundedRectangle(rcRounded, fore/*.allocated*/, back/*.allocated*/);
+		surface->RoundedRectangle(rcRounded, fore, back);
 	} else if (markType == SC_MARK_CIRCLE) {
 		PRectangle rcCircle;
 		rcCircle.left = centreX - dimOn2;
 		rcCircle.top = centreY - dimOn2;
 		rcCircle.right = centreX + dimOn2;
 		rcCircle.bottom = centreY + dimOn2;
-		surface->Ellipse(rcCircle, fore/*.allocated*/, back/*.allocated*/);
+		surface->Ellipse(rcCircle, fore, back);
 	} else if (markType == SC_MARK_ARROW) {
 		Point pts[] = {
     		Point(centreX - dimOn4, centreY - dimOn2),
@@ -137,7 +137,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
     		Point(centreX + dimOn2 - dimOn4, centreY),
 		};
 		surface->Polygon(pts, sizeof(pts) / sizeof(pts[0]),
-                 		fore/*.allocated*/, back/*.allocated*/);
+                 		fore, back);
 
 	} else if (markType == SC_MARK_ARROWDOWN) {
 		Point pts[] = {
@@ -146,7 +146,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
     		Point(centreX, centreY + dimOn2 - dimOn4),
 		};
 		surface->Polygon(pts, sizeof(pts) / sizeof(pts[0]),
-                 		fore/*.allocated*/, back/*.allocated*/);
+                 		fore, back);
 
 	} else if (markType == SC_MARK_PLUS) {
 		Point pts[] = {
@@ -164,7 +164,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
     		Point(centreX - armSize, centreY + 1),
 		};
 		surface->Polygon(pts, sizeof(pts) / sizeof(pts[0]),
-                 		fore/*.allocated*/, back/*.allocated*/);
+                 		fore, back);
 
 	} else if (markType == SC_MARK_MINUS) {
 		Point pts[] = {
@@ -174,7 +174,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
     		Point(centreX - armSize, centreY + 1),
 		};
 		surface->Polygon(pts, sizeof(pts) / sizeof(pts[0]),
-                 		fore/*.allocated*/, back/*.allocated*/);
+                 		fore, back);
 
 	} else if (markType == SC_MARK_SMALLRECT) {
 		PRectangle rcSmall;
@@ -182,7 +182,7 @@ void LineMarker::Draw(Surface *surface, PRectangle &rcWhole, Font &fontForCharac
 		rcSmall.top = rc.top + 2;
 		rcSmall.right = rc.right - 1;
 		rcSmall.bottom = rc.bottom - 2;
-		surface->RectangleDraw(rcSmall, fore/*.allocated*/, back/*.allocated*/);
+		surface->RectangleDraw(rcSmall, fore, back);
 
 	} else if (markType == SC_MARK_EMPTY || markType == SC_MARK_BACKGROUND ||
 		markType == SC_MARK_UNDERLINE || markType == SC_MARK_AVAILABLE) {

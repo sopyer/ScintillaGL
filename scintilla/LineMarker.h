@@ -62,7 +62,6 @@ public:
 		image = NULL;
 		return *this;
 	}
-	//void RefreshColourPalette(Palette &pal, bool want);
 	void SetXPM(const char *textForm);
 	void SetXPM(const char *const *linesForm);
 	void SetRGBAImage(Point sizeRGBAImage, const unsigned char *pixelsRGBAImage);

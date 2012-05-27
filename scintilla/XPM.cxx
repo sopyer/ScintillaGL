@@ -120,7 +120,7 @@ void XPM::Init(const char *const *linesForm) {
 		return;
 	}
 	codes = new char[nColours];
-	colours = new Colour/*Pair*/[nColours];
+	colours = new Colour[nColours];
 
 	int strings = 1+height+nColours;
 	lines = new char *[strings];
@@ -147,7 +147,7 @@ void XPM::Init(const char *const *linesForm) {
 		codes[c] = colourDef[0];
 		colourDef += 4;
 		if (*colourDef == '#') {
-			colours[c]/*.desired.Set(colourDef)*/ = ColourFromText(colourDef);
+			colours[c] = ColourFromText(colourDef);
 		} else {
 			colours[c] = MakeRGBA(0xff, 0xff, 0xff);
 			codeTransparent = codes[c];
@@ -166,24 +166,6 @@ void XPM::Clear() {
 	delete []lines;
 	lines = 0;
 }
-
-//void XPM::RefreshColourPalette(Palette &pal, bool want) {
-//	if (!data || !codes || !colours || !lines) {
-//		return;
-//	}
-//	for (int i=0; i<nColours; i++) {
-//		pal.WantFind(colours[i], want);
-//	}
-//}
-
-//void XPM::CopyDesiredColours() {
-//	if (!data || !codes || !colours || !lines) {
-//		return;
-//	}
-//	for (int i=0; i<nColours; i++) {
-//		colours[i].Copy();
-//	}
-//}
 
 void XPM::Draw(Surface *surface, PRectangle &rc) {
 	if (!data || !codes || !colours || !lines) {
@@ -292,7 +274,6 @@ void XPMSet::Add(int ident, const char *textForm) {
 	for (int i = 0; i < len; i++) {
 		if (set[i]->GetId() == ident) {
 			set[i]->Init(textForm);
-			//set[i]->CopyDesiredColours();
 			return;
 		}
 	}
@@ -301,7 +282,6 @@ void XPMSet::Add(int ident, const char *textForm) {
 	XPM *pxpm = new XPM(textForm);
 	if (pxpm) {
 		pxpm->SetId(ident);
-		//pxpm->CopyDesiredColours();
 		if (len == maximum) {
 			maximum += 64;
 			XPM **setNew = new XPM *[maximum];

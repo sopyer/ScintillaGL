@@ -877,6 +877,7 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 		// Try to optimise small scrolls
 #ifndef UNDER_CE
 		int linesToMove = topLine - topLineNew;
+		bool performBlit = (abs(linesToMove) <= 10) && (paintState == notPainting);
 #endif
 		SetTopLine(topLineNew);
 		// Optimize by styling the view as this will invalidate any needed area
@@ -884,7 +885,7 @@ void Editor::ScrollTo(int line, bool moveThumb) {
 		StyleToPositionInView(PositionAfterArea(GetClientRectangle()));
 #ifndef UNDER_CE
 		// Perform redraw rather than scroll if many lines would be redrawn anyway.
-		if ((abs(linesToMove) <= 10) && (paintState == notPainting)) {
+		if (performBlit) {
 			ScrollText(linesToMove);
 		}
 #else
@@ -2088,7 +2089,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 		// Layout the line, determining the position of each character,
 		// with an extra element at the end for the end of the line.
 		int startseg = 0;	// Start of the current segment, in char. number
-		int startsegx = 0;	// Start of the current segment, in pixels
+		float startsegx = 0;	// Start of the current segment, in pixels
 		ll->positions[0] = 0;
 		unsigned int tabWidth = vstyle.spaceWidth * pdoc->tabInChars;
 		bool lastSegItalics = false;
@@ -2109,7 +2110,7 @@ void Editor::LayoutLine(int line, Surface *surface, ViewStyle &vstyle, LineLayou
 				if (vstyle.styles[ll->styles[charInLine]].visible) {
 					if (isControl) {
 						if (ll->chars[charInLine] == '\t') {
-							ll->positions[charInLine + 1] = ((((startsegx + 2) /
+							ll->positions[charInLine + 1] = ((((static_cast<int>(startsegx) + 2) /
 							        tabWidth) + 1) * tabWidth) - startsegx;
 						} else if (controlCharSymbol < 32) {
 							if (ctrlCharWidth[ll->chars[charInLine]] == 0) {
@@ -2774,8 +2775,10 @@ void Editor::DrawLine(Surface *surface, ViewStyle &vsDraw, int line, int lineVis
 		// draw strings that are completely past the right side of the window.
 		if ((rcSegment.left <= rcLine.right) && (rcSegment.right >= rcLine.left)) {
 			// Clip to line rectangle, since may have a huge position which will not work with some platforms
-			rcSegment.left = Platform::Maximum(rcSegment.left, rcLine.left);
-			rcSegment.right = Platform::Minimum(rcSegment.right, rcLine.right);
+			if (rcSegment.left < rcLine.left)
+				rcSegment.left = rcLine.left;
+			if (rcSegment.right > rcLine.right)
+				rcSegment.right = rcLine.right;
 
 			int styleMain = ll->styles[i];
 			const int inSelection = hideSelection ? 0 : sel.CharacterInSelection(iDoc);
@@ -3226,7 +3229,7 @@ void Editor::DrawCarets(Surface *surface, ViewStyle &vsDraw, int lineDoc, int xS
 		const int spaceWidth = static_cast<int>(vsDraw.styles[ll->EndLineStyle()].spaceWidth);
 		const int virtualOffset = posCaret.VirtualSpace() * spaceWidth;
 		if (ll->InLine(offset, subLine) && offset <= ll->numCharsBeforeEOL) {
-			int xposCaret = ll->positions[offset] + virtualOffset - ll->positions[ll->LineStart(subLine)];
+			float xposCaret = ll->positions[offset] + virtualOffset - ll->positions[ll->LineStart(subLine)];
 			if (ll->wrapIndent != 0) {
 				int lineStart = ll->LineStart(subLine);
 				if (lineStart != 0)	// Wrapped
@@ -4343,14 +4346,12 @@ void Editor::NotifySavePoint(Document *, void *, bool atSavePoint) {
 void Editor::CheckModificationForWrap(DocModification mh) {
 	if (mh.modificationType & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT)) {
 		llc.Invalidate(LineLayout::llCheckTextAndStyle);
+		int lineDoc = pdoc->LineFromPosition(mh.position);
+		int lines = Platform::Maximum(0, mh.linesAdded);
 		if (wrapState != eWrapNone) {
-			int lineDoc = pdoc->LineFromPosition(mh.position);
-			int lines = Platform::Maximum(0, mh.linesAdded);
 			NeedWrapping(lineDoc, lineDoc + lines + 1);
 		}
 		// Fix up annotation heights
-		int lineDoc = pdoc->LineFromPosition(mh.position);
-		int lines = Platform::Maximum(0, mh.linesAdded);
 		SetAnnotationHeights(lineDoc, lineDoc + lines + 2);
 	}
 }
@@ -4474,7 +4475,7 @@ void Editor::NotifyModified(Document *, DocModification mh, void *) {
 	}
 
 	//if ((mh.modificationType & SC_MOD_CHANGEMARKER) || (mh.modificationType & SC_MOD_CHANGEMARGIN)) {
-	//	if ((paintState == notPainting) || !PaintContainsMargin()) {
+	//	if ((!willRedrawAll) && ((paintState == notPainting) || !PaintContainsMargin())) {
 	//		if (mh.modificationType & SC_MOD_CHANGEFOLD) {
 	//			// Fold changes can affect the drawing of following lines so redraw whole margin
 	//			RedrawSelMargin(mh.line-1, true);
@@ -6473,8 +6474,18 @@ void Editor::SetBraceHighlight(Position pos0, Position pos1, int matchStyle) {
 
 void Editor::SetAnnotationHeights(int start, int end) {
 	if (vs.annotationVisible) {
+		bool changedHeight = false;
 		for (int line=start; line<end; line++) {
-			cs.SetHeight(line, pdoc->AnnotationLines(line) + 1);
+			int linesWrapped = 1;
+			if (wrapState != eWrapNone) {
+				AutoLineLayout ll(llc, RetrieveLineLayout(line));
+				if (ll) {
+					LayoutLine(line, drawSurface, vs, ll, wrapWidth);
+					linesWrapped = ll->lines;
+				}
+			}
+			if (cs.SetHeight(line, pdoc->AnnotationLines(line) + linesWrapped))
+				changedHeight = true;
 		}
 	}
 }
@@ -6723,7 +6734,10 @@ void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		vs.styles[wParam].back = Colour(lParam);
 		break;
 	case SCI_STYLESETBOLD:
-		vs.styles[wParam].bold = lParam != 0;
+		vs.styles[wParam].weight = lParam != 0 ? SC_WEIGHT_BOLD : SC_WEIGHT_NORMAL;
+		break;
+	case SCI_STYLESETWEIGHT:
+		vs.styles[wParam].weight = lParam;
 		break;
 	case SCI_STYLESETITALIC:
 		vs.styles[wParam].italic = lParam != 0;
@@ -6732,6 +6746,9 @@ void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam
 		vs.styles[wParam].eolFilled = lParam != 0;
 		break;
 	case SCI_STYLESETSIZE:
+		vs.styles[wParam].size = lParam * SC_FONT_SIZE_MULTIPLIER;
+		break;
+	case SCI_STYLESETSIZEFRACTIONAL:
 		vs.styles[wParam].size = lParam;
 		break;
 	case SCI_STYLESETFONT:
@@ -6769,12 +6786,16 @@ sptr_t Editor::StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 	case SCI_STYLEGETBACK:
 		return vs.styles[wParam].back;
 	case SCI_STYLEGETBOLD:
-		return vs.styles[wParam].bold ? 1 : 0;
+		return vs.styles[wParam].weight > SC_WEIGHT_NORMAL;
+	case SCI_STYLEGETWEIGHT:
+		return vs.styles[wParam].weight;
 	case SCI_STYLEGETITALIC:
 		return vs.styles[wParam].italic ? 1 : 0;
 	case SCI_STYLEGETEOLFILLED:
 		return vs.styles[wParam].eolFilled ? 1 : 0;
 	case SCI_STYLEGETSIZE:
+		return vs.styles[wParam].size / SC_FONT_SIZE_MULTIPLIER;
+	case SCI_STYLEGETSIZEFRACTIONAL:
 		return vs.styles[wParam].size;
 	case SCI_STYLEGETFONT:
 		if (!vs.styles[wParam].fontName)
@@ -7741,14 +7762,8 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_MARKERGET:
 		return pdoc->GetMark(wParam);
 
-	case SCI_MARKERNEXT: {
-			int lt = pdoc->LinesTotal();
-			for (int iLine = wParam; iLine < lt; iLine++) {
-				if ((pdoc->GetMark(iLine) & lParam) != 0)
-					return iLine;
-			}
-		}
-		return -1;
+	case SCI_MARKERNEXT: 
+		return pdoc->MarkerNext(wParam, lParam);
 
 	case SCI_MARKERPREVIOUS: {
 			for (int iLine = wParam; iLine >= 0; iLine--) {
@@ -7854,9 +7869,11 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_STYLESETFORE:
 	case SCI_STYLESETBACK:
 	case SCI_STYLESETBOLD:
+	case SCI_STYLESETWEIGHT:
 	case SCI_STYLESETITALIC:
 	case SCI_STYLESETEOLFILLED:
 	case SCI_STYLESETSIZE:
+	case SCI_STYLESETSIZEFRACTIONAL:
 	case SCI_STYLESETFONT:
 	case SCI_STYLESETUNDERLINE:
 	case SCI_STYLESETCASE:
@@ -7870,9 +7887,11 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_STYLEGETFORE:
 	case SCI_STYLEGETBACK:
 	case SCI_STYLEGETBOLD:
+	case SCI_STYLEGETWEIGHT:
 	case SCI_STYLEGETITALIC:
 	case SCI_STYLEGETEOLFILLED:
 	case SCI_STYLEGETSIZE:
+	case SCI_STYLEGETSIZEFRACTIONAL:
 	case SCI_STYLEGETFONT:
 	case SCI_STYLEGETUNDERLINE:
 	case SCI_STYLEGETCASE:
@@ -7960,6 +7979,9 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 
 	case SCI_GETLINEVISIBLE:
 		return cs.GetVisible(wParam);
+
+	case SCI_GETALLLINESVISIBLE:
+		return cs.HiddenLines() ? 0 : 1;
 
 	case SCI_SETFOLDEXPANDED:
 		if (cs.SetExpanded(wParam, lParam != 0)) {
@@ -8368,6 +8390,16 @@ sptr_t Editor::Command(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	case SCI_RELEASEDOCUMENT:
 		(reinterpret_cast<Document *>(lParam))->Release();
 		break;
+
+	case SCI_CREATELOADER: {
+			Document *doc = new Document();
+			if (doc) {
+				doc->AddRef();
+				doc->Allocate(wParam);
+				doc->SetUndoCollection(false);
+			}
+			return reinterpret_cast<sptr_t>(static_cast<ILoader *>(doc));
+		}
 
 	case SCI_SETMODEVENTMASK:
 		modEventMask = wParam;

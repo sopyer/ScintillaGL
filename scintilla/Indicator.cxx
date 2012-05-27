@@ -23,7 +23,7 @@ using namespace Scintilla;
 #endif
 
 void Indicator::Draw(Surface *surface, const PRectangle &rc, const PRectangle &rcLine) {
-	surface->PenColour(fore/*.allocated*/);
+	surface->PenColour(fore);
 	int ymid = (rc.bottom + rc.top) / 2;
 	if (style == INDIC_SQUIGGLE) {
 		surface->MoveTo(rc.left, rc.top);

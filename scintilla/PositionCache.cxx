@@ -511,7 +511,7 @@ void PositionCacheEntry::Set(unsigned int styleNumber_, const char *s_,
 	if (s_ && positions_) {
 		positions = new short[len + (len + 1) / 2];
 		for (unsigned int i=0; i<len; i++) {
-			positions[i] = static_cast<short>(positions_[i]);
+			positions[i] = static_cast<float>(positions_[i]);
 		}
 		memcpy(reinterpret_cast<char *>(positions + len), s_, len);
 	}
@@ -621,7 +621,7 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 	if (len > BreakFinder::lengthStartSubdivision) {
 		// Break up into segments
 		unsigned int startSegment = 0;
-		int xStartSegment = 0;
+		float xStartSegment = 0;
 		while (startSegment < len) {
 			unsigned int lenSegment = pdoc->SafeSegment(s + startSegment, len - startSegment, BreakFinder::lengthEachSubdivision);
 			surface->MeasureWidths(vstyle.styles[styleNumber].font, s + startSegment, lenSegment, positions + startSegment);

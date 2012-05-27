@@ -476,12 +476,12 @@ namespace platform
 	}
 }
 
-void Font::Create(const char *faceName, int /*characterSet*/, int size,	bool /*bold*/, bool /*italic*/, int)
+void Font::Create(const FontParameters &fp)
 {
 	stbtt_Font* newFont = new stbtt_Font;
 	size_t len;
 
-	FILE* f = fopen(faceName, "rb");
+	FILE* f = fopen(fp.faceName, "rb");
 
 	assert(f);
 
@@ -492,7 +492,7 @@ void Font::Create(const char *faceName, int /*characterSet*/, int size,	bool /*b
 	unsigned char* buf = (unsigned char*)malloc(len);
 	unsigned char* bmp = new unsigned char[512*512];
 	fread(buf, 1, len, f);
-	stbtt_BakeFontBitmap(buf, 0, (float)size, bmp, 512, 512, 32, 96, newFont->cdata); // no guarantee this fits!
+	stbtt_BakeFontBitmap(buf, 0, fp.size, bmp, 512, 512, 32, 96, newFont->cdata); // no guarantee this fits!
 	// can free ttf_buffer at this point
 	glGenTextures(1, &newFont->ftex);
 	glBindTexture(GL_TEXTURE_2D, newFont->ftex);
@@ -503,7 +503,7 @@ void Font::Create(const char *faceName, int /*characterSet*/, int size,	bool /*b
 
 	stbtt_InitFont(&newFont->fontinfo, buf, 0);
 
-	newFont->scale = stbtt_ScaleForPixelHeight(&newFont->fontinfo, (float)size);
+	newFont->scale = stbtt_ScaleForPixelHeight(&newFont->fontinfo, fp.size);
 
 
 	delete [] bmp;

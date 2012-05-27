@@ -120,6 +120,38 @@ inline Colour ColourFromText(const char *val) {
 /**
  * Font management.
  */
+
+
+struct FontParameters {
+	const char *faceName;
+	float size;
+	int weight;
+	bool italic;
+	int extraFontFlag;
+	int technology;
+	int characterSet;
+
+	FontParameters(
+		const char *faceName_,
+		float size_=10,
+		int weight_=400,
+		bool italic_=false,
+		int extraFontFlag_=0,
+		int technology_=0,
+		int characterSet_=0) :
+
+		faceName(faceName_),
+		size(size_),
+		weight(weight_),
+		italic(italic_),
+		extraFontFlag(extraFontFlag_),
+		technology(technology_),
+		characterSet(characterSet_)
+	{
+	}
+
+};
+
 class Font {
 protected:
 	FontID fid;
@@ -130,8 +162,7 @@ public:
 	Font();
 	virtual ~Font();
 
-	virtual void Create(const char *faceName, int characterSet, int size,
-		bool bold, bool italic, int extraFontFlag=0);
+	virtual void Create(const FontParameters &fp);
 	virtual void Release();
 
 	FontID GetID() { return fid; }
