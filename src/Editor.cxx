@@ -1761,6 +1761,12 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 		surface = surfWindow;
 	}
 
+	// Clip vertically to paint area to avoid drawing line numbers
+	if (rcMargin.bottom > rc.bottom)
+		rcMargin.bottom = rc.bottom;
+	if (rcMargin.top < rc.top)
+		rcMargin.top = rc.top;
+
 	PRectangle rcSelMargin = rcMargin;
 	rcSelMargin.right = rcMargin.left;
 
@@ -1793,16 +1799,17 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 				surface->FillRectangle(rcSelMargin, vs.styles[STYLE_LINENUMBER].back);
 			}
 
-			int visibleLine = topLine;
-			int yposScreen = 0;
+			const int lineStartPaint = rcMargin.top / vs.lineHeight;
+			int visibleLine = topLine + lineStartPaint;
+			int yposScreen = lineStartPaint * vs.lineHeight;
 			// Work out whether the top line is whitespace located after a
 			// lessening of fold level which implies a 'fold tail' but which should not
 			// be displayed until the last of a sequence of whitespace.
 			bool needWhiteClosure = false;
 			if (vs.ms[margin].mask & SC_MASK_FOLDERS) {
-				int level = pdoc->GetLevel(cs.DocFromDisplay(topLine));
+				int level = pdoc->GetLevel(cs.DocFromDisplay(visibleLine));
 				if (level & SC_FOLDLEVELWHITEFLAG) {
-					int lineBack = cs.DocFromDisplay(topLine);
+					int lineBack = cs.DocFromDisplay(visibleLine);
 					int levelPrev = level;
 					while ((lineBack > 0) && (levelPrev & SC_FOLDLEVELWHITEFLAG)) {
 						lineBack--;
@@ -2010,7 +2017,7 @@ void Editor::PaintSelMargin(Surface *surfWindow, PRectangle &rc) {
 	surface->FillRectangle(rcBlankMargin, vs.styles[STYLE_DEFAULT].back);
 
 	if (bufferedDraw) {
-		surfWindow->Copy(rcMargin, Point(), *pixmapSelMargin);
+		surfWindow->Copy(rcMargin, Point(rcMargin.left, rcMargin.top), *pixmapSelMargin);
 	}
 }
 
@@ -4309,7 +4316,7 @@ void Editor::DelCharBack(bool allowLineStartDeletion) {
 	UndoGroup ug(pdoc, (sel.Count() > 1) || !sel.Empty());
 	if (sel.Empty()) {
 		for (size_t r=0; r<sel.Count(); r++) {
-			if (!RangeContainsProtected(sel.Range(r).caret.Position(), sel.Range(r).caret.Position() + 1)) {
+			if (!RangeContainsProtected(sel.Range(r).caret.Position() - 1, sel.Range(r).caret.Position())) {
 				if (sel.Range(r).caret.VirtualSpace()) {
 					sel.Range(r).caret.SetVirtualSpace(sel.Range(r).caret.VirtualSpace() - 1);
 					sel.Range(r).anchor.SetVirtualSpace(sel.Range(r).caret.VirtualSpace());
@@ -9258,6 +9265,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 	
 	case SCI_GETTECHNOLOGY:
 		return technology;
+
+	case SCI_COUNTCHARACTERS:
+		return pdoc->CountCharacters(wParam, lParam);
 
 	default:
 		return DefWndProc(iMessage, wParam, lParam);
